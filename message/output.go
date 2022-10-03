@@ -31,7 +31,7 @@ func Printf(v ...interface{}) (int, error) {
 func Print(v ...interface{}) (int, error) {
 	now := time.Now()
 	output := []interface{}{
-		"[" + now.Format(formtdata) + "]",
+		"[" + now.Format(formtdata) + "] ",
 	}
 	for _, vs := range v {
 		output = append(output, vs)

@@ -23,7 +23,7 @@ type Config struct {
 }
 
 //環境設定
-func Envread() (*Config, error) {
+func EnvRead() (*Config, error) {
 	server_cfg := &SetupServer{}
 	if err := env.Parse(server_cfg); err != nil {
 		return nil, err
