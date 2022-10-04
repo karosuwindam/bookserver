@@ -4,8 +4,13 @@ import (
 	"bookserver/config"
 	"bookserver/message"
 	"bookserver/webserver"
+	"bytes"
 	"context"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"testing"
 
 	"golang.org/x/sync/errgroup"
@@ -55,10 +60,7 @@ func TestUploadSetupt(t *testing.T) {
 	if u.Name() != "upload" {
 		t.Errorf("input message err %v", u.Name())
 	}
-	if u.Message() != "OK" {
-		t.Errorf("input message status err %v", u.Message())
-	}
-
+	t.Log(u.MessageJsonOut())
 	t.Log("----------------- Set up OK --------------------------")
 
 }
@@ -68,12 +70,13 @@ func TestUploadServer(t *testing.T) {
 	zippass := "zip"
 	t.Setenv("PDF_FILEPASS", pdfpass)
 	t.Setenv("ZIP_FILEPASS", zippass)
+	t.Log("----------------- upload Server --------------------------")
 
 	u, _ := Setup()
 
 	cfg, _ := config.EnvRead()
 	ss, _ := webserver.NewSetup(cfg)
-	// ss.Add("/upload",u.)
+	ss.AddV1("/upload", u, FIleupload)
 	s, _ := ss.NewServer()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -81,7 +84,13 @@ func TestUploadServer(t *testing.T) {
 	eq.Go(func() error {
 		return runServer(ctx, s)
 	})
+	uploadfile("test.zip", t)
+	uploadfile("test.pdf", t)
 	cancel()
+	if err := eq.Wait(); err != nil {
+		t.Fatal(err)
+	}
+	t.Log("----------------- upload Server OK --------------------------")
 
 }
 
@@ -98,4 +107,34 @@ func runServer(ctx context.Context, s *webserver.Server) error {
 	message.Println("server stop")
 	s.Srv.Shutdown(context.Background())
 	return eg.Wait()
+}
+
+func uploadfile(filename string, t *testing.T) {
+	var buffer bytes.Buffer
+	writer := multipart.NewWriter(&buffer)
+	fileWriter, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatalf("Failed to create file writer. %s", err)
+	}
+
+	readFile, err := os.Open(filename)
+	if err != nil {
+		t.Fatalf("Failed to open file. %s", err)
+	}
+	defer readFile.Close()
+	io.Copy(fileWriter, readFile)
+	writer.Close()
+
+	res, err := http.Post("http://localhost:8080/v1/upload", writer.FormDataContentType(), &buffer)
+	if err != nil {
+		t.Fatalf("Failed to POST request. %s", err)
+	}
+	// API レスポンス検証
+	message, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		t.Fatalf("Failed to read HTTP response body. %s", err)
+	}
+	t.Logf("message:%v", string(message))
+
 }
