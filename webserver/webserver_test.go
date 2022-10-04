@@ -16,6 +16,20 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "hello")
 }
 
+type hellov1s struct {
+	str string
+}
+
+func hellov1(t interface{}, w http.ResponseWriter, r *http.Request) {
+	switch t.(type) {
+	case *hellov1s:
+		out := t.(*hellov1s)
+		fmt.Fprintf(w, "hello %v", out.str)
+	default:
+		hello(w, r)
+	}
+}
+
 func TestWebServerSetup(t *testing.T) {
 	t.Log("----------------- Server Setup --------------------------")
 	cfg, _ := config.EnvRead()
@@ -34,6 +48,11 @@ func TestWebServerNew(t *testing.T) {
 	cfg, _ := config.EnvRead()
 	ss, _ := NewSetup(cfg)
 	ss.Add("/", hello)
+	h := &hellov1s{str: "test"}
+	if err := ss.AddV1("test", h, hellov1); err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	s, err := ss.NewServer()
 	if err != nil {
 		t.Error(err.Error())
@@ -55,6 +74,18 @@ func TestWebServerNew(t *testing.T) {
 	}
 	if string(got) != "hello" {
 		t.Errorf("message : %v", string(got))
+	}
+	rsp1, err := http.Get("http://localhost:8080/v1/test")
+	if err != nil {
+		t.Errorf("%+v", err)
+	}
+	defer rsp1.Body.Close()
+	got1, err := io.ReadAll((rsp1.Body))
+	if err != nil {
+		t.Errorf("%+v", err)
+	}
+	if string(got1) != "hello "+h.str {
+		t.Errorf("message : %v", string(got1))
 	}
 	cancel()
 	if err := eq.Wait(); err != nil {

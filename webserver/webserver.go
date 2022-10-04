@@ -4,8 +4,10 @@ import (
 	"bookserver/config"
 	"bookserver/message"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
+	"time"
 )
 
 type SetupServer struct {
@@ -35,6 +37,8 @@ func NewSetup(data *config.Config) (*SetupServer, error) {
 		port:     data.Server.Port,
 	}
 	cfg.mux = http.NewServeMux()
+	cfg.routefunc = map[string]func(interface{}, http.ResponseWriter, *http.Request){}
+	cfg.routeinterface = map[string]interface{}{}
 	cfg.mux.HandleFunc("/v1/", cfg.v1)
 	return cfg, nil
 }
@@ -74,7 +78,30 @@ func (t *SetupServer) Add(route string, handler func(http.ResponseWriter, *http.
 
 func (t *SetupServer) muxHandler() http.Handler { return t.mux }
 
-//未チェック
+func v1OtherBuck(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Path
+	msg := message.Message{Name: "v1", Status: url, Code: http.StatusOK}
+	rst := message.Result{Name: "v1", Code: http.StatusOK, Option: "", Date: time.Now(), Result: msg}
+	fmt.Fprintf(w, "%v", rst.Output())
+}
+
 func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Path
+	flag := false
+	var check string
+	for turl, _ := range t.routeinterface {
+		if len(url) >= len(turl) {
+			if turl == url[:len(turl)] {
+				check = turl
+				flag = true
+				break
+			}
+		}
+	}
+	if flag { //登録済み
+		t.routefunc[check](t.routeinterface[check], w, r)
+	} else { //日登録
+		v1OtherBuck(w, r)
+	}
 
 }
