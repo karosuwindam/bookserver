@@ -3,6 +3,7 @@ package webserver
 import (
 	"bookserver/config"
 	"bookserver/message"
+	"bookserver/webserver/common"
 	"errors"
 	"fmt"
 	"net"
@@ -21,8 +22,8 @@ type SetupServer struct {
 	routefunc map[string]func(
 		interface{}, http.ResponseWriter, *http.Request,
 	) // /v1/{data}による実行関数
-	routeinterface map[string]interface{} // /v1/{data}による実行関数の入力データ
-	accessmpa      map[string]UserType    // /v1/{data}によるアクセス制御
+	routeinterface map[string]interface{}     // /v1/{data}による実行関数の入力データ
+	accessmpa      map[string]common.UserType // /v1/{data}によるアクセス制御
 
 	mux *http.ServeMux //webサーバのmux
 }
@@ -35,14 +36,6 @@ type Server struct {
 	// 解放の管理関数
 	L net.Listener
 }
-
-type UserType int
-
-const (
-	ADMIN UserType = 1
-	USER  UserType = 1 << 1
-	GUEST UserType = 1 << 2
-)
 
 // Status
 // ToDo
@@ -64,8 +57,11 @@ func NewSetup(data *config.Config) (*SetupServer, error) {
 	cfg.mux = http.NewServeMux()
 	cfg.routefunc = map[string]func(interface{}, http.ResponseWriter, *http.Request){}
 	cfg.routeinterface = map[string]interface{}{}
-	cfg.accessmpa = map[string]UserType{}
+	cfg.accessmpa = map[string]common.UserType{}
 	cfg.mux.HandleFunc("/v1/", cfg.v1)
+
+	cfg.route()
+
 	return cfg, nil
 }
 
@@ -91,7 +87,7 @@ func (t *SetupServer) NewServer() (*Server, error) {
 // route(string) : URLルートパス /v1/として紐づける
 // sdata(interface{}) : 関数に引き渡すポインタ情報
 // funcdata(func(interface{}, http.ResponseWriter, *http.Request)) : 処理実行関数
-func (t *SetupServer) AddV1(usertype UserType, route string, sdata interface{}, funcdata func(interface{}, http.ResponseWriter, *http.Request)) error {
+func (t *SetupServer) AddV1(usertype common.UserType, route string, sdata interface{}, funcdata func(interface{}, http.ResponseWriter, *http.Request)) error {
 	if reflect.TypeOf(sdata).Kind() != reflect.Ptr {
 		return errors.New("sdata is not pointer")
 	}
@@ -142,7 +138,7 @@ func v1OtherBuck(w http.ResponseWriter, r *http.Request) {
 func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	flag := false
-	user := ADMIN | GUEST | USER //ユーザの値
+	user := common.ADMIN | common.GUEST | common.USER //ユーザの値
 	var check string
 	for turl := range t.routeinterface {
 		if len(url) >= len(turl) {

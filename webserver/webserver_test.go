@@ -3,6 +3,7 @@ package webserver
 import (
 	"bookserver/config"
 	"bookserver/message"
+	"bookserver/webserver/common"
 	"context"
 	"fmt"
 	"io"
@@ -49,7 +50,7 @@ func TestWebServerNew(t *testing.T) {
 	ss, _ := NewSetup(cfg)
 	ss.Add("/", hello)
 	h := &hellov1s{str: "test"}
-	if err := ss.AddV1(GUEST, "test", h, hellov1); err != nil {
+	if err := ss.AddV1(common.GUEST, "test", h, hellov1); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
