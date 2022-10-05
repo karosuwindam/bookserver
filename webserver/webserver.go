@@ -22,6 +22,7 @@ type SetupServer struct {
 		interface{}, http.ResponseWriter, *http.Request,
 	) // /v1/{data}による実行関数
 	routeinterface map[string]interface{} // /v1/{data}による実行関数の入力データ
+	accessmpa      map[string]UserType    // /v1/{data}によるアクセス制御
 
 	mux *http.ServeMux //webサーバのmux
 }
@@ -34,6 +35,14 @@ type Server struct {
 	// 解放の管理関数
 	L net.Listener
 }
+
+type UserType int
+
+const (
+	ADMIN UserType = 1
+	USER  UserType = 1 << 1
+	GUEST UserType = 1 << 2
+)
 
 // Status
 // ToDo
@@ -55,6 +64,7 @@ func NewSetup(data *config.Config) (*SetupServer, error) {
 	cfg.mux = http.NewServeMux()
 	cfg.routefunc = map[string]func(interface{}, http.ResponseWriter, *http.Request){}
 	cfg.routeinterface = map[string]interface{}{}
+	cfg.accessmpa = map[string]UserType{}
 	cfg.mux.HandleFunc("/v1/", cfg.v1)
 	return cfg, nil
 }
@@ -81,7 +91,7 @@ func (t *SetupServer) NewServer() (*Server, error) {
 // route(string) : URLルートパス /v1/として紐づける
 // sdata(interface{}) : 関数に引き渡すポインタ情報
 // funcdata(func(interface{}, http.ResponseWriter, *http.Request)) : 処理実行関数
-func (t *SetupServer) AddV1(route string, sdata interface{}, funcdata func(interface{}, http.ResponseWriter, *http.Request)) error {
+func (t *SetupServer) AddV1(usertype UserType, route string, sdata interface{}, funcdata func(interface{}, http.ResponseWriter, *http.Request)) error {
 	if reflect.TypeOf(sdata).Kind() != reflect.Ptr {
 		return errors.New("sdata is not pointer")
 	}
@@ -97,6 +107,7 @@ func (t *SetupServer) AddV1(route string, sdata interface{}, funcdata func(inter
 	}
 	t.routefunc[v1route] = funcdata
 	t.routeinterface[v1route] = sdata
+	t.accessmpa[v1route] |= usertype
 	return nil
 }
 
@@ -131,6 +142,7 @@ func v1OtherBuck(w http.ResponseWriter, r *http.Request) {
 func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	flag := false
+	user := ADMIN | GUEST | USER //ユーザの値
 	var check string
 	for turl := range t.routeinterface {
 		if len(url) >= len(turl) {
@@ -141,7 +153,7 @@ func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	if flag { //登録済み
+	if flag && t.accessmpa[check]|user > 0 { //登録済み
 		t.routefunc[check](t.routeinterface[check], w, r)
 	} else { //日登録
 		v1OtherBuck(w, r)

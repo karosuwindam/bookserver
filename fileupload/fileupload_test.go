@@ -76,7 +76,7 @@ func TestUploadServer(t *testing.T) {
 
 	cfg, _ := config.EnvRead()
 	ss, _ := webserver.NewSetup(cfg)
-	ss.AddV1("/upload", u, FIleupload)
+	ss.AddV1(webserver.GUEST, "/upload", u, FIleupload)
 	s, _ := ss.NewServer()
 
 	ctx, cancel := context.WithCancel(context.Background())

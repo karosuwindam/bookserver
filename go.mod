@@ -8,4 +8,8 @@ require (
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0
 )
 
-require github.com/mattn/go-sqlite3 v1.14.15 // indirect
+require (
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.15 // indirect
+)
