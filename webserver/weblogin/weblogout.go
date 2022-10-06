@@ -18,20 +18,16 @@ func getlogout(w http.ResponseWriter, r *http.Request) {
 	}
 	ses.Values["login"] = nil
 	ses.Values["name"] = nil
+	if nm != "" {
+		jwttmp[nm] = ""
+	}
 	ses.Save(r, w)
 	fmt.Fprintf(w, "%v\n", msg.Output())
 }
 
-func (t *loginbaseconging) webServerLogout(w http.ResponseWriter, r *http.Request) {
+func WebServerLogout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	default:
 		getlogout(w, r)
-	}
-}
-func WebServerLogout(data interface{}, w http.ResponseWriter, r *http.Request) {
-	switch data.(type) {
-	case *loginbaseconging:
-		data.(*loginbaseconging).webServerLogout(w, r)
-	default:
 	}
 }

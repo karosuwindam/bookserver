@@ -1,13 +1,13 @@
 package webserver
 
 import (
-	"bookserver/webserver/common"
+	"bookserver/config"
 	"bookserver/webserver/weblogin"
 )
 
 // 子供モジュールの設定処理
-func (t *SetupServer) route() {
-	wln := weblogin.Setup()
-	t.AddV1(common.GUEST, "login", wln, weblogin.WebServerLogin)
-	t.AddV1(common.GUEST, "logout", wln, weblogin.WebServerLogout)
+func (t *SetupServer) route(cfg *config.Config) {
+	weblogin.Setup(cfg)
+	t.Add("/login", weblogin.WebServerLogin)
+	t.Add("/logout", weblogin.WebServerLogout)
 }

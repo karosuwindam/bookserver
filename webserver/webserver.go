@@ -60,7 +60,7 @@ func NewSetup(data *config.Config) (*SetupServer, error) {
 	cfg.accessmpa = map[string]common.UserType{}
 	cfg.mux.HandleFunc("/v1/", cfg.v1)
 
-	cfg.route()
+	cfg.route(data)
 
 	return cfg, nil
 }

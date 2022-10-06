@@ -17,24 +17,34 @@ type SetupSql struct {
 	DBFILE string `env:"DB_FILE" envDefault:"test.db"` //ファイルパス
 }
 
+type SecretKey struct {
+	JwtKey string `env:"JWT_KEY" envDefault:"SECRET_KEY"`
+}
+
 type Config struct {
-	Server *SetupServer
-	Sql    *SetupSql
+	Server   *SetupServer
+	Sql      *SetupSql
+	SeretKey *SecretKey
 }
 
 //環境設定
 func EnvRead() (*Config, error) {
-	server_cfg := &SetupServer{}
-	if err := env.Parse(server_cfg); err != nil {
+	serverCfg := &SetupServer{}
+	if err := env.Parse(serverCfg); err != nil {
 		return nil, err
 	}
-	sql_cfg := &SetupSql{}
-	if err := env.Parse(sql_cfg); err != nil {
+	sqlCfg := &SetupSql{}
+	if err := env.Parse(sqlCfg); err != nil {
+		return nil, err
+	}
+	secretCfg := &SecretKey{}
+	if err := env.Parse(secretCfg); err != nil {
 		return nil, err
 	}
 	return &Config{
-		Server: server_cfg,
-		Sql:    sql_cfg,
+		Server:   serverCfg,
+		Sql:      sqlCfg,
+		SeretKey: secretCfg,
 	}, nil
 
 }

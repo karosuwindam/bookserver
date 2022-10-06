@@ -28,8 +28,8 @@ func TestEnvReadDefult(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log("----------------- Check SQL data --------------------------")
-	if cfg.Sql.DBNAME != "mysql" {
-		t.Errorf("Error Hostname %v = %v", cfg.Sql.DBNAME, "mysql")
+	if cfg.Sql.DBNAME != "sqlite3" {
+		t.Errorf("Error Hostname %v = %v", cfg.Sql.DBNAME, "sqlite3")
 		t.FailNow()
 	}
 	if cfg.Sql.DBHOST != "127.0.0.1" {
@@ -50,6 +50,11 @@ func TestEnvReadDefult(t *testing.T) {
 	}
 	if cfg.Sql.DBFILE != "test.db" {
 		t.Errorf("Error Hostname %v = %v", cfg.Sql.DBFILE, "test.db")
+		t.FailNow()
+	}
+	t.Log("----------------- Seclet key data --------------------------")
+	if cfg.SeretKey.JwtKey != "SECRET_KEY" {
+		t.Errorf("Error Hostname %v = %v", cfg.SeretKey.JwtKey, "SECRET_KEY")
 		t.FailNow()
 	}
 
@@ -131,6 +136,42 @@ func TestEnvReadSQL(t *testing.T) {
 		cfg.Sql.DBNAME, cfg.Sql.DBHOST,
 		cfg.Sql.DBPORT, cfg.Sql.DBUSER,
 		cfg.Sql.DBPASS, cfg.Sql.DBFILE,
+	}
+
+	for i := 0; i < len(ckcfg); i++ {
+		if ckcfg[i] != input[i] {
+			t.Errorf("Error %v %v = %v", aEnv[i], ckcfg[i], input[i])
+			t.FailNow()
+		}
+
+	}
+	t.Log(aEnv)
+	t.Log(ckcfg)
+	t.Log("----------------- EnvRead OK --------------------------")
+
+}
+
+func TestEnvReadSecletKey(t *testing.T) {
+	setupEnv := map[string]string{}
+	aEnv := []string{"JWT_KEY"}
+	input := []string{}
+	for _, env := range aEnv {
+		tmp, _ := makeRandomStr(10)
+		setupEnv[env] = tmp
+		input = append(input, tmp)
+	}
+	t.Log("----------------- EnvRead setup seclet key --------------------------")
+	for key, value := range setupEnv {
+		t.Setenv(key, value)
+	}
+
+	cfg, err := EnvRead()
+	if err != nil {
+		t.Errorf(err.Error())
+		t.FailNow()
+	}
+	ckcfg := []string{
+		cfg.SeretKey.JwtKey,
 	}
 
 	for i := 0; i < len(ckcfg); i++ {
