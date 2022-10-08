@@ -18,8 +18,8 @@ type SQLStatus struct {
 }
 
 func Setup(cfg *config.Config) (*SQLStatus, error) {
-	var output *SQLStatus
-	output.Sql = sqlite.Setup(DbPass + cfg.Sql.DBFILE)
+	output := &SQLStatus{}
+	output.Sql = sqlite.Setup(cfg.Sql.DBROOTPASS + cfg.Sql.DBFILE)
 	if err := output.Sql.Open(); err != nil {
 		return nil, err
 	}
