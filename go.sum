@@ -6,8 +6,8 @@ github.com/gorilla/securecookie v1.1.1 h1:miw7JPhV+b/lAHSXz4qd/nN9jRiAFV5FwjeKyC
 github.com/gorilla/securecookie v1.1.1/go.mod h1:ra0sb63/xPlUeL+yeDciTfxMRAA+MP+HVt/4epWDjd4=
 github.com/gorilla/sessions v1.2.1 h1:DHd3rPN5lE3Ts3D8rKkQ8x/0kqfeNmBAaiSi+o7FsgI=
 github.com/gorilla/sessions v1.2.1/go.mod h1:dk2InVEVJ0sfLlnXv9EAgkf6ecYs/i80K/zI+bUmuGM=
-github.com/karosuwindam/sqlite v0.3.1 h1:8hjwn3G79p4vJrOCDRwh0MP2mRZd0YSXu4SdwI1gIYk=
-github.com/karosuwindam/sqlite v0.3.1/go.mod h1:12vQzaouqax/mfy9d8cMWimqIWovFhqFCC5ZcHROp1M=
+github.com/karosuwindam/sqlite v0.3.2 h1:kLEcBzjzdLjNVaQf1Gjp4Ho4g0ds7B27v1qKvTbu+0k=
+github.com/karosuwindam/sqlite v0.3.2/go.mod h1:12vQzaouqax/mfy9d8cMWimqIWovFhqFCC5ZcHROp1M=
 github.com/mattn/go-sqlite3 v1.14.15 h1:vfoHhTN1af61xCRSWzFIWzx2YskyMTwHLrExkBOjvxI=
 github.com/mattn/go-sqlite3 v1.14.15/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
 golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 h1:cu5kTvlzcw1Q5S9f5ip1/cpiB4nXvw1XYzFPGgzLUOY=

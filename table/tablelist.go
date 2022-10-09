@@ -1,6 +1,6 @@
 package table
 
-type booknames struct {
+type Booknames struct {
 	Id       int    `json:"id" db:"id"`
 	Name     string `json:"name" db:"name"`
 	Title    string `json:"title" db:"title"`
@@ -10,14 +10,14 @@ type booknames struct {
 	Ext      string `json:"ext" db:"ext"`
 }
 
-type copyfile struct {
+type Copyfile struct {
 	Id       int    `json:"id" db:"id"`
 	Zippass  string `json:"zippass" db:"zippass"`
 	Filesize int    `json:"filesize" db:"filesize"`
 	Copyflag int    `json:"copyflag" db:"copyflag"`
 }
 
-type filelists struct {
+type Filelists struct {
 	Id      int    `json:"id" db:"id"`
 	Name    string `json:"name" db:"name"`
 	Pdfpass string `json:"pdfpass" db:"pdfpass"`
@@ -31,38 +31,47 @@ const (
 	FILELIST = "filelists"
 )
 
-type readBase struct {
-	pData interface{}
-}
-
+// テーブル内の型情報を格納
 var tablelist map[string]interface{}
 
+// tablelistsetup()
+//
+// 初期化用関数、テーブルリストを作成する。
 func tablelistsetup() {
 	tablelist = map[string]interface{}{}
-	tablelist[BOOKNAME] = booknames{}
-	tablelist[COPYFILE] = copyfile{}
-	tablelist[FILELIST] = filelists{}
+	tablelist[BOOKNAME] = Booknames{}
+	tablelist[COPYFILE] = Copyfile{}
+	tablelist[FILELIST] = Filelists{}
 	return
 }
 
-func jsonconvertstruct(table, json string) interface{} {
-
-	return nil
-}
-
-func readBaseCreate(tname string) readBase {
-	var out readBase
+// readBaseCreate(string) = interface{}
+//
+// SQL読み取り用の型を作成
+func readBaseCreate(tname string) interface{} {
+	var out interface{}
 	switch tname {
 	case BOOKNAME:
-		tmp := []booknames{}
-		out.pData = tmp
+		out = &[]Booknames{}
 	case COPYFILE:
-		tmp := []copyfile{}
-		out.pData = tmp
+		out = &[]Copyfile{}
 	case FILELIST:
-		tmp := []filelists{}
-		out.pData = tmp
+		out = &[]Filelists{}
 	}
 
 	return out
+}
+
+// ckType(interface{}) = bool
+//
+// 変数の型の確認
+//
+// a(interface{}) : 型を代入
+func ckType(a interface{}) bool {
+	switch a.(type) {
+	case *Booknames, *Filelists, *Copyfile:
+		return true
+
+	}
+	return false
 }

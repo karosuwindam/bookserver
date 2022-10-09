@@ -3,6 +3,8 @@ package main
 import (
 	"bookserver/config"
 	"bookserver/table"
+	"encoding/json"
+	"fmt"
 )
 
 type mainconfig struct {
@@ -23,6 +25,16 @@ func Setup() *mainconfig {
 
 func Run(cfg *mainconfig) error {
 	defer cfg.sql.Close()
+	if rd, err := cfg.sql.ReadAll(table.BOOKNAME); err == nil {
+		fmt.Println(rd)
+	}
+	writedata := table.Booknames{}
+	jsond := "{\"Id\":\"1\",\"Name\":\"test\",\"Title\":\"tt\",\"Writer\":\"ttt\",\"Brand\":\"tttt\",\"Booktype\":\"aaaa\",\"Ext\":\"bbb\"}"
+
+	json.Unmarshal([]byte(jsond), &writedata)
+	cfg.sql.Add(table.BOOKNAME, &writedata)
+	bJson, _ := json.Marshal(&writedata)
+	fmt.Println(string(bJson))
 
 	return nil
 }
