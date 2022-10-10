@@ -1,5 +1,7 @@
 package table
 
+import "reflect"
+
 type Booknames struct {
 	Id       int    `json:"id" db:"id"`
 	Name     string `json:"name" db:"name"`
@@ -62,6 +64,16 @@ func readBaseCreate(tname string) interface{} {
 	return out
 }
 
+// CkList (string) = bool
+//
+// 名前が含まれているか確認する関数
+func CkList(tName string) bool {
+	if tablelist[tName] != nil {
+		return true
+	}
+	return false
+}
+
 // ckType(interface{}) = bool
 //
 // 変数の型の確認
@@ -71,7 +83,28 @@ func ckType(a interface{}) bool {
 	switch a.(type) {
 	case *Booknames, *Filelists, *Copyfile:
 		return true
+	case *[]Booknames, *[]Filelists, *[]Copyfile:
+		return true
 
 	}
 	return false
+}
+
+// createSerchText (tname, keyword) = map[string]string
+//
+// 検索用のmap配列を作る
+// 対象の構造体からstringを探して構造体に挿入
+func createSerchText(tname, keyword string) map[string]string {
+	output := map[string]string{}
+	if tablelist[tname] == nil {
+		return output
+	}
+	st := reflect.TypeOf(tablelist[tname])
+	for i := 0; i < st.NumField(); i++ {
+		f := st.Field(i)
+		if f.Type.Kind() == reflect.String && f.Tag.Get("db") != "" {
+			output[f.Tag.Get("db")] = keyword
+		}
+	}
+	return output
 }

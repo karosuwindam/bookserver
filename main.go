@@ -2,41 +2,42 @@ package main
 
 import (
 	"bookserver/config"
-	"bookserver/table"
-	"encoding/json"
-	"fmt"
+	"bookserver/fileupload"
+	"bookserver/webserver"
+	"bookserver/webserver/common"
 )
 
 type mainconfig struct {
-	sql *table.SQLStatus
+	s *webserver.SetupServer
 }
 
 func Setup() *mainconfig {
+	scfg := &mainconfig{}
 	cfg, err := config.EnvRead()
 	if err != nil {
 		return nil
 	}
-	sql, err := table.Setup(cfg)
-	if err != nil {
+	if ss, err := webserver.NewSetup(cfg); err == nil {
+		scfg.s = ss
+	} else {
 		return nil
 	}
-	return &mainconfig{sql: sql}
+
+	if upcfg, err := fileupload.Setup(); err == nil {
+		scfg.s.AddV1(common.ADMIN, "/upload", upcfg, fileupload.FIleupload)
+
+	}
+
+	return scfg
 }
 
 func Run(cfg *mainconfig) error {
-	defer cfg.sql.Close()
-	if rd, err := cfg.sql.ReadAll(table.BOOKNAME); err == nil {
-		fmt.Println(rd)
+	s, err := cfg.s.NewServer()
+	if err != nil {
+		return err
 	}
-	writedata := table.Booknames{}
-	jsond := "{\"Id\":\"1\",\"Name\":\"test\",\"Title\":\"tt\",\"Writer\":\"ttt\",\"Brand\":\"tttt\",\"Booktype\":\"aaaa\",\"Ext\":\"bbb\"}"
-
-	json.Unmarshal([]byte(jsond), &writedata)
-	cfg.sql.Add(table.BOOKNAME, &writedata)
-	bJson, _ := json.Marshal(&writedata)
-	fmt.Println(string(bJson))
-
-	return nil
+	defer s.Sql.Close()
+	return s.Srv.Serve(s.L)
 }
 
 func main() {

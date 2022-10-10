@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/karosuwindam/sqlite"
 )
@@ -85,4 +86,33 @@ func (sql *SQLStatus) ReadAll(tName string) (string, error) {
 		return "", err
 	}
 	return string(bJSON), nil
+}
+
+// ReadWhileTime (tName, datetype)
+// datetype(string) : today, toweek, tomonth
+func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
+	readdata := readBaseCreate(tName)
+
+	switch strings.ToLower(datetype) {
+	case "today":
+		if err := sql.Cfg.ReadToday(tName, readdata); err != nil {
+			return "", err
+		}
+	case "toweek":
+		if err := sql.Cfg.ReadToWeek(tName, readdata); err != nil {
+			return "", err
+		}
+	case "tomonth":
+		if err := sql.Cfg.ReadToMonth(tName, readdata); err != nil {
+			return "", err
+		}
+	default:
+		return "", errors.New("datetype err :" + datetype)
+	}
+	bJSON, err := json.Marshal(readdata)
+	if err != nil {
+		return "", err
+	}
+	return string(bJSON), nil
+
 }

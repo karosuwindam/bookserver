@@ -3,6 +3,7 @@ package webserver
 import (
 	"bookserver/config"
 	"bookserver/message"
+	"bookserver/table"
 	"bookserver/webserver/common"
 	"errors"
 	"fmt"
@@ -25,6 +26,8 @@ type SetupServer struct {
 	routeinterface map[string]interface{}     // /v1/{data}による実行関数の入力データ
 	accessmpa      map[string]common.UserType // /v1/{data}によるアクセス制御
 
+	sql *table.SQLStatus //SQLサーバのステータス
+
 	mux *http.ServeMux //webサーバのmux
 }
 
@@ -33,6 +36,8 @@ type SetupServer struct {
 type Server struct {
 	// Webサーバの管理関数
 	Srv *http.Server
+	//SQLサーバのステータス
+	Sql *table.SQLStatus
 	// 解放の管理関数
 	L net.Listener
 }
@@ -76,6 +81,7 @@ func (t *SetupServer) NewServer() (*Server, error) {
 	}
 	return &Server{
 		Srv: &http.Server{Handler: t.muxHandler()},
+		Sql: t.sql,
 		L:   l,
 	}, nil
 }

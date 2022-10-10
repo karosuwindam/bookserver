@@ -26,6 +26,14 @@ type Result struct {
 	Result interface{} `json:"result"`
 }
 
+type Results struct {
+	Name   string    `json:"name"`
+	Code   int       `json:"code"`
+	Option string    `json:"option"`
+	Date   time.Time `json:"date"`
+	Result string    `json:"result"`
+}
+
 // MessageのJSON変換
 func (m *Message) Output() string {
 	msg := Message{Name: m.Name, Status: m.Status, Code: m.Code}
@@ -42,9 +50,16 @@ func (m *Message) InputMessage(msg string, flag logout) {
 	}
 }
 
-//ResultのJSON変換
+//Result のJSON変換
 func (r *Result) Output() string {
 	result := Result{Name: r.Name, Date: r.Date, Result: r.Result, Option: r.Option, Code: r.Code}
+	bytes, _ := json.Marshal(result)
+	return string(bytes)
+}
+
+//Results のJSON変換
+func (r *Results) Output() string {
+	result := Results{Name: r.Name, Date: r.Date, Result: r.Result, Option: r.Option, Code: r.Code}
 	bytes, _ := json.Marshal(result)
 	return string(bytes)
 }

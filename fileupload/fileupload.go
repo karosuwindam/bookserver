@@ -35,6 +35,14 @@ func Setup() (*UploadPass, error) {
 	if err := env.Parse(output); err != nil {
 		return nil, err
 	}
+
+	if err := os.MkdirAll(output.Pdf, 0777); err != nil {
+		return nil, err
+	}
+
+	if err := os.MkdirAll(output.Zip, 0777); err != nil {
+		return nil, err
+	}
 	output.rst = message.Result{
 		Name:   "upload",
 		Code:   http.StatusOK,

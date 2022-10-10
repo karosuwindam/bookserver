@@ -12,6 +12,8 @@ https://github.com/karosuwindam/bookserver2
 |url|Method|説明|備考|
 |--|--|--|--|
 |/health|*|healthチェック機能||
+|/login|
+|/logout|
 |/v1/upload|POST|ファイルのアップロード機能||
 |/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り||
 |/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る||
