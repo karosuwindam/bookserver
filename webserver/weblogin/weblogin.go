@@ -34,6 +34,15 @@ var jwttmp map[string]string = map[string]string{}
 var jwtsecretkey string
 var cs *sessions.CookieStore = sessions.NewCookieStore([]byte("secret-key-12345"))
 
+// UName() ユーザの名前
+func (t *JwtData) UName() string { return t.userName }
+
+// UType() ユーザーの種類
+func (t *JwtData) UType() common.UserType { return t.usertype }
+
+// Ext() 時間出力
+func (t *JwtData) Ext() time.Time { return time.Unix(t.ext, 0) }
+
 func Setup(cfg *config.Config) *loginbaseconging {
 	psckdata["admin"] = "admin1234"
 	str, _ := createjwt("admin", "admin1234")

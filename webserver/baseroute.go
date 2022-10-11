@@ -19,7 +19,7 @@ func (t *SetupServer) route(cfg *config.Config) {
 		t.sql = comcfg.Sql
 		t.AddV1(common.GUEST, "/read/", comcfg.Sql, read.WebSQLRead)
 		t.AddV1(common.GUEST, "/search/", comcfg.Sql, search.WebSQLSearch)
-		t.AddV1(common.GUEST, "/add/", comcfg.Sql, add.WebSQLRead)
-		t.AddV1(common.GUEST, "/edit/", comcfg.Sql, edit.WebSQLEdit)
+		t.AddV1(common.ADMIN, "/add/", comcfg.Sql, add.WebSQLRead)
+		t.AddV1(common.ADMIN, "/edit/", comcfg.Sql, edit.WebSQLEdit)
 	}
 }

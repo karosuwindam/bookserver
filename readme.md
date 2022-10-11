@@ -9,18 +9,18 @@ https://github.com/karosuwindam/bookserver2
 
 * 機能APIについて
 
-|url|Method|説明|備考|
+|url|Method|説明|必要権限|備考|
 |--|--|--|--|
 |/health|*|healthチェック機能||
 |/login|
 |/logout|
 |/v1/upload|POST|ファイルのアップロード機能||
-|/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り||
-|/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る||
-|/v1/serch/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る||
-|/v1/add/[テーブル]/|POST|データベースにデータを追加||
-|/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得||
-|/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集||
+|/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り|GUEST|
+|/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る|GUEST|
+|/v1/serch/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
+|/v1/add/[テーブル]/|POST|データベースにデータを追加|ADMIN|
+|/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得|ADMIN|
+|/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集|ADMIN|
 
 
 # データベースにデータを追加について
@@ -45,3 +45,6 @@ https://github.com/karosuwindam/bookserver2
 curl localhost:8080/v1/add/booknames/  -X POST -d "name=bagaet" --data-urlencode "title=はなび" --data-urlencode "ext=げた"
 curl localhost:8080/v1/add/filelists/  -X POST --data-urlencode "name=はなび" --data-urlencode "pdfpass=げた" --data-urlencode "zippass=gaega.zip"
 curl localhost:8080/v1/add/copyfile/  -X POST --data-urlencode "zippass=はなび" -d "filesize=130" -d "copyflag=1"
+
+
+curl -H "Authorization: bearer <token>" localhost:8080/v1/

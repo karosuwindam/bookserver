@@ -5,11 +5,13 @@ import (
 	"bookserver/message"
 	"bookserver/table"
 	"bookserver/webserver/common"
+	"bookserver/webserver/weblogin"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -144,7 +146,27 @@ func v1OtherBuck(w http.ResponseWriter, r *http.Request) {
 func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	flag := false
-	user := common.ADMIN | common.GUEST | common.USER //ユーザの値
+	var user common.UserType //ユーザの値
+	nowtime := time.Now()
+	var toketime time.Time
+
+	jwttoken := r.Header.Get("Authorization")
+	if strings.Index(jwttoken, "bearer ") >= 0 {
+		jwttoken = jwttoken[len("bearer "):]
+		if jwtdata, err := weblogin.Unpackjwt(jwttoken); err != nil {
+			user = common.GUEST
+			toketime = time.Now().Add(time.Hour)
+
+		} else {
+			user = jwtdata.UType()
+			toketime = jwtdata.Ext()
+			fmt.Println(jwtdata)
+		}
+	} else {
+		toketime = time.Now().Add(time.Hour)
+		user = common.GUEST
+	}
+
 	var check string
 	for turl := range t.routeinterface {
 		if len(url) >= len(turl) {
@@ -155,8 +177,13 @@ func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	if flag && t.accessmpa[check]|user > 0 { //登録済み
-		t.routefunc[check](t.routeinterface[check], w, r)
+	if flag && (t.accessmpa[check]&user > 0) { //登録済み
+		if t.accessmpa[check] == common.GUEST || toketime.Sub(nowtime) >= 0 {
+			t.routefunc[check](t.routeinterface[check], w, r)
+		} else { //期限切れ
+			v1OtherBuck(w, r)
+
+		}
 	} else { //日登録
 		v1OtherBuck(w, r)
 	}
