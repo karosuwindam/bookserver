@@ -50,6 +50,32 @@ func TestTableReadAll(t *testing.T) {
 	}
 }
 
+func TestTableSerch(t *testing.T) {
+	t.Setenv("DB_ROOTPASS", "./")
+	t.Setenv("DB_FILE", "test-read.db")
+	cfg, _ := config.EnvRead()
+	sql, _ := Setup(cfg)
+	defer sql.Close()
+	if jsond, err := sql.Search(BOOKNAME, "t"); err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	} else {
+		t.Log(jsond)
+	}
+	if jsond, err := sql.Search(COPYFILE, "bb"); err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	} else {
+		t.Log(jsond)
+	}
+	if jsond, err := sql.Search(FILELIST, "bbb"); err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	} else {
+		t.Log(jsond)
+	}
+}
+
 func TestTableReadID(t *testing.T) {
 	t.Setenv("DB_ROOTPASS", "./")
 	cfg, _ := config.EnvRead()

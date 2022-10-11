@@ -22,7 +22,7 @@ func TestTablelistSetup(t *testing.T) {
 func TestCreateSerchKeyword(t *testing.T) {
 	tablelistsetup()
 	booksrdata := createSerchText(BOOKNAME, "a")
-	ckbookdata := []string{"booktype", "brand", "ext", "name", "title", "writer"}
+	ckbookdata := []string{"booktype", "burand", "ext", "name", "title", "writer"}
 	for i := 1; i < len(ckbookdata); i++ {
 		if booksrdata[ckbookdata[i]] != booksrdata[ckbookdata[i-1]] {
 			t.Fatalf("%v != %v", booksrdata[ckbookdata[i]], booksrdata[ckbookdata[i-1]])

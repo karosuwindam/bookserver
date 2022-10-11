@@ -116,3 +116,19 @@ func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
 	return string(bJSON), nil
 
 }
+
+func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
+	if keyword == "" {
+		return "", nil
+	}
+	readdata := readBaseCreate(tName)
+	skeyword := createSerchText(tName, keyword)
+	if err := sql.Cfg.Read(tName, readdata, skeyword, sqlite.ORLike); err != nil {
+		return "", err
+	}
+	bJSON, err := json.Marshal(readdata)
+	if err != nil {
+		return "", err
+	}
+	return string(bJSON), nil
+}
