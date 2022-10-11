@@ -59,6 +59,29 @@ func (sql *SQLStatus) Add(tName string, writedata interface{}) error {
 	return nil
 }
 
+// Edit (tName, writedata, id)
+func (sql *SQLStatus) Edit(tName string, writedata interface{}, id int) (string, error) {
+	readdata := readBaseCreate(tName)
+	key := map[string]string{"id": strconv.Itoa(id)}
+
+	if err := sql.Cfg.Read(tName, readdata, key); err != nil {
+		return "", err
+	}
+	// wv := reflect.ValueOf(writedata)
+	if err := sql.Cfg.Update(tName, writedata); err != nil {
+		return "", err
+	}
+	readdata = readBaseCreate(tName)
+	if err := sql.Cfg.Read(tName, readdata, key); err != nil {
+		return "", err
+	}
+	bJSON, err := json.Marshal(readdata)
+	if err != nil {
+		return "", err
+	}
+	return string(bJSON), nil
+}
+
 // ReadID (tName,id)
 func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
 	readdata := readBaseCreate(tName)

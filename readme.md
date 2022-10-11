@@ -19,6 +19,8 @@ https://github.com/karosuwindam/bookserver2
 |/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る||
 |/v1/serch/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る||
 |/v1/add/[テーブル]/|POST|データベースにデータを追加||
+|/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得||
+|/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集||
 
 
 # データベースにデータを追加について

@@ -20,7 +20,7 @@ const (
 )
 
 func (cfg *sqlSearch) websqlsearchget(w http.ResponseWriter, r *http.Request) {
-	out := message.Result{Name: "sql read", Code: http.StatusOK, Date: time.Now(), Option: r.Method + ":"}
+	out := message.Result{Name: "sql Search", Code: http.StatusOK, Date: time.Now(), Option: r.Method + ":"}
 	sUrl := common.UrlAnalysis(r.URL.Path)
 	urlPoint := 0
 	tName := ""
