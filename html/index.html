@@ -1,8 +1,24 @@
 <html>
     <head>
+        
+        <script src="./javascript/login.js"></script>
+        <script src="./javascript/readdata.js"></script>
         <title>hello</title>
+        <script>
+            function logininput(){
+                var name = document.getElementById("name").value
+                var pass = document.getElementById("pass").value
+                login(name,pass)
+            }
+        </script>
     </head>
     <body>
         <p>hello</p>
+        <input type="text" name="name" id="name">
+        <input type="text" name="pass" id="pass">
+        <input type="button" value="login" onclick='logininput()'>
+        <input type="button" value="loginget" onclick='loginget()'>
+        <input type="button" value="logout" onclick='logout()'>
+        <input type="button" value="loadlist" onclick='loadlist("booknames")'>
     </body>
 </html>
