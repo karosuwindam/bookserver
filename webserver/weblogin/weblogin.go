@@ -189,8 +189,10 @@ func getlogin(w http.ResponseWriter, r *http.Request) {
 
 		}
 	} else {
+		msg.Code = http.StatusUnauthorized
 		msg.Result = "User:" + nm + " " + "LOGIN NG"
 	}
+	w.WriteHeader(msg.Code)
 	fmt.Fprintf(w, "%v\n", msg.Output())
 }
 

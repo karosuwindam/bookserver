@@ -51,5 +51,6 @@ func Sqlreadmessageback(out message.Result, joutdata string, w http.ResponseWrit
 		fmt.Fprintf(w, "%s", jout)
 
 	}
+	w.WriteHeader(out.Code)
 
 }

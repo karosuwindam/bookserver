@@ -102,7 +102,7 @@ func ViewHtml(w http.ResponseWriter, r *http.Request) {
 		upath += "index.html"
 	}
 	if !Exists(HTMLPASS + upath) {
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusNotFound)
 		tmp["urlpath"] = r.URL.Path
 		fmt.Fprint(w, ConvertData(ReadHtml(HTMLPASS+"/404.html"), tmp))
 		return
