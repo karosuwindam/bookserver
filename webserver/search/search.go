@@ -34,11 +34,11 @@ func (cfg *sqlSearch) websqlsearchget(w http.ResponseWriter, r *http.Request) {
 	if urlPoint+IDKEYWRODPOINT > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else if urlPoint+IDKEYWRODPOINT == len(sUrl) || sUrl[urlPoint+IDKEYWRODPOINT] == "" {
 		out.Option += "table=" + tName + " keyword not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		keyword := sUrl[urlPoint+IDKEYWRODPOINT]
 		out.Option += "table=" + tName + " keyword=" + keyword

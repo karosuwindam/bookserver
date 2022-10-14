@@ -1,4 +1,5 @@
 var searchurl = ["booknames","filelists","copyfile"]
+var table_list = [bookname_row,filelists_row,copyfile_row];
 var selectdata = 0
 
 function loadlist(table) {
@@ -26,8 +27,10 @@ function loadlistdata(table,output) {
         console.log(tmp.result);		          // 取得した ファイルの中身を表示
         if (table == `listdata`){
           document.getElementById(output).innerHTML = listoutput(data);
-        }else{
+        }else if (tmp.result != "[]"){
           document.getElementById(output).innerHTML = jsonDataOutput(tmp.result);
+        }else{
+          document.getElementById(output).innerHTML = "";
         }
   }
   };
@@ -156,12 +159,13 @@ function serchDataTagSplit(tag){
 
 function jsonDataOutput(tmp){
   var output = ""
-  var table_title = ["id","name","title","writer","brand","booktype","ext"]
-  if (meta_suburl=="filelist"){
-    table_title = ["id","name","pdfpass","zippass","tag"]
-  }else if(meta_suburl=="copyfile"){
-    table_title = ["id","zippass","copyflag","filesize"]
-  }
+  // var table_title = ["id","name","title","writer","brand","booktype","ext"]
+  // if (meta_suburl=="filelist"){
+  //   table_title = ["id","name","pdfpass","zippass","tag"]
+  // }else if(meta_suburl=="copyfile"){
+  //   table_title = ["id","zippass","copyflag","filesize"]
+  // }
+  var table_title = table_list[selectdata]
   output += "<table>"
   output += "<tr>"
   for (var i=0;i<table_title.length;i++){
@@ -172,25 +176,28 @@ function jsonDataOutput(tmp){
   //   output += "<div>"
     output += "<tr>"
   //   output += tmp[i].name
-    output += "<td>"+tmp[i].id+"</td>"
-    if (meta_suburl !="copyfile"){
-      output += "<td>"+tmp[i].name+"</td>"
+    for (var j=0;j<table_title.length;j++){
+      output += "<td>"+tmp[i][table_title[j]]+"</td>"      
     }
-    if (meta_suburl=="filelist"){
-      output += "<td>"+tmp[i].pdfpass+"</td>"
-      output += "<td>"+tmp[i].Zippass+"</td>"
-      output += "<td>"+tmp[i].tag+"</td>"
-    }else if(meta_suburl=="copyfile"){
-      output += "<td>"+tmp[i].Zippass+"</td>"
-      output += "<td>"+tmp[i].copyflag+"</td>"
-      output += "<td>"+tmp[i].Filesize+"</td>"
-    }else{
-      output += "<td>"+tmp[i].title+"</td>"
-      output += "<td>"+tmp[i].Writer+"</td>"
-      output += "<td>"+tmp[i].brand+"</td>"
-      output += "<td>"+tmp[i].booktype+"</td>"
-      output += "<td>"+tmp[i].ext+"</td>"
-    }
+    // output += "<td>"+tmp[i].id+"</td>"
+    // if (meta_suburl !="copyfile"){
+    //   output += "<td>"+tmp[i].name+"</td>"
+    // }
+    // if (meta_suburl=="filelist"){
+    //   output += "<td>"+tmp[i].pdfpass+"</td>"
+    //   output += "<td>"+tmp[i].Zippass+"</td>"
+    //   output += "<td>"+tmp[i].tag+"</td>"
+    // }else if(meta_suburl=="copyfile"){
+    //   output += "<td>"+tmp[i].Zippass+"</td>"
+    //   output += "<td>"+tmp[i].copyflag+"</td>"
+    //   output += "<td>"+tmp[i].Filesize+"</td>"
+    // }else{
+    //   output += "<td>"+tmp[i].title+"</td>"
+    //   output += "<td>"+tmp[i].Writer+"</td>"
+    //   output += "<td>"+tmp[i].brand+"</td>"
+    //   output += "<td>"+tmp[i].booktype+"</td>"
+    //   output += "<td>"+tmp[i].ext+"</td>"
+    // }
   //   output += " <a href='edit/"+tmp[i].id+"'>"+"edit"+"</a>"
     output += "<td><a href='show/"
     if (meta_suburl!=""){
@@ -232,6 +239,10 @@ function searchgetData(output){
           var data=req.responseText;
           out.innerHTML = outputhtmlJson(data)
           //out.innerHTML = data
+      }else if (req.readyState == 4 && req.status != 200){
+        nowserchpage = 1
+        var data=req.responseText;
+        out.innerHTML = outputhtmlJson(data)
       }
   };
   req.open("GET",url+keyword,false);
@@ -242,6 +253,9 @@ function outputhtmlJson(str){
   var tmp = JSON.parse(str);
   var ary;
   console.log(tmp.result)
+  if (tmp.result == "[]") {
+    tmp.result = ""
+  }
   switch (selectdata){
       case 0:
           ary = bookname_edit(tmp.result);

@@ -43,6 +43,7 @@ func UrlAnalysis(url string) []string {
 // SQLの読み取り結果の出力
 func Sqlreadmessageback(out message.Result, joutdata string, w http.ResponseWriter) {
 	jout := out.Output()
+	w.WriteHeader(out.Code)
 	if joutdata != "" {
 		jout = strings.Replace(jout, "\"result\":\"\"", "\"result\":"+joutdata, -1)
 		fmt.Fprintf(w, "%s", jout)
@@ -51,6 +52,5 @@ func Sqlreadmessageback(out message.Result, joutdata string, w http.ResponseWrit
 		fmt.Fprintf(w, "%s", jout)
 
 	}
-	w.WriteHeader(out.Code)
 
 }

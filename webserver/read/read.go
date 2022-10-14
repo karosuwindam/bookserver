@@ -35,7 +35,7 @@ func (cfg *sqlRead) sqlreadlist(w http.ResponseWriter, r *http.Request) {
 	if urlPoint+IDPOINT > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		out.Option += "table=" + tName
 		if jdata, err := cfg.sql.ReadAll(tName); err != nil {
@@ -64,17 +64,17 @@ func (cfg *sqlRead) sqlreadget(w http.ResponseWriter, r *http.Request) {
 	if urlPoint+IDPOINT > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else if urlPoint+IDPOINT == len(sUrl) || sUrl[urlPoint+IDPOINT] == "" {
 		out.Option += "table=" + tName + " id not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		id, err := strconv.Atoi(sUrl[urlPoint+IDPOINT])
 		if err != nil {
 			out.Option += "table=" + tName + " id input error"
 			out.Code = http.StatusNotFound
-			out.Result = "[]"
+			out.Result = []string{}
 		} else {
 			out.Option += "table=" + tName + " id=" + sUrl[urlPoint+IDPOINT]
 			if jdata, err := cfg.sql.ReadID(tName, id); err != nil {

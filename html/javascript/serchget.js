@@ -1,4 +1,4 @@
-var bookname_row = ["id","name","title","writer","brand","booktype","ext"];
+var bookname_row = ["id","name","title","writer","burand","booktype","ext"];
 var copyfile_row = ["id","zippass","filesize","copyflag"];
 var filelists_row =["id","name","pdfpass","zippass"];
 
@@ -6,7 +6,10 @@ function bookname_edit(ary){
     var output =[]
     for (var i=0;i<ary.length;i++){
         var tmp =[]
-        tmp.push(ary[i].id,ary[i].name,ary[i].title,ary[i].Writer,ary[i].brand,ary[i].ext)
+        for (var j=0;j<bookname_row.length;j++){
+            tmp.push(ary[i][bookname_row[j]])
+        }
+        // tmp.push(ary[i]["id"],ary[i]["name"],ary[i].title,ary[i].Writer,ary[i].brand,ary[i].ext)
         output.push(tmp)
     }
     return output
