@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <title>編集</title>
+        <link rel="stylesheet" href="/css/main.css">
+        <script type="text/javascript" src="javascript/getjson.js"></script>
+        <script type="text/javascript" src="javascript/serchget.js"></script>
+        <script type="text/javascript" src="javascript/readdata.js"></script>
+        <script type="text/javascript" src="javascript/login.js"></script>
+        <script>
+
+            window.onload = function(){
+                loadlistdata("booknames","output");
+                // getJSON("/list/filelist","output");
+            }
+            function bookname(){
+                document.getElementById("new").href="/new/bookname"
+                meta_suburl = 'bookname'
+                selectdata = 0;
+                loadlistdata('booknames','output');
+            }
+            function filelist(){
+                document.getElementById("new").href="/new/filelist"
+                meta_suburl = 'filelist'
+                selectdata = 1;
+                loadlistdata('filelists','output');
+            }
+            function copyfile(){
+                document.getElementById("new").href="/new/copyfile"
+                meta_suburl = 'copyfile'
+                selectdata = 2;
+                loadlistdata('copyfiles','output');
+            }
+            function listdata(){
+                document.getElementById("new").display = "none"
+                meta_suburl = `listdata`
+                selectdata = 3;
+                getJSON('/listdata/','output');
+            }
+            function ckdatab(){
+                var data = document.getElementById(output)
+                if (data.innerHTML == ""){
+                    data.innerHTML = ""
+                    data.style.display = "none"
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id="answer" class=""></div>
+        <a href=javascript:void(0); onclick="bookname();return false" class="tab-button">bookname</a>
+        <a href=javascript:void(0); onclick="filelist();return false" class="tab-button">filelist</a>
+        <a href=javascript:void(0); onclick="copyfile();return false" class="tab-button">copyfile</a>
+        <a href=javascript:void(0); onclick="listdata();return false" class="tab-button">listdata</a>
+        <input type="text" name="" id="serch" onkeyup="searchgetData('output2');ckdatab('output2');return false">
+        <input type="button" value="serch" onclick="searchgetData('output2');ckdatab('output2');return false">
+        <input type="button" value="clear" onclick="document.getElementById('serch').value='';searchgetData('output2');ckdatab('output2');return false">
+        <div id="output" class="output">testout</div>
+        <div>
+            <a href="/new/bookname" id="new">add new</a> <a href="/">index</a>
+        </div>
+        <div id="output2" class="output2"></div>
+    </body>
+</html>
