@@ -13,3 +13,23 @@ function adddata(table,json_data) {
     xhr.send(json_data);
 
 }
+
+function createaddform(table,output) {
+  var data = "";
+  var table_listdata = table_list[selectdata] 
+  data += table +"<br>"
+  data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"</tr>"
+  for (var i = 0;i<table_listdata.length;i++){
+    data += "<tr>"
+    data += "<td>"
+    data += table_listdata[i]
+    data += "</td>"
+    data += "<td>"
+    data += "<input type=\"text\" name=\""+table+"\" id=\""+table+"_"+table_listdata[i]+"\">"
+    data += "</td>"
+    data += "</tr>"
+  }
+  data += "</table>"
+  data +="<input type=\"button\" value=\"push\" onclick=\"sendadddata('"+table+"')\">"
+  document.getElementById(output).innerHTML = data;
+}
