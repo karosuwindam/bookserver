@@ -1,0 +1,139 @@
+<html>
+    <head>
+        
+        <script src="./javascript/login.js"></script>
+        <script src="./javascript/readdata.js"></script>
+        <script src="./javascript/adddata.js"></script>
+        <title>hello</title>
+        <script>
+            function logininput(){
+                var name = document.getElementById("name").value
+                var pass = document.getElementById("pass").value
+                login(name,pass)
+            }
+            function sendbooknamesdata(){
+                var data = {};
+                var tablename = "booknames";
+                var dataname = ["name","title","writer","burand","booktype","ext"]
+                for (var i=0;i<dataname.length;i++) {
+                    data[dataname[i]] = document.getElementById(tablename+"_"+dataname[i]).value
+                }
+                json_data = JSON.stringify(data);
+                console.log(json_data);
+                adddata(tablename,json_data)
+            }
+            
+            function updateProgress(e) {
+            if (e.lengthComputable) {
+                var percent = e.loaded / e.total;
+                // $("progress").attr("value", percent * 100);
+                document.getElementById("progress").value = percent * 100;
+                if (percent == 1){
+                    document.getElementById("file").disabled = false;
+                    document.getElementById("post2").disabled = false;
+                    document.getElementById("progress").value = 0;
+                    document.getElementById("file").value = "";
+                    document.getElementById("fileck").innerHTML = "";
+                    document.getElementById("health").innerHTML = "";
+                }
+            }
+            }
+
+            function uploadstart() {
+                if (document.getElementById("file").files.length == 0){
+                    return 
+                }
+                if (TOKEN == ""){
+                    return
+                }
+                document.getElementById("file").disabled = true;
+                document.getElementById("post2").disabled = true;
+                var formData = new FormData();
+                formData.append("file", document.getElementById("file").files[0]);
+
+                var request = new XMLHttpRequest();
+                request.upload.addEventListener("progress", updateProgress, false);
+
+                request.open("POST", "/v1/upload");
+                request.setRequestHeader('Authorization', 'bearer '+TOKEN);
+                request.send(formData);
+            }
+            function updataserch(str){
+                for ( var i=1;i<str.length;i++){
+                    var tmp = str.slice(-i) -0;
+                    if (isNaN(tmp)){
+                        tmp = str.slice(0,str.length-i+1)
+                        break
+                    }
+                }
+                document.getElementById("keyword").value = tmp;
+                serchgetJSON('output');
+            }
+            function ck_health(){
+                var xhr = new XMLHttpRequest();
+                var URL = "/health";
+                xhr.open('GET',URL,true);
+                xhr.send( null );
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState == 4){
+                    if(xhr.status == 200){
+                        var data = xhr.responseText;
+                        //<!-- レスポンスが返ってきたらテキストエリアに代入する -->
+                        var tmp = JSON.parse(data);
+                        if (tmp.Message != "OK"){
+                            document.getElementById("health").innerHTML = tmp.Message;
+                            console.log(tmp.Message);
+                        }else{
+                            document.getElementById("health").innerHTML = "";
+                        }
+                        uploadstart();
+                        // return true
+                    }else{
+                        var data = xhr.responseText;
+                        var tmp = JSON.parse(data);
+                        document.getElementById("health").innerHTML = tmp.Message;
+                        console.log(tmp.Message)
+                        // return false
+                    }
+                    }
+                }
+            }
+            function onclickSerch(){
+                var keyword = document.getElementById("keyword").value;
+                searchkeyword(keyword,"output")
+            }
+        </script>
+    </head>
+    <body onload="readstoragesession()">
+        <div id="upload">
+            
+            <progress id="progress" value="0" max="100"></progress>
+            <input type="file" name="file" onchange="formdataJSON(this);"  id="file">
+            <button type="button" id="post2" onclick="uploadstart();">送信</button>
+        </div>
+        <div>
+            <p>hello</p>
+            <a href="edit.html">edit</a>
+        </div>
+        <input type="text" name="name" id="name">
+        <input type="text" name="pass" id="pass">
+        <input type="button" value="login" onclick='logininput()'>
+        <input type="button" value="loginget" onclick='loginget()'>
+        <input type="button" value="logout" onclick='logout()'>
+        <input type="button" value="loadlist" onclick='loadlist("booknames")'>
+        <div id=""booknames>
+            <input type="text" name="name" id="booknames_name">
+            <input type="text" name="title" id="booknames_title">
+            <input type="text" name="writer" id="booknames_writer">
+            <input type="text" name="burand" id="booknames_burand">
+            <input type="text" name="booktype" id="booknames_booktype">
+            <input type="text" name="ext" id="booknames_ext">
+            <input type="button" value="put" onclick="sendbooknamesdata()">
+        </div>
+        <div id="search">
+            <input type="text" name="keyword" id="keyword">
+            <input type="button" value="search" onclick="onclickSerch()">
+        </div>
+        <div id="output"></div>
+    </body>
+</html>

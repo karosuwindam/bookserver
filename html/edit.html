@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <title>編集</title>
+        <link rel="stylesheet" href="/css/main.css">
+        <script type="text/javascript" src="javascript/getjson.js"></script>
+        <script type="text/javascript" src="javascript/serchget.js"></script>
+        <script type="text/javascript" src="javascript/readdata.js"></script>
+        <script type="text/javascript" src="javascript/adddata.js"></script>
+        <script type="text/javascript" src="javascript/login.js"></script>
+        <script>
+
+            window.onload = function(){
+                readstoragesession()
+                loadlistdata("booknames","output");
+                // getJSON("/list/filelist","output");
+            }
+            var viewaddformF = false;
+            function viewaddform(){
+                if (!viewaddformF){
+                    document.getElementById("output2").style.display = "";
+                    createaddform(meta_suburl,"output2")
+                }else {
+                    document.getElementById("output2").style.display = "none";
+                }
+                viewaddformF = !viewaddformF
+
+            }
+            function bookname(){
+                viewaddformF = true
+                viewaddform()
+                meta_suburl = 'booknames'
+                selectdata = 0;
+                loadlistdata('booknames','output');
+            }
+            function filelist(){
+                viewaddformF = true
+                viewaddform()
+                meta_suburl = 'filelist'
+                selectdata = 1;
+                loadlistdata('filelists','output');
+            }
+            function copyfile(){
+                viewaddformF = true
+                viewaddform()
+                meta_suburl = 'copyfile'
+                selectdata = 2;
+                loadlistdata('copyfiles','output');
+            }
+            function listdata(){
+                viewaddformF = true
+                viewaddform()
+                document.getElementById("new").display = "none"
+                meta_suburl = `listdata`
+                selectdata = 3;
+                getJSON('/listdata/','output');
+            }
+            function ckdatab(){
+                var data = document.getElementById(output)
+                if (data.innerHTML == ""){
+                    data.innerHTML = ""
+                    data.style.display = "none"
+                }
+            }
+            function sendadddata(table){
+                var table_rows = table_list[0]
+                var readData = {};
+                for (var i=0;i<table_rows.length;i++){
+                    var tmp =document.getElementById(table+"_"+table_rows[i]);
+                    if (tmp != null){
+                        readData[table_rows[i]] = tmp.value;
+
+                    }
+                };
+                var json_data = JSON.stringify(readData);
+                console.log(json_data);
+                adddata(table,json_data);
+
+            }
+        </script>
+    </head>
+    <body>
+        <div id="answer" class=""></div>
+        <a href=javascript:void(0); onclick="bookname();return false" class="tab-button">bookname</a>
+        <a href=javascript:void(0); onclick="filelist();return false" class="tab-button">filelist</a>
+        <a href=javascript:void(0); onclick="copyfile();return false" class="tab-button">copyfile</a>
+        <a href=javascript:void(0); onclick="listdata();return false" class="tab-button">listdata</a>
+        <input type="text" name="" id="serch" onkeyup="searchgetData('output2');ckdatab('output2');return false">
+        <input type="button" value="serch" onclick="searchgetData('output2');ckdatab('output2');return false">
+        <input type="button" value="clear" onclick="document.getElementById('serch').value='';searchgetData('output2');ckdatab('output2');return false">
+        <div id="output" class="output">testout</div>
+        <div>
+            <!-- <a href="/new/bookname" id="new">add new</a> -->
+            <a href="/">index</a>
+            <a href="javasript:void(0);" onclick="viewaddform();return false"> add _new</a>
+        </div>
+        <div id="output2" class="output2"></div>
+    </body>
+</html>

@@ -32,7 +32,7 @@ func (cfg *sqlAdd) sqladd(w http.ResponseWriter, r *http.Request) {
 	if urlPoint > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		b, _ := io.ReadAll(r.Body)
 
