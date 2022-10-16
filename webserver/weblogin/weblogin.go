@@ -161,11 +161,13 @@ func login(w http.ResponseWriter, r *http.Request) {
 	ses, _ := cs.Get(r, "hello-session")
 	ses.Values["login"] = nil
 	ses.Values["name"] = nil
+	ses.Values["time"] = nil
 	nm := r.PostFormValue("name")
 	pw := r.PostFormValue("pass")
 	if cklogin(nm, pw) {
 		ses.Values["login"] = true
 		ses.Values["name"] = nm
+		ses.Values["time"] = time.Now().Add(time.Hour).Unix()
 		if jwtdata, err := createjwt(nm, pw); err == nil {
 			jwttmp[nm] = jwtdata
 		} else {
@@ -176,13 +178,31 @@ func login(w http.ResponseWriter, r *http.Request) {
 	getlogin(w, r)
 }
 
+func tokenReNew(w http.ResponseWriter, r *http.Request) {
+	ses, _ := cs.Get(r, "hello-session")
+	name, _ := ses.Values["name"].(string)
+	ses.Values["time"] = time.Now().Add(time.Hour).Unix()
+	claims, err := convetStructoToMap(&JwtData{userName: name, ext: time.Now().Add(time.Hour * 24).Unix(), usertype: common.ADMIN | common.GUEST | common.USER})
+	if err != nil {
+
+	}
+	// ヘッダーとペイロードの生成
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, _ := token.SignedString([]byte(jwtsecretkey))
+	jwttmp[name] = tokenString
+	ses.Save(r, w)
+
+}
+
 func getlogin(w http.ResponseWriter, r *http.Request) {
 	msg := message.Result{Name: "login", Code: http.StatusOK, Date: time.Now()}
 	ses, _ := cs.Get(r, "hello-session")
 	flg, _ := ses.Values["login"].(bool)
 	nm, _ := ses.Values["name"].(string)
+	limittime, _ := ses.Values["time"].(int64)
 	if flg {
-		if token := jwttmp[nm]; token != "" {
+		if token := jwttmp[nm]; token != "" && limittime >= time.Now().Unix() {
+			tokenReNew(w, r)
 			msg.Result = tResurlt{status: "User:" + nm + " " + "LOGIN OK", Token: token}
 		} else {
 			msg.Result = "User:" + nm + " " + "LOGIN OK"
