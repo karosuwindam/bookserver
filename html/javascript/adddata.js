@@ -20,6 +20,9 @@ function createaddform(table,output) {
   data += table +"<br>"
   data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"</tr>"
   for (var i = 0;i<table_listdata.length;i++){
+    if (table_listdata[i] == "id") {
+      continue
+    }
     data += "<tr>"
     data += "<td>"
     data += table_listdata[i]

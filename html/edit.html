@@ -35,7 +35,7 @@
             function filelist(){
                 viewaddformF = true
                 viewaddform()
-                meta_suburl = 'filelist'
+                meta_suburl = 'filelists'
                 selectdata = 1;
                 loadlistdata('filelists','output');
             }
@@ -44,7 +44,7 @@
                 viewaddform()
                 meta_suburl = 'copyfile'
                 selectdata = 2;
-                loadlistdata('copyfiles','output');
+                loadlistdata('copyfile','output');
             }
             function listdata(){
                 viewaddformF = true
@@ -62,13 +62,19 @@
                 }
             }
             function sendadddata(table){
-                var table_rows = table_list[0]
+                var table_rows = table_list[selectdata]
                 var readData = {};
                 for (var i=0;i<table_rows.length;i++){
                     var tmp =document.getElementById(table+"_"+table_rows[i]);
                     if (tmp != null){
                         readData[table_rows[i]] = tmp.value;
 
+                    }
+                    switch(table_rows[i]){
+                    case "filesize":
+                    case "copyflag":
+                    readData[table_rows[i]] = readData[table_rows[i]] -0;
+                        break;
                     }
                 };
                 var json_data = JSON.stringify(readData);

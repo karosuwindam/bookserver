@@ -90,6 +90,7 @@ func (cfg *sqlEdit) sqledit(w http.ResponseWriter, r *http.Request) {
 				out.Code = http.StatusNotFound
 				log.Println(err.Error())
 			} else {
+				message.Println("Edit database for", tName, "id=", id, "data:", string(b))
 				joutdata = fmt.Sprintf("%s", jdata)
 				out.Result = ""
 			}
