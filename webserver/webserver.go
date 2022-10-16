@@ -140,6 +140,17 @@ func v1OtherBuck(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%v", rst.Output())
 }
 
+// v1NotAuthBuck(http.ResponseWriter, *http.Request)
+//
+// /v1/による認証が有効でないときのの返却処理関数
+func v1NotAuthBuck(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.Path
+	methd := r.Method
+	msg := message.Message{Name: "v1", Status: methd + ":" + url + " Input Authorization: bearer", Code: http.StatusUnauthorized}
+	rst := message.Result{Name: "v1", Code: http.StatusUnauthorized, Option: "", Date: time.Now(), Result: msg}
+	fmt.Fprintf(w, "%v", rst.Output())
+}
+
 // (*SetupServer) v1(http.ResponseWriter, *http.Request)
 //
 // /v1/にアクセスした時に判断する処理
@@ -180,8 +191,8 @@ func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 	if flag && (t.accessmpa[check]&user > 0) { //登録済み
 		if t.accessmpa[check] == common.GUEST || toketime.Sub(nowtime) >= 0 {
 			t.routefunc[check](t.routeinterface[check], w, r)
-		} else { //期限切れ
-			v1OtherBuck(w, r)
+		} else { //再認証のメッセージを
+			v1NotAuthBuck(w, r)
 
 		}
 	} else { //日登録

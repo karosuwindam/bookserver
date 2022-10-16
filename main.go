@@ -3,8 +3,17 @@ package main
 import (
 	"bookserver/config"
 	"bookserver/fileupload"
+	"bookserver/message"
+	"bookserver/textread"
 	"bookserver/webserver"
 	"bookserver/webserver/common"
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type mainconfig struct {
@@ -24,6 +33,7 @@ func Setup() *mainconfig {
 	}
 
 	if upcfg, err := fileupload.Setup(); err == nil {
+		scfg.s.Add("/", textread.ViewHtml)
 		scfg.s.AddV1(common.ADMIN, "/upload", upcfg, fileupload.FIleupload)
 
 	}
@@ -31,19 +41,35 @@ func Setup() *mainconfig {
 	return scfg
 }
 
-func Run(cfg *mainconfig) error {
+func Run(cfg *mainconfig, ctx context.Context) error {
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+	eg, ctx := errgroup.WithContext(ctx)
+
 	s, err := cfg.s.NewServer()
 	if err != nil {
 		return err
 	}
-	defer s.Sql.Close()
-	return s.Srv.Serve(s.L)
+	eg.Go(func() error {
+		defer s.Sql.Close()
+		errout := s.Srv.Serve(s.L)
+		return errout
+	})
+	<-ctx.Done()
+	message.Println("shutdown")
+	if err := s.Srv.Shutdown(context.Background()); err != nil {
+		log.Println(err)
+	}
+	return eg.Wait()
 }
 
 func main() {
+	ctx := context.Background()
 	cfg := Setup()
-	if cfg == nil {
-		return
+
+	if err := Run(cfg, ctx); err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
-	Run(cfg)
+
 }

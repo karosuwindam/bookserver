@@ -17,7 +17,7 @@ https://github.com/karosuwindam/bookserver2
 |/v1/upload|POST|ファイルのアップロード機能||
 |/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り|GUEST|
 |/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る|GUEST|
-|/v1/serch/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
+|/v1/search/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
 |/v1/add/[テーブル]/|POST|データベースにデータを追加|ADMIN|
 |/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得|ADMIN|
 |/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集|ADMIN|

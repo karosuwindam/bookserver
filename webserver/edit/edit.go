@@ -72,17 +72,17 @@ func (cfg *sqlEdit) sqledit(w http.ResponseWriter, r *http.Request) {
 	if urlPoint+IDPOINT > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else if urlPoint+IDPOINT == len(sUrl) || sUrl[urlPoint+IDPOINT] == "" {
 		out.Option += "table=" + tName + " id not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		id, err := strconv.Atoi(sUrl[urlPoint+IDPOINT])
 		if err != nil {
 			out.Option += "table=" + tName + " id input error"
 			out.Code = http.StatusNotFound
-			out.Result = "[]"
+			out.Result = []string{}
 		} else {
 			b, _ := io.ReadAll(r.Body)
 			out.Option += "table=" + tName + " id=" + sUrl[urlPoint+IDPOINT]
@@ -115,17 +115,17 @@ func (cfg *sqlEdit) sqleditget(w http.ResponseWriter, r *http.Request) {
 	if urlPoint+IDPOINT > len(sUrl) {
 		out.Option += "table not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else if urlPoint+IDPOINT == len(sUrl) || sUrl[urlPoint+IDPOINT] == "" {
 		out.Option += "table=" + tName + " id not input"
 		out.Code = http.StatusNotFound
-		out.Result = "[]"
+		out.Result = []string{}
 	} else {
 		id, err := strconv.Atoi(sUrl[urlPoint+IDPOINT])
 		if err != nil {
 			out.Option += "table=" + tName + " id input error"
 			out.Code = http.StatusNotFound
-			out.Result = "[]"
+			out.Result = []string{}
 		} else {
 			out.Option += "table=" + tName + " id=" + sUrl[urlPoint+IDPOINT]
 			if jdata, err := cfg.sql.ReadID(tName, id); err != nil {
