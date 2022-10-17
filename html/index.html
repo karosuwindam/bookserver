@@ -1,15 +1,51 @@
 <html>
     <head>
         
+        <link rel="stylesheet" href="/css/main.css">
         <script src="./javascript/login.js"></script>
         <script src="./javascript/readdata.js"></script>
         <script src="./javascript/adddata.js"></script>
         <title>hello</title>
         <script>
             function logininput(){
-                var name = document.getElementById("name").value
-                var pass = document.getElementById("pass").value
-                login(name,pass)
+                if (document.getElementById("login").value == "login"){
+                    var name = document.getElementById("name").value
+                    var pass = document.getElementById("pass").value
+                    login(name,pass);
+                    loginupdate();
+                }else{
+                    logoutput();
+                }
+            }
+            function logoutput(){
+                logout()
+                document.getElementById("login").value = "login";
+                document.getElementById("name").disabled = false;
+                document.getElementById("pass").disabled = false;
+            }
+            function loginupdate(){
+                var xhr = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+                xhr.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+                if(xhr.readyState == 4 && xhr.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+                    var data = xhr.responseText;
+                    // console.log(data);		          // 取得した ファイルの中身を表示
+                    var tmp = JSON.parse(data)
+                    TOKEN = tmp.result.token
+                    document.getElementById("login").value = "logout"
+                    document.getElementById("name").disabled = true;
+                    document.getElementById("pass").disabled = true;
+                }else if(xhr.readyState == 4 && xhr.status != 200){
+                    var data = xhr.responseText;
+                    // console.log(data);		          // 取得した ファイルの中身を表示
+                    if (TOKEN != "") {
+                        logout();
+                    }
+                    document.getElementById("login").value = "login"
+                }
+                };
+                xhr.open('GET','/login');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.send(null);
             }
             function sendbooknamesdata(){
                 var data = {};
@@ -104,20 +140,20 @@
             }
         </script>
     </head>
-    <body onload="readstoragesession()">
+    <body onload="readstoragesession();loginupdate()">
         <div id="upload">
             
             <progress id="progress" value="0" max="100"></progress>
             <input type="file" name="file" onchange="formdataJSON(this);"  id="file">
             <button type="button" id="post2" onclick="uploadstart();">送信</button>
+            <input type="text" name="name" id="name">
+            <input type="password" name="pass" id="pass">
+            <input type="button" value="login" id="login" onclick='logininput()'>
         </div>
         <div>
             <p>hello</p>
             <a href="edit.html">edit</a>
         </div>
-        <input type="text" name="name" id="name">
-        <input type="text" name="pass" id="pass">
-        <input type="button" value="login" onclick='logininput()'>
         <input type="button" value="loginget" onclick='loginget()'>
         <input type="button" value="logout" onclick='logout()'>
         <input type="button" value="loadlist" onclick='loadlist("booknames")'>

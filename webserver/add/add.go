@@ -88,6 +88,7 @@ func (cfg *sqlAdd) sqladd(w http.ResponseWriter, r *http.Request) {
 					log.Println(err.Error())
 					out.Option += " NG"
 				} else {
+					message.Println("Add database for", tName, "data:", jout)
 					if jread, err := cfg.sql.ReadID(tName, jout.Id); err != nil {
 						log.Println(err.Error())
 						out.Option += " NG"

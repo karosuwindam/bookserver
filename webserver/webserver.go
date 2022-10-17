@@ -167,13 +167,16 @@ func (t *SetupServer) v1(w http.ResponseWriter, r *http.Request) {
 		if jwtdata, err := weblogin.Unpackjwt(jwttoken); err != nil {
 			user = common.GUEST
 			toketime = time.Now().Add(time.Hour)
+			message.Println(r.Method, r.URL.Path, "USER:", "GUEST")
 
 		} else {
 			user = jwtdata.UType()
 			toketime = jwtdata.Ext()
-			fmt.Println(jwtdata)
+			// fmt.Println(jwtdata)
+			message.Println(r.Method, r.URL.Path, "USER:", jwtdata.UName())
 		}
 	} else {
+		message.Println(r.Method, r.URL.Path, "USER:", "GUEST")
 		toketime = time.Now().Add(time.Hour)
 		user = common.GUEST
 	}

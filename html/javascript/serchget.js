@@ -1,6 +1,3 @@
-var bookname_row = ["id","name","title","writer","burand","booktype","ext"];
-var copyfile_row = ["id","zippass","filesize","copyflag"];
-var filelists_row =["id","name","pdfpass","zippass"];
 
 function bookname_edit(ary){
     var output =[]

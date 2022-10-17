@@ -21,6 +21,7 @@ https://github.com/karosuwindam/bookserver2
 |/v1/add/[テーブル]/|POST|データベースにデータを追加|ADMIN|
 |/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得|ADMIN|
 |/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集|ADMIN|
+|/v1/edit/[テーブル]/[id]|DELETE|データベースのデータを削除|ADMIN
 
 
 # データベースにデータを追加について
