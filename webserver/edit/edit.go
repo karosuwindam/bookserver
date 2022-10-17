@@ -55,6 +55,46 @@ func (cfg *sqlEdit) sqleditwrite(tName string, b []byte, id int) (string, error)
 	}
 	return "", errors.New("Data NG")
 }
+func (cfg *sqlEdit) sqldelete(w http.ResponseWriter, r *http.Request) {
+
+	out := message.Result{Name: "sql delete", Code: http.StatusOK, Date: time.Now(), Option: r.Method + ":"}
+	sUrl := common.UrlAnalysis(r.URL.Path)
+	joutdata := ""
+	urlPoint := 0
+	tName := ""
+	for ; urlPoint < len(sUrl); urlPoint++ {
+		if table.CkList(sUrl[urlPoint]) {
+			tName = sUrl[urlPoint]
+			break
+		}
+	}
+	if urlPoint+IDPOINT > len(sUrl) {
+		out.Option += "table not input"
+		out.Code = http.StatusNotFound
+		out.Result = []string{}
+	} else if urlPoint+IDPOINT == len(sUrl) || sUrl[urlPoint+IDPOINT] == "" {
+		out.Option += "table=" + tName + " id not input"
+		out.Code = http.StatusNotFound
+		out.Result = []string{}
+	} else {
+		id, err := strconv.Atoi(sUrl[urlPoint+IDPOINT])
+		if err != nil {
+			out.Option += "table=" + tName + " id input error"
+			out.Code = http.StatusNotFound
+			out.Result = []string{}
+		} else {
+			if _, err := cfg.sql.Delete(tName, id); err != nil {
+				out.Result = err.Error()
+			} else {
+				// joutdata = fmt.Sprintf("delete %v OK", id)
+				out.Result = fmt.Sprintf("delete %v OK", id)
+			}
+
+		}
+
+	}
+	common.Sqlreadmessageback(out, joutdata, w)
+}
 
 func (cfg *sqlEdit) sqledit(w http.ResponseWriter, r *http.Request) {
 
@@ -90,6 +130,7 @@ func (cfg *sqlEdit) sqledit(w http.ResponseWriter, r *http.Request) {
 				out.Code = http.StatusNotFound
 				log.Println(err.Error())
 			} else {
+				message.Println("Edit database for", tName, "id=", id, "data:", string(b))
 				joutdata = fmt.Sprintf("%s", jdata)
 				out.Result = ""
 			}
@@ -148,6 +189,8 @@ func (cfg *sqlEdit) websqledit(w http.ResponseWriter, r *http.Request) {
 	switch strings.ToUpper(r.Method) {
 	case "POST":
 		cfg.sqledit(w, r)
+	case "DELETE":
+		cfg.sqldelete(w, r)
 	default:
 		cfg.sqleditget(w, r)
 	}
