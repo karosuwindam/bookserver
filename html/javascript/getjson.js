@@ -3,44 +3,7 @@ var jsondata
 var rowmax = 8
 var rownum = 4
 var nowserchpage = 1
-function destory(id){
-  myRet = confirm("destory id="+id+" OK??");
-  if (myRet){
-    var xhr = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
-    xhr.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
-      if(xhr.readyState == 4 && xhr.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-          var data = xhr.responseText;
-          console.log(data);		          // 取得した ファイルの中身を表示
-          document.getElementById("answer").innerHTML = "destory id=" + id + " OK"
-          getJSON("/list","output");
-      }
-    };
 
-    var url = "destory/"
-    if (meta_suburl != ""){
-      url += meta_suburl + "/"
-    }
-    url += id;
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    xhr.send(null);
-  }
-}
-function addfile(name,zippass,pdfpass,tag){
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
-    if(xhr.readyState == 4 && xhr.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-        var data = xhr.responseText;
-        console.log(data);		          // 取得した ファイルの中身を表示
-        document.getElementById("answer").innerHTML = "destory id=" + id + " OK"
-    }
-  };
-  var url = "/new/filelist"
-  xhr.open('POST',url,true)
-  xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-  var output = "name="+name+"&zippass="+zippass+"&pdfpass="+pdfpass+"&tag="+tag
-  xhr.send(output);
-}
 function ck_copyfilebox(str,ckflag){
   var xhr = new XMLHttpRequest();
  
@@ -123,13 +86,6 @@ function listoutput(str){
     output += "<td>"+tmp[i].Zip.Name
     if ((tmp[i].Pdf.Flag=="1")&&(tmp[i].Zip.Flag=="0")&&(tmp[i].Jpg.Flag=="1")&&(tmp[i].Data.name!="")){
       output += " " 
-      // output += "<form action='/new/filelist' method='post'>"
-      // output += "<input type='hidden' name='name' value="+tmp[i].Data.name+">"
-      // output += "<input type='hidden' name='pdfpass' value="+tmp[i].Data.pdfpass+">"
-      // output += "<input type='hidden' name='zippass' value="+tmp[i].Data.Zippass+">"
-      // output += "<input type='hidden' name='tag' value="+tmp[i].Data.tag+">"
-      // output += "<input type='submit' value='send'>"
-      // output += "</form>"
       output += "<input type='button' value='send' onclick=\""
       output += "addfile('"+tmp[i].Data.name+"','"+tmp[i].Data.Zippass+"','"+tmp[i].Data.pdfpass+"','"+tmp[i].Data.tag+"')"
       output += ";this.disabled=true;return false\"> none"
@@ -146,87 +102,7 @@ function listoutput(str){
   return output
 }
 
-function jsonOutput(str){
-    var output = ""
-    var table_title = ["id","name","title","writer","brand","booktype","ext"]
-    if (meta_suburl=="filelist"){
-      table_title = ["id","name","pdfpass","zippass","tag"]
-    }else if(meta_suburl=="copyfile"){
-      table_title = ["id","zippass","copyflag","filesize"]
-    }
-    var tmp = JSON.parse(str)
-    output += "<table>"
-    output += "<tr>"
-    for (var i=0;i<table_title.length;i++){
-        output += "<th>"+table_title[i]+"</th>"
-    }
-    output += "</tr>"
-    for (var i=0; i< tmp.length;i++){
-    //   output += "<div>"
-      output += "<tr>"
-    //   output += tmp[i].name
-      output += "<td>"+tmp[i].id+"</td>"
-      if (meta_suburl !="copyfile"){
-        output += "<td>"+tmp[i].name+"</td>"
-      }
-      if (meta_suburl=="filelist"){
-        output += "<td>"+tmp[i].pdfpass+"</td>"
-        output += "<td>"+tmp[i].Zippass+"</td>"
-        output += "<td>"+tmp[i].tag+"</td>"
-      }else if(meta_suburl=="copyfile"){
-        output += "<td>"+tmp[i].Zippass+"</td>"
-        output += "<td>"+tmp[i].copyflag+"</td>"
-        output += "<td>"+tmp[i].Filesize+"</td>"
-      }else{
-        output += "<td>"+tmp[i].title+"</td>"
-        output += "<td>"+tmp[i].Writer+"</td>"
-        output += "<td>"+tmp[i].brand+"</td>"
-        output += "<td>"+tmp[i].booktype+"</td>"
-        output += "<td>"+tmp[i].ext+"</td>"
-      }
-    //   output += " <a href='edit/"+tmp[i].id+"'>"+"edit"+"</a>"
-      output += "<td><a href='show/"
-      if (meta_suburl!=""){
-        output +=meta_suburl+"/"
-      }
-      output += tmp[i].id+"'>"+"show"+"</a></td>"
-      output += "<td><a href='edit/"
-      if (meta_suburl!=""){
-        output +=meta_suburl+"/"
-      }
-      output += tmp[i].id+"'>"+"edit"+"</a></td>"
-    //   output += " <a href='destory/"+tmp[i].id+"'>"+"destory"+"</a>"
-      output += "<td><a href='javascript:destory("+tmp[i].id+");'>"+"destory"+"</a></td>"
-      if (meta_suburl=="copyfile"){
-        output += "<td>"+"<input type='checkbox' "
-        if (tmp[i].copyflag == "1"){
-          output += "checked='checked' "
-        }
-        output += "onclick=\"ck_copyfilebox(\'"+tmp[i].Zippass+"\',this.checked)\""
-        output += ">"+"</td>"
-      }
-      output += "</tr>"
-    //   output +="</div>"
-    }
-    output += "</table>"
-    return output
-  }
-  function getJSON(url,output) {
-    var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
-    req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
-      if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
-          var data = req.responseText;
-          console.log(data);		          // 取得した JSON ファイルの中身を表示
-          if (meta_suburl == `listdata`){
-            document.getElementById(output).innerHTML = listoutput(data);
-          }else{
-            document.getElementById(output).innerHTML = jsonOutput(data);
-          }
-      }
-    };
-    req.open("GET", url+"/"+meta_suburl, false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
-    req.send(null);					    // 実際にサーバーへリクエストを送信
-  }
+
 function serchDataTagSplit(tag){
   var output = ""
   var tmp = tag.split(",")
@@ -243,6 +119,7 @@ function serchDataTagSplit(tag){
   }
   return output
 }
+
 // nowserchpage
 function serchpageout(tmp){
   var num = tmp.length

@@ -6,60 +6,87 @@
         <script type="text/javascript" src="javascript/serchget.js"></script>
         <script type="text/javascript" src="javascript/readdata.js"></script>
         <script type="text/javascript" src="javascript/adddata.js"></script>
+        <script type="text/javascript" src="javascript/editdata.js"></script>
         <script type="text/javascript" src="javascript/login.js"></script>
+        <script type="text/javascript" src="javascript/deletedata.js"></script>
         <script>
 
             window.onload = function(){
                 readstoragesession()
                 loadlistdata("booknames","output");
-                // getJSON("/list/filelist","output");
+                meta_suburl = 'booknames'
+                selectdata = 0;
             }
             var viewaddformF = false;
             function viewaddform(){
                 if (!viewaddformF){
-                    document.getElementById("output2").style.display = "";
+                    // document.getElementById("output2").style.display = "";
                     createaddform(meta_suburl,"output2")
                 }else {
-                    document.getElementById("output2").style.display = "none";
+                    // document.getElementById("output2").style.display = "none";
+                    document.getElementById("output2").innerHTML = "";
                 }
                 viewaddformF = !viewaddformF
 
             }
-            function bookname(){
+
+            function vieweditform(id){
+                createeditform(id,meta_suburl,"edit")
+            }
+            function reviewform() {
+                switch (meta_suburl){
+                    case "booknames":
+                        bookname();
+                        break;
+                    case "filelists":
+                        filelist();
+                        break;
+                    case "copyfile":
+                        copyfile();
+                        break;
+                    case "listdata":
+                        listdata();
+                        break;
+                }
+            }
+
+            function frominit(suburl){
+                meta_suburl = suburl
+                if (document.getElementById('edit').innerHTML != ""){
+                    closeedit('edit')
+                }
                 viewaddformF = true
                 viewaddform()
-                meta_suburl = 'booknames'
+                document.getElementById("answer").innerHTML = ""
+                loginget()
+                // document.getElementById("new").style.display="";
+            }
+            function bookname(){
+                frominit('booknames')
                 selectdata = 0;
                 loadlistdata('booknames','output');
             }
             function filelist(){
-                viewaddformF = true
-                viewaddform()
-                meta_suburl = 'filelists'
+                frominit('filelists')
                 selectdata = 1;
                 loadlistdata('filelists','output');
             }
             function copyfile(){
-                viewaddformF = true
-                viewaddform()
-                meta_suburl = 'copyfile'
+                frominit('copyfile')
                 selectdata = 2;
                 loadlistdata('copyfile','output');
             }
             function listdata(){
-                viewaddformF = true
-                viewaddform()
-                document.getElementById("new").display = "none"
-                meta_suburl = `listdata`
+                frominit('listdata')
+                // document.getElementById("new").style.display = "none"
                 selectdata = 3;
-                getJSON('/listdata/','output');
             }
             function ckdatab(){
-                var data = document.getElementById(output)
-                if (data.innerHTML == ""){
-                    data.innerHTML = ""
-                    data.style.display = "none"
-                }
+                // var data = document.getElementById(output)
+                // if (data.innerHTML == ""){
+                //     data.innerHTML = ""
+                //     data.style.display = "none"
+                // }
             }
             function sendadddata(table){
                 var table_rows = table_list[selectdata]
@@ -100,5 +127,6 @@
             <a href="javasript:void(0);" onclick="viewaddform();return false"> add _new</a>
         </div>
         <div id="output2" class="output2"></div>
+        <div id="edit" class="edit"></div>
     </body>
 </html>

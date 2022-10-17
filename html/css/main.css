@@ -13,6 +13,15 @@ div.output2{
     background-color: rgba(31, 34, 194, 0.7);
 
 }
+div.edit{
+    position: absolute;
+    top: 10%;
+    max-height: 90%;
+    width: 70%;
+    color:white;
+    overflow-x: auto;
+    background-color: rgba(255,255,255,0.7);
+}
 a.tab-button{
     display: inline-block;
     max-width: 180px;

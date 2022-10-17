@@ -155,3 +155,10 @@ func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	}
 	return string(bJSON), nil
 }
+
+func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
+	if err := sql.Cfg.Delete(tName, id); err != nil {
+		return "", err
+	}
+	return "", nil
+}

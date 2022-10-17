@@ -33,6 +33,6 @@ function createaddform(table,output) {
     data += "</tr>"
   }
   data += "</table>"
-  data +="<input type=\"button\" value=\"push\" onclick=\"sendadddata('"+table+"')\">"
+  data +="<input type=\"button\" value=\"push\" onclick=\"sendadddata('"+table+"');closeedit('"+output+"')\">"
   document.getElementById(output).innerHTML = data;
 }
