@@ -19,8 +19,8 @@ type PdftoZip struct {
 }
 
 //setup
-func Setup(pdfpass, pdfname, zippass, tmppass string) (*PdftoZip, error) {
-	t := &PdftoZip{Pdfpass: pdfpass, PdfName: pdfname, Zippass: zippass, Tmppass: tmppass}
+func Setup(pdfpass, pdfname, zippass, zipname, tmppass string) (*PdftoZip, error) {
+	t := &PdftoZip{Pdfpass: pdfpass, PdfName: pdfname, ZipName: zipname, Zippass: zippass, Tmppass: tmppass}
 	return t, nil
 }
 
@@ -48,7 +48,8 @@ func (t *PdftoZip) createtmpfolder() string {
 	}
 	tmppass += t.PdfName[:len(t.PdfName)-4]
 	os.MkdirAll(tmppass, 0777)
-	return tmppass
+	t.Tmppass = tmppass + "/"
+	return tmppass + "/"
 }
 
 //ZIPのフルパス作成
@@ -66,6 +67,9 @@ func (t *PdftoZip) zipfullpass() string {
 func (t *PdftoZip) removeimage() error {
 	dirfolder, err := dirread.Setup(t.Tmppass)
 	if err != nil {
+		return err
+	}
+	if err := dirfolder.Read("./"); err != nil {
 		return err
 	}
 	for _, filedata := range dirfolder.Data {
@@ -91,6 +95,9 @@ func (t *PdftoZip) imagetoZip() error {
 	zipWrite := zip.NewWriter(dest)
 	defer zipWrite.Close()
 	for _, file := range dirfolder.Data {
+		if file.Folder {
+			continue
+		}
 		if err := addToZip(t.Tmppass+file.Name, zipWrite); err != nil {
 			return err
 		}
@@ -119,7 +126,7 @@ func addToZip(filename string, zipWriter *zip.Writer) error {
 	return nil
 }
 
-func (t *PdftoZip) Pdftoimage() {
+func (t *PdftoZip) Pdftoimage() error {
 	str := t.PdfName
 	if strings.Index(str, "pdf") > 0 {
 		filename := str[:len(t.PdfName)-4]
@@ -137,12 +144,13 @@ func (t *PdftoZip) Pdftoimage() {
 		} else { //作成成功
 			//zipファイルの作成
 			if err := t.imagetoZip(); err != nil { //失敗時の処理
-
+				return err
 			}
 			//pdfimagesでできたファイルの削除
 			if err := t.removeimage(); err != nil {
-
+				return err
 			}
 		}
 	}
+	return nil
 }
