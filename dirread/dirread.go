@@ -38,7 +38,11 @@ func Setup(s string) (*Dirtype, error) {
 	if !dirpasscheck(s) {
 		return t, errors.New("folder pass err :" + s)
 	}
-	t.path = s
+	if s[len(s)-1] == "/"[0] {
+		t.path = s
+	} else {
+		t.path = s + "/"
+	}
 	var tmp []filedata
 	var tmp2 []int
 	if (len(t.Data) == 0) || (t.Renew) {

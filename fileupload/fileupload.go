@@ -1,6 +1,7 @@
 package fileupload
 
 import (
+	"bookserver/dirread"
 	"bookserver/message"
 	"fmt"
 	"log"
@@ -17,6 +18,11 @@ type UploadPass struct {
 	Zip  string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"`
 	rst  message.Result
 	flag bool
+}
+
+type UploadFilelist struct {
+	Name string `json:name`
+	Size int64  `json:size`
 }
 
 // URLの解析
@@ -125,10 +131,83 @@ func (t *UploadPass) upload_file(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// pdfGetList
+func (t *UploadPass) pdfGetList() ([]UploadFilelist, error) {
+	out := []UploadFilelist{}
+	dr, err := dirread.Setup(t.Pdf)
+	if err != nil {
+		return out, err
+	}
+	if err := dr.Read("./"); err == nil {
+		for _, filedata := range dr.Data {
+			tmp := UploadFilelist{Name: filedata.Name, Size: filedata.Size}
+			out = append(out, tmp)
+		}
+	} else {
+		return out, err
+	}
+	return out, nil
+}
+
+// zipGetList
+func (t *UploadPass) zipGetList() ([]UploadFilelist, error) {
+	out := []UploadFilelist{}
+	dr, err := dirread.Setup(t.Zip)
+	if err != nil {
+		return out, err
+	}
+	if err := dr.Read("./"); err == nil {
+		for _, filedata := range dr.Data {
+			tmp := UploadFilelist{Name: filedata.Name, Size: filedata.Size}
+			out = append(out, tmp)
+		}
+	} else {
+		return out, err
+	}
+	return out, nil
+}
+
 // upload_list
 // リスト情報取得
 // ToDo
 func (t *UploadPass) upload_list(w http.ResponseWriter, r *http.Request) {
+	t.rst.Result = ""
+	sUrl := urlAnalysis(r.URL.Path)
+	urlPoint := 0
+	for ; urlPoint < len(sUrl); urlPoint++ {
+		if sUrl[urlPoint] == "pdf" {
+			break
+		} else if sUrl[urlPoint] == "zip" {
+			break
+		}
+	}
+	if urlPoint >= len(sUrl) {
+		t.rst.Code = http.StatusBadRequest
+		return
+	} else {
+		switch sUrl[urlPoint] {
+		case "pdf":
+			if rst, err := t.pdfGetList(); err != nil {
+				t.rst.Code = http.StatusBadRequest
+				t.rst.Result = err.Error()
+			} else {
+				t.rst.Result = rst
+			}
+		case "zip":
+			if rst, err := t.zipGetList(); err != nil {
+				t.rst.Code = http.StatusBadRequest
+				t.rst.Result = err.Error()
+			} else {
+				t.rst.Result = rst
+			}
+		}
+	}
+}
+
+// upload_get
+// 既存ファイルの確認
+// ToDo
+func (t *UploadPass) upload_get(w http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -151,6 +230,8 @@ func fileupload(t *UploadPass, w http.ResponseWriter, r *http.Request) {
 		t.upload_file(w, r)
 	case "LIST":
 		t.upload_list(w, r)
+	case "GET":
+		t.upload_get(w, r)
 	}
 	t.upload_defult(w, r)
 }
