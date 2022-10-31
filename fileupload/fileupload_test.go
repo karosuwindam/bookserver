@@ -125,6 +125,36 @@ func TestUploadServerList(t *testing.T) {
 
 }
 
+func TestUloadServerGet(t *testing.T) {
+
+	pdfpass := "pdf"
+	zippass := "zip"
+	t.Setenv("PDF_FILEPASS", pdfpass)
+	t.Setenv("ZIP_FILEPASS", zippass)
+	t.Log("----------------- upload Server --------------------------")
+
+	u, _ := Setup()
+
+	cfg, _ := config.EnvRead()
+	ss, _ := webserver.NewSetup(cfg)
+	ss.AddV1(common.GUEST, "/upload", u, FIleupload)
+	s, _ := ss.NewServer()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	eq, ctx := errgroup.WithContext(ctx)
+	eq.Go(func() error {
+		return runServer(ctx, s)
+	})
+	//処理
+	uploadFileget("http://localhost:8080/v1/upload/pdf/test.pdf", t)
+	uploadFileget("http://localhost:8080/v1/upload/zip/bbb", t)
+	cancel()
+	if err := eq.Wait(); err != nil {
+		t.Fatal(err)
+	}
+	t.Log("----------------- upload Server OK --------------------------")
+}
+
 func runServer(ctx context.Context, s *webserver.Server) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
@@ -173,6 +203,30 @@ func uploadfile(filename string, t *testing.T) {
 func listFileget(url string, t *testing.T) {
 	client := &http.Client{}
 	req, err := http.NewRequest("LIST", url, nil)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status :%v", resp.StatusCode)
+	}
+	t.Logf("%s", b)
+
+}
+func uploadFileget(url string, t *testing.T) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf(err.Error())
 		t.FailNow()

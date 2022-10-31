@@ -65,7 +65,7 @@ func (t *Dirtype) Read(s string) error {
 		return err
 	}
 	for _, f := range files {
-		tmp2 := filedata{s + f.Name(), f.IsDir(), f.Size(), f.ModTime(), t.path + s}
+		tmp2 := filedata{f.Name(), f.IsDir(), f.Size(), f.ModTime(), t.path + s}
 		tmp = append(tmp, tmp2)
 	}
 	t.Data = tmp

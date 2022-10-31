@@ -21,8 +21,19 @@ type UploadPass struct {
 }
 
 type UploadFilelist struct {
+	// ファイル名
 	Name string `json:name`
-	Size int64  `json:size`
+	// ファイルのサイズ
+	Size int64 `json:size`
+}
+
+type UploadFileGet struct {
+	// 上書き
+	Overwrite bool `json:overwrite`
+	// データあり
+	Register bool `json:register`
+	// 書き換え名前
+	Name string `json:name`
 }
 
 // URLの解析
@@ -204,10 +215,63 @@ func (t *UploadPass) upload_list(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// filedbchkeck
+// ファイル名の変更確認
+func filedbchkeck(str string) (string, bool) {
+	//ToDO
+	return str, true
+}
+
 // upload_get
 // 既存ファイルの確認
 // ToDo
 func (t *UploadPass) upload_get(w http.ResponseWriter, r *http.Request) {
+	t.rst.Result = ""
+	out := UploadFileGet{}
+	sUrl := urlAnalysis(r.URL.Path)
+	urlPoint := 0
+	for ; urlPoint < len(sUrl); urlPoint++ {
+		if sUrl[urlPoint] == "pdf" {
+			break
+		} else if sUrl[urlPoint] == "zip" {
+			break
+		}
+	}
+	if urlPoint+1 >= len(sUrl) || sUrl[urlPoint+1] == "" {
+		t.rst.Code = http.StatusBadRequest
+		t.rst.Result = out
+		return
+	} else {
+		out.Name, out.Register = filedbchkeck(sUrl[urlPoint+1])
+		switch sUrl[urlPoint] {
+		case "pdf":
+			if rst, err := t.pdfGetList(); err != nil {
+				t.rst.Code = http.StatusBadRequest
+				t.rst.Result = err.Error()
+			} else {
+				for _, filename := range rst {
+					if filename.Name == sUrl[urlPoint+1] {
+						out.Overwrite = true
+						break
+					}
+				}
+				t.rst.Result = out
+			}
+		case "zip":
+			if rst, err := t.zipGetList(); err != nil {
+				t.rst.Code = http.StatusBadRequest
+				t.rst.Result = err.Error()
+			} else {
+				for _, filename := range rst {
+					if filename.Name == sUrl[urlPoint+1] {
+						out.Overwrite = true
+						break
+					}
+				}
+				t.rst.Result = out
+			}
+		}
+	}
 
 }
 
