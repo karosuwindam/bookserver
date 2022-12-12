@@ -2,6 +2,6 @@ package fileupload
 
 import "bookserver/table"
 
-func ReadDb(str string, sql *table.SQLStatus) {
-	sql.Search(table.BOOKNAME, str)
+func (t *UploadPass) ReadDb(str string) (string, error) {
+	return t.Sql.ReadName(table.BOOKNAME, str)
 }

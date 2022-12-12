@@ -50,6 +50,11 @@ type Status struct {
 	// 	Status string `json:status`
 }
 
+// BackSQL()
+//
+// SQLの接続情報を戻す
+func (t *SetupServer) BackSQL() *table.SQLStatus { return t.sql }
+
 // NewSetup(*config.Config) = *SetupServer,error
 //
 // Webサーバ設定の初期化関数

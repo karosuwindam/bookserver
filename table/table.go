@@ -140,6 +140,7 @@ func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
 
 }
 
+// 一致するファイルを探す
 func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
 	if keyword == "" {
 		return "", nil
@@ -156,6 +157,7 @@ func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
 	return string(bJSON), nil
 }
 
+// キーワードを検索する
 func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	if keyword == "" {
 		return "", nil
@@ -172,6 +174,7 @@ func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	return string(bJSON), nil
 }
 
+// idを指定して削除する。
 func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
 	if err := sql.Cfg.Delete(tName, id); err != nil {
 		return "", err

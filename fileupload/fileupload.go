@@ -3,6 +3,7 @@ package fileupload
 import (
 	"bookserver/dirread"
 	"bookserver/message"
+	"bookserver/table"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,7 @@ type UploadPass struct {
 	Pdf  string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"`
 	Zip  string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"`
 	rst  message.Result
+	Sql  *table.SQLStatus
 	flag bool
 }
 

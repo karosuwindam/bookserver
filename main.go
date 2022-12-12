@@ -34,6 +34,7 @@ func Setup() *mainconfig {
 
 	if upcfg, err := fileupload.Setup(); err == nil {
 		scfg.s.Add("/", textread.ViewHtml)
+		upcfg.Sql = scfg.s.BackSQL()
 		scfg.s.AddV1(common.ADMIN, "/upload", upcfg, fileupload.FIleupload)
 
 	}
