@@ -10,7 +10,7 @@ https://github.com/karosuwindam/bookserver2
 * 機能APIについて
 
 |url|Method|説明|必要権限|備考|
-|--|--|--|--|
+|--|--|--|--|--|
 |/health|*|healthチェック機能||
 |/login|
 |/logout|
