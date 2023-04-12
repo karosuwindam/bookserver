@@ -3,7 +3,6 @@ package upload
 import (
 	"bookserver/api/common"
 	"bookserver/dirread"
-	"bookserver/table"
 	"bookserver/webserverv2"
 	"encoding/json"
 	"errors"
@@ -22,7 +21,6 @@ var apiname string = "upload" //api名
 type UploadPass struct {
 	Pdf  string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
 	Zip  string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
-	Sql  *table.SQLStatus
 	flag bool
 }
 
@@ -89,6 +87,7 @@ func upload_file(w http.ResponseWriter, r *http.Request) common.Result {
 		fp.WriteAt(data, tmplength)
 		tmplength += int64(n)
 	}
+	uploadname <- filename
 	fmt.Println("Create File End")
 	msg.Result = "OK"
 	return msg
@@ -263,12 +262,28 @@ var route []webserverv2.WebConfig = []webserverv2.WebConfig{
 	{"/" + apiname + "/", fileupload},
 }
 
+// GetuploadName = string,error
+//
+// Uploadされたファイル名を取得
+func GetUploadName() (string, error) {
+	output := ""
+	var err error = nil
+	select {
+	case output = <-uploadname:
+	case <-time.After(100 * time.Millisecond):
+		err = errors.New("time out")
+	}
+	return output, err
+}
+
 var setupdata UploadPass = UploadPass{}
+var uploadname chan string = make(chan string, 30)
 
 // Setup() = []webserverv2.WebConfig
 //
 // セットアップして、HTMLのルートフォルダを用意する
 func Setup() ([]webserverv2.WebConfig, error) {
+	uploadname = make(chan string, 30)
 	if err := env.Parse(&setupdata); err != nil {
 
 	}

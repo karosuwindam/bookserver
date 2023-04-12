@@ -1,6 +1,8 @@
 package table
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestTablelistSetup(t *testing.T) {
 	tablelistsetup()
@@ -49,4 +51,34 @@ func TestCreateSerchKeyword(t *testing.T) {
 	}
 	t.Log(filesrdata)
 
+}
+
+func TestJsonToStruct(t *testing.T) {
+	jsondata := readfile("./jsonsample/booknames.json")
+	if tmp := JsonToStruct(BOOKNAME, []byte(jsondata)); tmp == nil {
+		t.FailNow()
+	} else {
+		_, ok := tmp.(Booknames)
+		if !ok {
+			t.FailNow()
+		}
+	}
+	jsondata = readfile("./jsonsample/copyfile.json")
+	if tmp := JsonToStruct(COPYFILE, []byte(jsondata)); tmp == nil {
+		t.FailNow()
+	} else {
+		_, ok := tmp.(Copyfile)
+		if !ok {
+			t.FailNow()
+		}
+	}
+	jsondata = readfile("./jsonsample/filelist.json")
+	if tmp := JsonToStruct(FILELIST, []byte(jsondata)); tmp == nil {
+		t.FailNow()
+	} else {
+		_, ok := tmp.(Filelists)
+		if !ok {
+			t.FailNow()
+		}
+	}
 }

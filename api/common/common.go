@@ -27,10 +27,29 @@ type Result struct {
 	Result interface{} `json:"Result"`
 }
 
+// 共通の出力設定
 func CommonBack(msg Result, w http.ResponseWriter) {
 	jsondata, _ := json.Marshal(msg)
 	w.WriteHeader(msg.Code)
 	fmt.Fprintf(w, "%v\n", string(jsondata))
+}
+
+// SQLの読み取り結果の出力
+func Sqlreadmessageback(msg Result, w http.ResponseWriter) {
+	jout, ok := msg.Result.(string)
+	if !ok {
+		jout = ""
+	}
+	msg.Result = ""
+	jsondata, _ := json.Marshal(msg)
+	w.WriteHeader(msg.Code)
+	if jout != "" {
+		out := strings.Replace(string(jsondata), "\"Result\":\"\"", "\"Result\":"+jout, -1)
+		fmt.Fprintf(w, "%s", out)
+	} else {
+		fmt.Fprintf(w, "%v\n", string(jsondata))
+	}
+
 }
 
 func Setup() error {
@@ -40,7 +59,13 @@ func Setup() error {
 // USERの状態で権限の確認
 // ToDo
 func CkLogin(msg *Result, w http.ResponseWriter, r *http.Request) bool {
-	return true
+	if true {
+		return true
+	} else {
+		msg.Code = http.StatusUnauthorized
+		msg.Result = "Not Login"
+	}
+	return false
 }
 
 // ファイルの存在確認

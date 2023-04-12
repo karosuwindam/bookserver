@@ -52,6 +52,20 @@ func TestEnvReadDefult(t *testing.T) {
 		t.Errorf("Error Hostname %v = %v", cfg.Sql.DBFILE, "test.db")
 		t.FailNow()
 	}
+	t.Log("----------------- Check Folder data --------------------------")
+	if cfg.Folder.Tmp != "./tmp" {
+		t.Errorf("Error Hostname %v = %v", cfg.Folder.Tmp, "./tmp")
+		t.FailNow()
+	}
+	if cfg.Folder.Zip != "./upload/zip" {
+		t.Errorf("Error Hostname %v = %v", cfg.Folder.Zip, "./upload/zip")
+		t.FailNow()
+	}
+	if cfg.Folder.Pdf != "./upload/pdf" {
+		t.Errorf("Error Hostname %v = %v", cfg.Folder.Pdf, "./upload/pdf")
+		t.FailNow()
+
+	}
 	t.Log("----------------- Seclet key data --------------------------")
 	if cfg.SeretKey.JwtKey != "SECRET_KEY" {
 		t.Errorf("Error Hostname %v = %v", cfg.SeretKey.JwtKey, "SECRET_KEY")

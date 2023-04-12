@@ -5,6 +5,7 @@ import (
 	"bookserver/webserverv2"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -67,6 +68,23 @@ func TestUploadServerPost(t *testing.T) {
 	})
 	uploadfile("test.zip", t)
 	uploadfile("test.pdf", t)
+	if name, err := GetUploadName(); err != nil {
+		t.Fatalf("GtuploadName get Error:%v", err.Error())
+		t.FailNow()
+	} else {
+		fmt.Println(name)
+	}
+	if name, err := GetUploadName(); err != nil {
+		t.Fatalf("GtuploadName get Error:%v", err.Error())
+		t.FailNow()
+	} else {
+		fmt.Println(name)
+	}
+	if _, err := GetUploadName(); err != nil {
+		fmt.Println("GtuploadName get Error:", err.Error())
+	} else {
+		t.FailNow()
+	}
 	cancel()
 	if err := eq.Wait(); err != nil {
 		t.Fatal(err)

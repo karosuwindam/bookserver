@@ -100,6 +100,9 @@ func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
 // ReadAll (tName)
 func (sql *SQLStatus) ReadAll(tName string) (string, error) {
 	readdata := readBaseCreate(tName)
+	if readdata == nil {
+		return "", errors.New("Not found Table")
+	}
 
 	if err := sql.Cfg.Read(tName, readdata); err != nil {
 		return "", err
