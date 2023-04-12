@@ -1,76 +1,61 @@
 package main
 
 import (
+	"bookserver/api"
 	"bookserver/config"
-	"bookserver/fileupload"
-	"bookserver/message"
-	"bookserver/textread"
-	"bookserver/webserver"
-	"bookserver/webserver/common"
+	"bookserver/textroot"
+	"bookserver/transform"
+	"bookserver/webserverv2"
 	"context"
+	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
-
-	"golang.org/x/sync/errgroup"
 )
 
-type mainconfig struct {
-	s *webserver.SetupServer
+func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
+	api.Setup(cfg)
+	transform.Setup(cfg)
+	scfg, err := webserverv2.NewSetup(cfg)
+	if err != nil {
+		return nil, err
+	}
+	webserverv2.Config(scfg, api.Route, "/v1")
+	webserverv2.Config(scfg, textroot.Route, "")
+	return scfg, nil
 }
-
-func Setup() *mainconfig {
-	scfg := &mainconfig{}
+func Run(ctx context.Context) error {
+	var err error
+	ctx, cancel := context.WithCancel(ctx)
 	cfg, err := config.EnvRead()
 	if err != nil {
 		return nil
 	}
-	if ss, err := webserver.NewSetup(cfg); err == nil {
-		scfg.s = ss
-	} else {
-		return nil
+	if scfg, err := Config(cfg); err == nil {
+		s, err := scfg.NewServer()
+		if err == nil {
+
+			go transform.Run(ctx)
+			err = s.Run(ctx)
+			cancel()
+			transform.Wait()
+			return err
+		}
 	}
-
-	if upcfg, err := fileupload.Setup(); err == nil {
-		scfg.s.Add("/", textread.ViewHtml)
-		upcfg.Sql = scfg.s.BackSQL()
-		scfg.s.AddV1(common.ADMIN, "/upload", upcfg, fileupload.FIleupload)
-
-	}
-
-	return scfg
+	return err
 }
 
-func Run(cfg *mainconfig, ctx context.Context) error {
-	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	defer stop()
-	eg, ctx := errgroup.WithContext(ctx)
-
-	s, err := cfg.s.NewServer()
-	if err != nil {
-		return err
-	}
-	eg.Go(func() error {
-		defer s.Sql.Close()
-		errout := s.Srv.Serve(s.L)
-		return errout
-	})
-	<-ctx.Done()
-	message.Println("shutdown")
-	if err := s.Srv.Shutdown(context.Background()); err != nil {
-		log.Println(err)
-	}
-	return eg.Wait()
+func EndCK() {
 }
-
 func main() {
+	log.SetFlags(log.Llongfile | log.Flags())
 	ctx := context.Background()
-	cfg := Setup()
-
-	if err := Run(cfg, ctx); err != nil {
+	fmt.Println("start")
+	if err := Run(ctx); err != nil {
+		EndCK()
 		log.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println("end")
+	EndCK()
 
 }

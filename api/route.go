@@ -5,6 +5,7 @@ import (
 	"bookserver/api/login"
 	"bookserver/api/tabledata"
 	"bookserver/api/upload"
+	"bookserver/api/view"
 	"bookserver/config"
 	"bookserver/webserverv2"
 )
@@ -32,6 +33,12 @@ func Setup(cfg *config.Config) error {
 
 	//table
 	if tmp, err := tabledata.Setup(cfg); err != nil {
+		return err
+	} else {
+		Route = append(Route, tmp...)
+	}
+	//view
+	if tmp, err := view.Setup(cfg); err != nil {
 		return err
 	} else {
 		Route = append(Route, tmp...)

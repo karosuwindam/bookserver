@@ -122,26 +122,55 @@ func JsonToStruct(tName string, data []byte) interface{} {
 	var out interface{}
 	switch tName {
 	case BOOKNAME:
-		tmp := Booknames{}
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			log.Println(err)
-			return nil
+		if string(data)[:1] == "[" {
+			tmp := []Booknames{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
+		} else {
+			tmp := Booknames{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
 		}
-		out = tmp
 	case COPYFILE:
-		tmp := Copyfile{}
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			log.Println(err)
-			return nil
+		if string(data)[:1] == "[" {
+			tmp := []Copyfile{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
+		} else {
+			tmp := Copyfile{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
 		}
-		out = tmp
 	case FILELIST:
-		tmp := Filelists{}
-		if err := json.Unmarshal(data, &tmp); err != nil {
-			log.Println(err)
-			return nil
+		if string(data)[:1] == "[" {
+
+			tmp := []Filelists{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
+		} else {
+			tmp := Filelists{}
+			if err := json.Unmarshal(data, &tmp); err != nil {
+				log.Println(err)
+				return nil
+			}
+			out = tmp
+
 		}
-		out = tmp
 	default:
 		return nil
 

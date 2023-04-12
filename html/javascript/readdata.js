@@ -1,7 +1,7 @@
 var searchurl = ["booknames","filelists","copyfile"]
-var bookname_row = ["id","name","title","writer","burand","booktype","ext"];
-var copyfile_row = ["id","zippass","filesize","copyflag"];
-var filelists_row =["id","name","pdfpass","zippass"];
+var bookname_row = ["Id","Name","Title","Writer","Burand","Booktype","Ext"];
+var copyfile_row = ["Id","Zippass","Filesize","Copyflag"];
+var filelists_row =["Id","Name","Pdfpass","Zippass"];
 var table_list = [bookname_row,filelists_row,copyfile_row];
 var selectdata = 0
 
@@ -31,7 +31,7 @@ function loadlistdata(table,output) {
         if (table == `listdata`){
           document.getElementById(output).innerHTML = listoutput(data);
         }else if (tmp.result != "[]"){
-          document.getElementById(output).innerHTML = jsonDataOutput(tmp.result);
+          document.getElementById(output).innerHTML = jsonDataOutput(tmp.Result);
         }else{
           document.getElementById(output).innerHTML = "";
         }
@@ -73,7 +73,7 @@ function jsonDataOutput(jsondata) {
   for (var i=0;i<jsondata.length;i++){
     tablebody +="<tr>"
     for (var j=0;j<table_title.length;j++){
-      if (table_title[j] == "id"){
+      if (table_title[j] == "Id"){
         var id = jsondata[i][table_title[j]];
       }
       tablebody += "<td>"+jsondata[i][table_title[j]]+"</td>";

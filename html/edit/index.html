@@ -2,17 +2,17 @@
     <head>
         <title>編集</title>
         <link rel="stylesheet" href="/css/main.css">
-        <script type="text/javascript" src="javascript/getjson.js"></script>
-        <script type="text/javascript" src="javascript/serchget.js"></script>
-        <script type="text/javascript" src="javascript/readdata.js"></script>
-        <script type="text/javascript" src="javascript/adddata.js"></script>
-        <script type="text/javascript" src="javascript/editdata.js"></script>
-        <script type="text/javascript" src="javascript/login.js"></script>
-        <script type="text/javascript" src="javascript/deletedata.js"></script>
+        <script type="text/javascript" src="/javascript/getjson.js"></script>
+        <script type="text/javascript" src="/javascript/serchget.js"></script>
+        <script type="text/javascript" src="/javascript/readdata.js"></script>
+        <script type="text/javascript" src="/javascript/adddata.js"></script>
+        <script type="text/javascript" src="/javascript/editdata.js"></script>
+        <script type="text/javascript" src="/javascript/login.js"></script>
+        <script type="text/javascript" src="/javascript/deletedata.js"></script>
         <script>
 
             window.onload = function(){
-                readstoragesession()
+                // readstoragesession()
                 loadlistdata("booknames","output");
                 meta_suburl = 'booknames'
                 selectdata = 0;
@@ -36,7 +36,7 @@
             function reviewform() {
                 switch (meta_suburl){
                     case "booknames":
-                        bookname();
+                        booknames();
                         break;
                     case "filelists":
                         filelist();
@@ -58,10 +58,10 @@
                 viewaddformF = true
                 viewaddform()
                 document.getElementById("answer").innerHTML = ""
-                loginget()
+                // loginget()
                 // document.getElementById("new").style.display="";
             }
-            function bookname(){
+            function booknames(){
                 frominit('booknames')
                 selectdata = 0;
                 loadlistdata('booknames','output');
@@ -104,6 +104,7 @@
                         break;
                     }
                 };
+                readData.Id =  readData.Id -0;
                 var json_data = JSON.stringify(readData);
                 console.log(json_data);
                 adddata(table,json_data);
@@ -113,7 +114,7 @@
     </head>
     <body>
         <div id="answer" class=""></div>
-        <a href=javascript:void(0); onclick="bookname();return false" class="tab-button">bookname</a>
+        <a href=javascript:void(0); onclick="booknames();return false" class="tab-button">bookname</a>
         <a href=javascript:void(0); onclick="filelist();return false" class="tab-button">filelist</a>
         <a href=javascript:void(0); onclick="copyfile();return false" class="tab-button">copyfile</a>
         <a href=javascript:void(0); onclick="listdata();return false" class="tab-button">listdata</a>

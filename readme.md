@@ -16,7 +16,7 @@ https://github.com/karosuwindam/bookserver2
 |/logout|
 |/v1/upload|POST|ファイルのアップロード機能||
 |/v1/upload/[フォルダ名]|LIST|アップロードフォルダ内のファイルリスト表示||
-|/v1/upload/[フォルダ名]|GET|アップロード予定のデータ確認||
+|/v1/upload|GET|{"Name":"ファイル名"}のjsonを送るファイル名が保存されているか確認できる||
 |/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り|GUEST|
 |/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る|GUEST|
 |/v1/search/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
