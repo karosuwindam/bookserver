@@ -4,7 +4,9 @@ import (
 	"bookserver/api/common"
 	"bookserver/table"
 	"bookserver/webserverv2"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -20,9 +22,51 @@ var keynames []string = []string{
 
 var apiname string = "search" //api名
 
+type SearchKey struct {
+	Table   string `json:"Table"`
+	Keyword string `json:"Keyword"`
+}
+
+// websqlSearchPost(w,r) = common.Result
+//
+// /searchでSearchKey形式でPostしたデータを対象のテーブルから検索して取得する
+func websqlSearchPost(w http.ResponseWriter, r *http.Request) common.Result {
+	msg := common.Result{Code: http.StatusOK, Date: time.Now()}
+	b, _ := io.ReadAll(r.Body)
+	msg.Option = r.Method + "," + string(b)
+	jout := SearchKey{}
+	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" || jout.Keyword == "" {
+		msg.Code = http.StatusNotFound
+		if err != nil {
+			msg.Result = err.Error()
+		}
+
+	} else {
+		if key[jout.Keyword] {
+			if jdata, err := sql.ReadWhileTime(jout.Table, jout.Keyword); err != nil {
+				msg.Code = http.StatusNotFound
+				log.Println(err.Error())
+			} else {
+				msg.Result = fmt.Sprintf("%s", jdata)
+			}
+
+		} else {
+			if jdata, err := sql.Search(jout.Table, jout.Keyword); err != nil {
+				msg.Code = http.StatusNotFound
+				log.Println(err.Error())
+			} else {
+				msg.Result = fmt.Sprintf("%s", jdata)
+			}
+
+		}
+	}
+	return msg
+
+}
+
 // websqlsearchget(w, r) = common.Result
 //
-// /read/:tablename/:keyword Keywordがあるデータを対象のテーブルから取得する
+// /search/:tablename/:keyword Keywordがあるデータを対象のテーブルから取得する
 //
 // 特殊キーワード today toweek tomonth
 func websqlsearchget(w http.ResponseWriter, r *http.Request) common.Result {
@@ -73,6 +117,8 @@ func websqlsearch(w http.ResponseWriter, r *http.Request) {
 	var msg common.Result = common.Result{Code: http.StatusOK, Date: time.Now(), Option: r.Method}
 
 	switch strings.ToUpper(r.Method) {
+	case "POST":
+		msg = websqlSearchPost(w, r)
 	default:
 		msg = websqlsearchget(w, r)
 	}
@@ -83,6 +129,7 @@ func websqlsearch(w http.ResponseWriter, r *http.Request) {
 }
 
 var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+	{Pass: "/" + apiname, Handler: websqlsearch},
 	{Pass: "/" + apiname + "/", Handler: websqlsearch},
 }
 

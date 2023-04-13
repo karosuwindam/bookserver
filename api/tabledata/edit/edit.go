@@ -23,7 +23,7 @@ func sqleditwrite(tName string, b []byte, id int) (string, error) {
 	switch tName {
 	case table.BOOKNAME:
 		jout := table.Booknames{}
-		if err := json.Unmarshal(b, &jout); err != nil && jout.Name == "" {
+		if err := json.Unmarshal(b, &jout); err != nil || jout.Name == "" {
 		} else {
 			if jread, err := sql.Edit(tName, &jout, id); err != nil {
 			} else {
@@ -32,7 +32,7 @@ func sqleditwrite(tName string, b []byte, id int) (string, error) {
 		}
 	case table.FILELIST:
 		jout := table.Filelists{}
-		if err := json.Unmarshal(b, &jout); err != nil && jout.Name == "" {
+		if err := json.Unmarshal(b, &jout); err != nil || jout.Name == "" {
 		} else {
 			if jread, err := sql.Edit(tName, &jout, id); err != nil {
 			} else {
@@ -88,6 +88,9 @@ func sqldelete(w http.ResponseWriter, r *http.Request) common.Result {
 
 }
 
+// sqledit(w,r) = common.Result
+//
+// /edit/:table/:id で送信したjsonデータから指定したテーブルのidを書き換える
 func sqledit(w http.ResponseWriter, r *http.Request) common.Result {
 	msg := common.Result{Code: http.StatusOK, Date: time.Now(), Option: r.Method}
 	sUrl := common.UrlAnalysis(r.URL.Path)
