@@ -10,11 +10,13 @@ https://github.com/karosuwindam/bookserver2
 * 機能APIについて
 
 |url|Method|説明|必要権限|備考|
-|--|--|--|--|
-|/health|*|healthチェック機能||
-|/login|
-|/logout|
+|--|--|--|--|--|
+|/health|*|healthチェック機能||未実装|
+|/login||未実装|
+|/logout||未実装|
 |/v1/upload|POST|ファイルのアップロード機能||
+|/v1/upload/[フォルダ名]|LIST|アップロードフォルダ内のファイルリスト表示||
+|/v1/upload|GET|{"Name":"ファイル名"}のjsonを送るファイル名が保存されているか確認できる||
 |/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り|GUEST|
 |/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る|GUEST|
 |/v1/search/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
@@ -39,7 +41,11 @@ https://github.com/karosuwindam/bookserver2
 |DB_PORT|SQLの接続ポート|3306||
 |DB_USER|SQLの接続ユーザ||
 |DB_PASS|SQLの接続ユーザパスワード||
-|DB_FILE|SQLite3の接続ファイルパス|test.db|
+|DB_FILE|SQLite3の接続ファイル名|test.db|
+|DBROOTPASS|SQLlite3の相対ファイルパス|./db/|
+|TMP_FILEPASS|テンプレートフォルダとして用意するフォルダ|./tmp|
+|PDF_FILEPASS|PDFを保存するフォルダ|./upload/pdf|
+|ZIP_FILEPASS|ZIPを保存するフォルダ|./upload/zip|
 
 ## CURLによるテスト
 

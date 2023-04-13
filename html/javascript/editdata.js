@@ -5,8 +5,8 @@ function createeditform(id,table,output) {
       if(xhr.readyState == 4 && xhr.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
           var data = xhr.responseText;
           var tmp = JSON.parse(data)
-          document.getElementById(output).innerHTML = createeditforminput(table,tmp.result[0],output);
-          console.log(tmp.result);		          // 取得した ファイルの中身を表示
+          document.getElementById(output).innerHTML = createeditforminput(table,tmp.Result[0],output);
+          console.log(tmp.Result);		          // 取得した ファイルの中身を表示
       }
     };
     var url = "/v1/edit/" + table + "/" + id
@@ -21,7 +21,7 @@ function geteditjsondata(id,table) {
     var jsondata = {};
     var table_listdata = table_list[selectdata] ;
     for (var i=0;i<table_listdata.length;i++){
-        if (table_listdata[i] == "id") {
+        if (table_listdata[i] == "Id") {
             jsondata[table_listdata[i]] = id
         }else {
             jsondata[table_listdata[i]] = document.getElementById(table+"_"+table_listdata[i]).value
@@ -43,7 +43,7 @@ function sendeditdata(id,table){
       if(xhr.readyState == 4 && xhr.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
           var data = xhr.responseText;
           var tmp = JSON.parse(data)
-          console.log(tmp.result);		          // 取得した ファイルの中身を表示
+          console.log(tmp.Result);		          // 取得した ファイルの中身を表示
       }
     };
     var url = "/v1/edit/" + table + "/" + id;
@@ -71,7 +71,7 @@ function createeditforminput(table,jsondata,tag) {
       output += table_listdata[i]
       output += "</td>"
       output += "<td>"
-      if (table_listdata[i] == "id") {
+      if (table_listdata[i] == "Id") {
         output += jsondata[table_listdata[i]]
         var id =jsondata[table_listdata[i]];
       }else{
