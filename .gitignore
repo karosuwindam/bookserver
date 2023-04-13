@@ -1,1 +1,5 @@
 testcheck*
+upload/pdf/*
+upload/zip/*
+tmp/*
+db/*

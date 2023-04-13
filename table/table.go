@@ -100,6 +100,9 @@ func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
 // ReadAll (tName)
 func (sql *SQLStatus) ReadAll(tName string) (string, error) {
 	readdata := readBaseCreate(tName)
+	if readdata == nil {
+		return "", errors.New("Not found Table")
+	}
 
 	if err := sql.Cfg.Read(tName, readdata); err != nil {
 		return "", err
@@ -140,6 +143,24 @@ func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
 
 }
 
+// 一致するファイルを探す
+func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
+	if keyword == "" {
+		return "", nil
+	}
+	readdata := readBaseCreate(tName)
+	skeyword := map[string]string{"name": keyword}
+	if err := sql.Cfg.Read(tName, readdata, skeyword, sqlite.AND); err != nil {
+		return "", err
+	}
+	bJSON, err := json.Marshal(readdata)
+	if err != nil {
+		return "", err
+	}
+	return string(bJSON), nil
+}
+
+// キーワードを検索する
 func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	if keyword == "" {
 		return "", nil
@@ -156,6 +177,7 @@ func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	return string(bJSON), nil
 }
 
+// idを指定して削除する。
 func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
 	if err := sql.Cfg.Delete(tName, id); err != nil {
 		return "", err

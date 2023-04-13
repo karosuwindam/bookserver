@@ -50,6 +50,28 @@ func TestTableReadAll(t *testing.T) {
 	}
 }
 
+func TestTableName(t *testing.T) {
+	t.Setenv("DB_ROOTPASS", "./")
+	t.Setenv("DB_FILE", "test-read.db")
+	cfg, _ := config.EnvRead()
+	sql, _ := Setup(cfg)
+	defer sql.Close()
+	t.Log("check: test")
+	if jsond, err := sql.ReadName(BOOKNAME, "test"); err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	} else {
+		t.Log(jsond)
+	}
+	t.Log("check: tt")
+	if jsond, err := sql.ReadName(BOOKNAME, "tt"); err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	} else {
+		t.Log(jsond)
+	}
+}
+
 func TestTableSerch(t *testing.T) {
 	t.Setenv("DB_ROOTPASS", "./")
 	t.Setenv("DB_FILE", "test-read.db")
