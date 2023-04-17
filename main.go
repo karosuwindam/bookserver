@@ -3,6 +3,8 @@ package main
 import (
 	"bookserver/api"
 	"bookserver/config"
+	"bookserver/proffdebug"
+	"bookserver/pyroscopesetup"
 	"bookserver/textroot"
 	"bookserver/transform"
 	"bookserver/webserverv2"
@@ -15,11 +17,13 @@ import (
 func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
 	api.Setup(cfg)
 	transform.Setup(cfg)
+	proffdebug.Setup(cfg)
 	scfg, err := webserverv2.NewSetup(cfg)
 	if err != nil {
 		return nil, err
 	}
 	webserverv2.Config(scfg, api.Route, "/v1")
+	webserverv2.Config(scfg, proffdebug.Route, "/debug")
 	webserverv2.Config(scfg, textroot.Route, "")
 	return scfg, nil
 }
@@ -47,7 +51,11 @@ func Run(ctx context.Context) error {
 func EndCK() {
 }
 func main() {
+	// flag.Parse() //コマンドラインオプションの有効
 	log.SetFlags(log.Llongfile | log.Flags())
+	pyro := pyroscopesetup.Setup()
+	pyroscopesetup.Add("status", "debug")
+	pyro.Run()
 	ctx := context.Background()
 	fmt.Println("start")
 	if err := Run(ctx); err != nil {

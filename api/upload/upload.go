@@ -248,6 +248,8 @@ func fileupload(w http.ResponseWriter, r *http.Request) {
 			msg = upload_list(w, r)
 		case "GET":
 			msg = upload_get(w, r)
+		case "PUT":
+			msg = upload_get(w, r)
 		}
 	}
 	msg.Name = apiname
