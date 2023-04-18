@@ -18,17 +18,11 @@ const (
 //
 // データ登録用で、pdfからzipファイルを作成する
 type PdftoZip struct {
-	Name       string //登録用の名称(巻数情報も含む)
-	InputFile  string //入力ファイル(pdf)
-	OutputFile string //出力ファイル(zip)
-	Tag        string //検索用のタグ情報
+	Name       string `json:"Name"` //登録用の名称(巻数情報も含む)
+	InputFile  string `json:"Pdf"`  //入力ファイル(pdf)
+	OutputFile string `json:"Zip"`  //出力ファイル(zip)
+	Tag        string `json:"Tag"`  //検索用のタグ情報
 }
-
-//キーワードをBooknamesから取り出す
-
-//Filelistsのファイルからidを取り出す
-
-//変換したファイルをFilelistsへ書き込む
 
 // createOutFileNmae(tabledata , count) = (string, string)
 //
@@ -73,7 +67,7 @@ func createOutFileNmae(tabledata *table.Booknames, count int) (string, string) {
 //
 // name: Booknamesからname列の文字列と一致する情報の取り出し
 func createBooknamesCount(name string) *table.Booknames {
-	if jdata, err := sql.ReadName(table.BOOKNAME, name); err != nil && jdata != "[]" {
+	if jdata, err := sql.ReadName(table.BOOKNAME, name); err == nil && jdata != "[]" {
 		if jout, ok := table.JsonToStruct(table.BOOKNAME, []byte(jdata)).([]table.Booknames); ok {
 			return &jout[0]
 		}
@@ -86,9 +80,10 @@ func createBooknamesCount(name string) *table.Booknames {
 // ファイル名からPdftozipの情報を作成する。
 func CreatePdfToZip(name string) (PdftoZip, error) {
 	var output PdftoZip
-	if name != "" {
+	if name == "" {
 		return output, errors.New("name is not data")
 	}
+	output.InputFile = name
 	tmpname := strings.ToLower(name)
 	if i := strings.Index(tmpname, PDF); i > 0 {
 		tmpname = name[:i]
@@ -98,6 +93,9 @@ func CreatePdfToZip(name string) (PdftoZip, error) {
 			output.OutputFile, output.Tag = createOutFileNmae(tmpst, count)
 		} else {
 			for j := 3; j > 0; j-- {
+				if len(tmpname) < j {
+					continue
+				}
 				tt := tmpname[len(tmpname)-j:]
 				if cc, err := strconv.Atoi(tt); err == nil {
 					count = cc
@@ -121,11 +119,13 @@ func CreatePdfToZip(name string) (PdftoZip, error) {
 // 既存ファイル名チェック
 func AddFileTable(tmp *table.Filelists) error {
 	if jout, err := sql.ReadName(table.FILELIST, tmp.Name); err == nil && jout != "[]" {
-		if tmpr, ok := table.JsonToStruct(table.FILELIST, []byte(jout)).(table.Filelists); ok {
-			tmp.Id = tmpr.Id
+		if tmpr, ok := table.JsonToStruct(table.FILELIST, []byte(jout)).([]table.Filelists); ok {
+			tmp.Id = tmpr[0].Id
 			if _, err := sql.Edit(table.FILELIST, tmp, tmp.Id); err != nil {
 				return err
 			}
+		} else {
+			return errors.New("file read error")
 		}
 	} else {
 		if err := sql.Add(table.FILELIST, tmp); err != nil {

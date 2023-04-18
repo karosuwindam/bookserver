@@ -15,13 +15,14 @@ function formdataJSON(inputElement){
         document.getElementById("fileck").innerHTML = fileckdata(tmp.Result)
       }
     };
-    var url = HOSTURL + "/v1/upload"
-    var jdata = {}
-    jdata["Name"] = filename
-    console.log(JSON.stringify(jdata));
-    req.open("PUT",url,true);
+    var url = HOSTURL + "/v1/upload/" + filename
+    // var jdata = {}
+    // jdata["Name"] = filename
+    // console.log(JSON.stringify(jdata));
+    req.open("GET",url,true);
     // req.send(JSON.stringify(jdata));
-    req.send(JSON.stringify(jdata))
+    // req.send(JSON.stringify(jdata))
+    req.send(null);
   }
   
   function fileckdata(str){
@@ -30,6 +31,11 @@ function formdataJSON(inputElement){
         output = str.Name + " 既存ファイルあり"
     }else {
         output = str.Name + " file is not"
+    }
+    if (str.Name.toLowerCase().indexOf('.pdf')>0) {
+        output += " create file: " + str.ChangeName.Zip
+    }else if (str.Name.toLowerCase().indexOf('.zip')>0) {
+        output += " create file: " + str.ChangeName.Pdf
     }
     return output
   }
