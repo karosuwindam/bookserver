@@ -77,7 +77,7 @@ func sqldelete(w http.ResponseWriter, r *http.Request) common.Result {
 				msg.Result = err.Error()
 			} else {
 				fmt.Printf("delete %v OK", id)
-				msg.Result = fmt.Sprintf("delete %v OK", id)
+				msg.Result = fmt.Sprintf("\"delete %v OK\"", id)
 			}
 		} else {
 			msg.Code = http.StatusBadRequest

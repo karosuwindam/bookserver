@@ -3,8 +3,8 @@ package upload
 import (
 	"bookserver/api/common"
 	"bookserver/dirread"
+	"bookserver/transform/writetable"
 	"bookserver/webserverv2"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -37,7 +37,8 @@ type UploadFileGet struct {
 	// データあり
 	Register bool `json:"Register"`
 	// 書き換え名前
-	Name string `json:"Name"`
+	Name       string              `json:"Name"`
+	ChangeName writetable.PdftoZip `json:"ChangeName"`
 }
 
 // upload_file
@@ -164,73 +165,31 @@ func upload_list(w http.ResponseWriter, r *http.Request) common.Result {
 // ToDo
 func upload_get(w http.ResponseWriter, r *http.Request) common.Result {
 	msg := common.Result{Code: http.StatusOK, Date: time.Now(), Option: r.Method}
+	sUrl := common.UrlAnalysis(r.URL.Path)
+	tName := ""
+	for i, url := range sUrl {
+		if url == apiname && len(sUrl) > i+1 {
+			tName = sUrl[i+1]
+			break
+		}
+	}
 	//jsonデータの取り出し
 	var out UploadFileGet
-	if err := json.NewDecoder(r.Body).Decode(&out); err != nil {
-		msg.Result = err.Error()
-		msg.Code = http.StatusBadRequest
-		return msg
-	}
-	//jsonの名前から存在確認
-	filename := out.Name
-	if strings.Index(strings.ToLower(filename), "pdf") > 0 {
+	out.Name = tName
+	if strings.Index(strings.ToLower(out.Name), "pdf") > 0 {
 		// savepass = setupdata.Pdf + "/"
-		out.Register = common.Exists(setupdata.Pdf + "/" + filename)
-	} else if strings.Index(strings.ToLower(filename), "zip") > 0 {
-		out.Register = common.Exists(setupdata.Zip + "/" + filename)
+		out.ChangeName, _ = writetable.CreatePdfToZip(out.Name)
+		out.Register = common.Exists(setupdata.Pdf + "/" + out.Name)
+	} else if strings.Index(strings.ToLower(out.Name), "zip") > 0 {
+		out.Register = common.Exists(setupdata.Zip + "/" + out.Name)
 		// savepass = setupdata.Zip + "/"
 	} else {
-		msg.Result = errors.New("input pass filename:" + filename).Error()
+		msg.Result = errors.New("input pass filename:" + out.Name).Error()
 		msg.Code = http.StatusBadRequest
 		return msg
 	}
 	msg.Result = out
 	return msg
-	// sUrl := urlAnalysis(r.URL.Path)
-	// urlPoint := 0
-	// for ; urlPoint < len(sUrl); urlPoint++ {
-	// 	if sUrl[urlPoint] == "pdf" {
-	// 		break
-	// 	} else if sUrl[urlPoint] == "zip" {
-	// 		break
-	// 	}
-	// }
-	// if urlPoint+1 >= len(sUrl) || sUrl[urlPoint+1] == "" {
-	// 	t.rst.Code = http.StatusBadRequest
-	// 	t.rst.Result = out
-	// 	return
-	// } else {
-	// 	out.Name, out.Register = filedbchkeck(sUrl[urlPoint+1])
-	// 	switch sUrl[urlPoint] {
-	// 	case "pdf":
-	// 		if rst, err := t.pdfGetList(); err != nil {
-	// 			t.rst.Code = http.StatusBadRequest
-	// 			t.rst.Result = err.Error()
-	// 		} else {
-	// 			for _, filename := range rst {
-	// 				if filename.Name == sUrl[urlPoint+1] {
-	// 					out.Overwrite = true
-	// 					break
-	// 				}
-	// 			}
-	// 			t.rst.Result = out
-	// 		}
-	// 	case "zip":
-	// 		if rst, err := t.zipGetList(); err != nil {
-	// 			t.rst.Code = http.StatusBadRequest
-	// 			t.rst.Result = err.Error()
-	// 		} else {
-	// 			for _, filename := range rst {
-	// 				if filename.Name == sUrl[urlPoint+1] {
-	// 					out.Overwrite = true
-	// 					break
-	// 				}
-	// 			}
-	// 			t.rst.Result = out
-	// 		}
-	// 	}
-	// }
-
 }
 
 // fuileupload(w r)
@@ -247,6 +206,8 @@ func fileupload(w http.ResponseWriter, r *http.Request) {
 		case "LIST":
 			msg = upload_list(w, r)
 		case "GET":
+			msg = upload_get(w, r)
+		case "PUT":
 			msg = upload_get(w, r)
 		}
 	}

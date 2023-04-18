@@ -33,9 +33,10 @@ type SearchKey struct {
 func websqlSearchPost(w http.ResponseWriter, r *http.Request) common.Result {
 	msg := common.Result{Code: http.StatusOK, Date: time.Now()}
 	b, _ := io.ReadAll(r.Body)
+	fmt.Println("",string(b))
 	msg.Option = r.Method + "," + string(b)
 	jout := SearchKey{}
-	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" || jout.Keyword == "" {
+	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" {
 		msg.Code = http.StatusNotFound
 		if err != nil {
 			msg.Result = err.Error()
@@ -113,7 +114,7 @@ func websqlsearchget(w http.ResponseWriter, r *http.Request) common.Result {
 //
 // /search/の動作
 func websqlsearch(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method, r.URL.Path)
+	fmt.Printf("%v %v", r.Method, r.URL.Path)
 	var msg common.Result = common.Result{Code: http.StatusOK, Date: time.Now(), Option: r.Method}
 
 	switch strings.ToUpper(r.Method) {

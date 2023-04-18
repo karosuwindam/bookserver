@@ -22,6 +22,8 @@ div.edit{
     overflow-x: auto;
     background-color: rgba(255,255,255,0.7);
 }
+
+
 a.tab-button{
     display: inline-block;
     max-width: 180px;
@@ -36,9 +38,9 @@ a.tab-button{
     border-bottom: 4px solid #84a01f;
     text-shadow: 1px 1px 1px rgba(255,255,255,0.7);　/* ボタンの色が明るめの場合は0.7の数字を大きく、暗めの場合は少なくするとリアルに */
 }
-
 a.tab-button:active{
     transform: translateY(4px);
     border-bottom: none;
 
 }
+
