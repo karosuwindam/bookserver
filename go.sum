@@ -10,5 +10,9 @@ github.com/karosuwindam/sqlite v0.4.0 h1:3zkDMC3M72wuYdrIB9kt/IO4e6+QCEXssHudaBs
 github.com/karosuwindam/sqlite v0.4.0/go.mod h1:12vQzaouqax/mfy9d8cMWimqIWovFhqFCC5ZcHROp1M=
 github.com/mattn/go-sqlite3 v1.14.15 h1:vfoHhTN1af61xCRSWzFIWzx2YskyMTwHLrExkBOjvxI=
 github.com/mattn/go-sqlite3 v1.14.15/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
+github.com/pyroscope-io/client v0.6.1-0.20230130114945-a64d920d2fba h1:SyF8fpp4K+eOGCwrlzunuDytyJ4F12ePvdnmmdA4P60=
+github.com/pyroscope-io/client v0.6.1-0.20230130114945-a64d920d2fba/go.mod h1:4h21iOU4pUOq0prKyDlvYRL+SCKsBc5wKiEtV+rJGqU=
+github.com/pyroscope-io/godeltaprof v0.1.0 h1:UBqtjt0yZi4jTxqZmLAs34XG6ycS3vUTlhEUSq4NHLE=
+github.com/pyroscope-io/godeltaprof v0.1.0/go.mod h1:psMITXp90+8pFenXkKIpNhrfmI9saQnPbba27VIaiQE=
 golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 h1:cu5kTvlzcw1Q5S9f5ip1/cpiB4nXvw1XYzFPGgzLUOY=
 golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
