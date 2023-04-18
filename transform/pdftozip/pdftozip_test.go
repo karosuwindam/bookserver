@@ -9,6 +9,7 @@ func TestSetup(t *testing.T) {
 	t.Setenv("PDF_FILEPASS", "./pdf")
 	t.Setenv("ZIP_FILEPASS", "./zip")
 	t.Setenv("TMP_FILEPASS", "./tmp")
+	t.Setenv("IMG_FILEPASS", "./img")
 	cfg, _ := config.EnvRead()
 	t.Log("------------- Set up ----------------------")
 	if err := SetUp(cfg); err != nil {
@@ -34,6 +35,7 @@ func TestPdftoimages(t *testing.T) {
 	t.Setenv("PDF_FILEPASS", "./pdf")
 	t.Setenv("ZIP_FILEPASS", "./zip")
 	t.Setenv("TMP_FILEPASS", "./tmp")
+	t.Setenv("IMG_FILEPASS", "./img")
 	cfg, _ := config.EnvRead()
 	if err := SetUp(cfg); err != nil {
 		t.Errorf("setup error")
