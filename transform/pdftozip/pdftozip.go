@@ -4,12 +4,20 @@ import (
 	"archive/zip"
 	"bookserver/config"
 	"bookserver/dirread"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"sync"
+)
+
+const (
+	JPG string = ".jpg"
+	PNG string = ".png"
 )
 
 var pdfimages string = "pdfimages" //pdfからイメージを取り出すコマンド
@@ -24,7 +32,7 @@ func cmdck() error {
 var tmpPass string //画像を一時保存するパス
 var pdfPass string //pdfの参照フォルダ
 var zipPass string //zipの参照フォルダ
-
+var imgPass string //画像を保存するフォルダパス
 // Setup(cfg) = error
 //
 // コマンド確認とフォルダ設定
@@ -45,6 +53,10 @@ func SetUp(cfg *config.Config) error {
 	if zipPass[len(zipPass)-1:] != "/" {
 		zipPass += "/"
 	}
+	imgPass = cfg.Folder.Img
+	if imgPass[len(imgPass)-1:] != "/" {
+		imgPass += "/"
+	}
 	if err := os.MkdirAll(tmpPass, 0777); err != nil {
 		return err
 	}
@@ -54,6 +66,10 @@ func SetUp(cfg *config.Config) error {
 	}
 
 	if err := os.MkdirAll(zipPass, 0777); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(imgPass, 0777); err != nil {
 		return err
 	}
 	return err
@@ -81,6 +97,30 @@ func removeimage(filename string) error {
 		return err
 	}
 	return nil
+}
+
+// imageCopy(filename, inputpass) = error
+func imageCopy(filename, inputpass string) error {
+	outname := filename
+	if strings.Index(strings.ToLower(inputpass), JPG) > 0 {
+		outname += JPG
+	} else if strings.Index(strings.ToLower(inputpass), PNG) > 0 {
+		outname += PNG
+	} else {
+		return errors.New("not for jpg, png")
+	}
+	src, err := os.Open(inputpass)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	dst, err := os.Create(imgPass + outname)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, src)
+	return err
 }
 
 // addToZip(filename zipWriter) = error
@@ -130,9 +170,17 @@ func imagetoZip(filename, outputFile string) error {
 	}
 	zipWrite := zip.NewWriter(dest)
 	defer zipWrite.Close()
+	imgflag := false
 	for _, file := range dirfolder.Data {
 		if file.Folder {
 			continue
+		}
+		if !imgflag {
+			if err := imageCopy(filename, file.RootPath+file.Name); err != nil {
+				log.Println(err)
+			} else {
+				imgflag = true
+			}
 		}
 		if err := addToZip(file.RootPath+file.Name, zipWrite); err != nil {
 			return err
