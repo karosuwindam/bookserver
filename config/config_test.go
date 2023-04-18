@@ -66,6 +66,11 @@ func TestEnvReadDefult(t *testing.T) {
 		t.FailNow()
 
 	}
+	if cfg.Folder.Img != "./html/img" {
+		t.Errorf("Error Hostname %v = %v", cfg.Folder.Img, "./upload/pdf")
+		t.FailNow()
+
+	}
 	t.Log("----------------- Seclet key data --------------------------")
 	if cfg.SeretKey.JwtKey != "SECRET_KEY" {
 		t.Errorf("Error Hostname %v = %v", cfg.SeretKey.JwtKey, "SECRET_KEY")
