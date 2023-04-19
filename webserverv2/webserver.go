@@ -8,9 +8,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/caarlos0/env/v6"
 	"golang.org/x/sync/errgroup"
@@ -107,8 +104,7 @@ func (t *SetupServer) muxHandler() http.Handler { return t.mux }
 // (s *Server) Run(ctx context.Context) = error
 // サーバをスタートする関数
 func (s *Server) Run(ctx context.Context) error {
-	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	defer stop()
+	ctx, cancel := context.WithCancel(ctx)
 	eg, ctx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
 		fmt.Println("Start Server")
@@ -119,6 +115,7 @@ func (s *Server) Run(ctx context.Context) error {
 		return nil
 	})
 	<-ctx.Done()
+	cancel()
 	if err := s.srv.Shutdown(context.Background()); err != nil {
 		log.Println(err)
 	}

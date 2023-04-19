@@ -14,6 +14,8 @@ https://github.com/karosuwindam/bookserver2
 |/health|*|healthチェック機能||未実装|
 |/login||未実装|
 |/logout||未実装|
+|/v1/view/[id]|*|idと連携したzipファイルのファイル情報を取得する||
+|/v1/image/[id]/[ファイル名]|*|zip内のファイルをダウンロードを取得||
 |/v1/upload|POST|ファイルのアップロード機能||
 |/v1/upload/[フォルダ名]|LIST|アップロードフォルダ内のファイルリスト表示||
 |/v1/upload|GET|{"Name":"ファイル名"}のjsonを送るファイル名が保存されているか確認できる||

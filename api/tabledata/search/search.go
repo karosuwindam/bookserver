@@ -17,7 +17,7 @@ var sql *table.SQLStatus
 
 var key map[string]bool //特殊キーワードの取得リスト
 var keynames []string = []string{
-	"today", "toweek", "tomonth",
+	"today", "toweek", "tomonth", "rand",
 } //特殊キーワードリスト
 
 var apiname string = "search" //api名
@@ -33,7 +33,7 @@ type SearchKey struct {
 func websqlSearchPost(w http.ResponseWriter, r *http.Request) common.Result {
 	msg := common.Result{Code: http.StatusOK, Date: time.Now()}
 	b, _ := io.ReadAll(r.Body)
-	fmt.Println("",string(b))
+	fmt.Println("", string(b))
 	msg.Option = r.Method + "," + string(b)
 	jout := SearchKey{}
 	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" {
@@ -44,11 +44,22 @@ func websqlSearchPost(w http.ResponseWriter, r *http.Request) common.Result {
 
 	} else {
 		if key[jout.Keyword] {
-			if jdata, err := sql.ReadWhileTime(jout.Table, jout.Keyword); err != nil {
-				msg.Code = http.StatusNotFound
-				log.Println(err.Error())
+			if jout.Keyword == "rand" {
+				if jdata, err := sql.ReadAll(jout.Table); err != nil {
+					msg.Code = http.StatusNotFound
+					log.Println(err.Error())
+				} else if jdata == "[]" {
+					msg.Result = fmt.Sprintf("%s", jdata)
+				} else {
+					msg.Result = fmt.Sprintf("%s", table.RandGenerate(table.JsonToStruct(jout.Table, []byte(jdata))))
+				}
 			} else {
-				msg.Result = fmt.Sprintf("%s", jdata)
+				if jdata, err := sql.ReadWhileTime(jout.Table, jout.Keyword); err != nil {
+					msg.Code = http.StatusNotFound
+					log.Println(err.Error())
+				} else {
+					msg.Result = fmt.Sprintf("%s", jdata)
+				}
 			}
 
 		} else {

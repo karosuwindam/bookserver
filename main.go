@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
@@ -29,7 +31,7 @@ func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
 }
 func Run(ctx context.Context) error {
 	var err error
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	cfg, err := config.EnvRead()
 	if err != nil {
 		return nil
@@ -40,8 +42,7 @@ func Run(ctx context.Context) error {
 
 			go transform.Run(ctx)
 			err = s.Run(ctx)
-			cancel()
-			transform.Wait()
+			stop()
 			return err
 		}
 	}
@@ -49,6 +50,7 @@ func Run(ctx context.Context) error {
 }
 
 func EndCK() {
+	transform.Wait()
 }
 func main() {
 	// flag.Parse() //コマンドラインオプションの有効
@@ -63,7 +65,7 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("end")
 	EndCK()
+	fmt.Println("end")
 
 }

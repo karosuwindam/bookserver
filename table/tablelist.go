@@ -3,6 +3,7 @@ package table
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
 	"reflect"
 )
 
@@ -35,6 +36,10 @@ const (
 	BOOKNAME = "booknames"
 	COPYFILE = "copyfile"
 	FILELIST = "filelists"
+)
+
+const (
+	RAND_MAX = 4
 )
 
 // テーブル内の型情報を格納
@@ -174,6 +179,109 @@ func JsonToStruct(tName string, data []byte) interface{} {
 	default:
 		return nil
 
+	}
+	return out
+}
+
+// RandGenerate(data) = string
+//
+// 配列データからランダムに4つ取り出す
+func RandGenerate(data interface{}) string {
+	out := ""
+	switch data.(type) {
+	case []Booknames:
+		tmp := data.([]Booknames)
+		if len(tmp) <= RAND_MAX {
+			bdata, _ := json.Marshal(tmp)
+			out = string(bdata)
+		} else {
+			outdata := []Booknames{}
+			tmprand := []int{}
+			for i := 0; i < 100 && len(tmprand) < RAND_MAX; i++ {
+				result := rand.Intn(len(tmp) - 1)
+				if len(tmprand) < 1 {
+					tmprand = append(tmprand, result)
+				} else {
+					flag := true
+					for _, j := range tmprand {
+						if j == result {
+							flag = false
+							break
+						}
+					}
+					if flag {
+						tmprand = append(tmprand, result)
+					}
+				}
+			}
+			for _, count := range tmprand {
+				outdata = append(outdata, tmp[count])
+			}
+			bdata, _ := json.Marshal(outdata)
+			out = string(bdata)
+		}
+	case []Filelists:
+		tmp := data.([]Filelists)
+		if len(tmp) <= RAND_MAX {
+			bdata, _ := json.Marshal(tmp)
+			out = string(bdata)
+		} else {
+			outdata := []Filelists{}
+			tmprand := []int{}
+			for i := 0; i < 100 && len(tmprand) < RAND_MAX; i++ {
+				result := rand.Intn(len(tmp) - 1)
+				if len(tmprand) < 1 {
+					tmprand = append(tmprand, result)
+				} else {
+					flag := true
+					for _, j := range tmprand {
+						if j == result {
+							flag = false
+							break
+						}
+					}
+					if flag {
+						tmprand = append(tmprand, result)
+					}
+				}
+			}
+			for _, count := range tmprand {
+				outdata = append(outdata, tmp[count])
+			}
+			bdata, _ := json.Marshal(outdata)
+			out = string(bdata)
+		}
+	case []Copyfile:
+		tmp := data.([]Copyfile)
+		if len(tmp) <= RAND_MAX {
+			bdata, _ := json.Marshal(tmp)
+			out = string(bdata)
+		} else {
+			outdata := []Copyfile{}
+			tmprand := []int{}
+			for i := 0; i < 100 && len(tmprand) < RAND_MAX; i++ {
+				result := rand.Intn(len(tmp) - 1)
+				if len(tmprand) < 1 {
+					tmprand = append(tmprand, result)
+				} else {
+					flag := true
+					for _, j := range tmprand {
+						if j == result {
+							flag = false
+							break
+						}
+					}
+					if flag {
+						tmprand = append(tmprand, result)
+					}
+				}
+			}
+			for _, count := range tmprand {
+				outdata = append(outdata, tmp[count])
+			}
+			bdata, _ := json.Marshal(outdata)
+			out = string(bdata)
+		}
 	}
 	return out
 }
