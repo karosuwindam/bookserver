@@ -4,3 +4,62 @@
     padding: 20px;
     border: 0px solid #666;
 }
+img.cell {
+    max-width: 250px;
+    max-height: 200px;
+}
+
+a.button{
+    color :white;
+    top: 3px;
+    left: 3;
+    transform: scaleY(5px);
+    position: relative;
+    display: inline-block;
+    position: relative;
+    padding: 2px 2px;
+    text-decoration: none;
+    background-color: #aaaaff;
+    border-bottom: solid 5px #2c5ab8;/*ボタン色より暗めに*/
+    border-right: solid 5px #5989f0;/*ボタン色より暗めに*/
+}
+a.button:before {  
+    content: " ";
+    position: absolute;
+    bottom: -5px;
+    left: -1px;
+    width: 0;
+    height: 0;
+    border-width: 0 6px 6px 0px;
+    border-style: solid;
+    border-color: transparent;
+    border-bottom-color: #FFF;
+  }
+  
+  a.button:after {  
+    content: " ";
+    position: absolute;
+    top: -1px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-width: 0px 6px 6px 0px;
+    border-style: solid;
+    border-color: #FFF;
+    border-bottom-color: transparent;
+  }
+  a.button:hover{
+      color:black;
+      background-color: #CCCCFF;
+
+  }
+  a.button:active {
+    /*ボタンを押したとき*/
+    border:none;
+    -webkit-transform: translate(6px,6px);
+    transform: translate(6px,6px);
+  }
+  
+  a.button:active:after, a.button:active:before {
+    content: none;/*ボタンを押すと線が消える*/
+  }

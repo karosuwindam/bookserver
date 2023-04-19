@@ -57,6 +57,10 @@ a.tab-button{
     border-bottom: 4px solid #84a01f;
     text-shadow: 1px 1px 1px rgba(255,255,255,0.7);　/* ボタンの色が明るめの場合は0.7の数字を大きく、暗めの場合は少なくするとリアルに */
 }
+a.tab-button:hover{
+    color:black;
+
+}
 a.tab-button:active{
     transform: translateY(4px);
     border-bottom: none;
@@ -68,7 +72,7 @@ a.tab-button-a{
     display: inline-block;
     max-width: 180px;
     text-align: left;
-    background-color: #9ec34b;
+    background-color: #afd757;
     font-size: 16px;
     color: #6c6d68;
     text-decoration: none;
@@ -77,6 +81,10 @@ a.tab-button-a{
     border-radius: 2px;
     border-bottom: 4px solid #84a01f;
     text-shadow: 1px 1px 1px rgba(255,255,255,0.7);　/* ボタンの色が明るめの場合は0.7の数字を大きく、暗めの場合は少なくするとリアルに */
+}
+a.tab-button-a:hover{
+    color:black;
+
 }
 a.tab-button-a:active{
     transform: translateY(4px);
