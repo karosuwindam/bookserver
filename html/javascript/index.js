@@ -74,7 +74,8 @@ function getSearchData(output) {
         var data = req.responseText;
         var jata = JSON.parse(data);
         console.log(jata);		          // 取得した JSON ファイルの中身を表示
-        document.getElementById(output).innerHTML = viewSearchTable(jata.Result)
+        document.getElementById(output).innerHTML = viewSearchTable(jata.Result, output)
+        imageload();
     }else if (req.readyState == 4 && req.status != 200){ 
         var data = req.responseText;
         var jata = JSON.parse(data);
@@ -89,11 +90,20 @@ function getSearchData(output) {
   req.send(JSON.stringify(jsondata));					    // 実際にサーバーへリクエストを送信
 }
 
-function viewSearchTable(jdata) {
+function viewSearchTable(jdata, id) {
   var output = ""
+  var count = document.getElementById(id).clientWidth / 280
+  if (count < 0) {
+    count = 1
+  }else {
+    count = Math.floor(count)
+  }
   tmpjdata = jdata
   for (var i=0;i<tmpjdata.length;i++){
     output += createViewCell(i)
+    if (i%count==(count-1)){
+      output += "<br>"
+    }
   }
   return output
 }
@@ -133,11 +143,25 @@ function createViewCell(count) {
   var jtmp = tmpjdata[count]
   var output = ""
   output += "<div class=\"serchdata\">"
-  output += "<div>"+"<img class='cell' src=\"img/"+jtmp.Name+".jpg\">"+"</div>"
+  output += "<div>"+"<img class='cell' data-src=\"img/"+jtmp.Name+".jpg\" src=\"img/"+jtmp.Name+".jpg\">"+"</div>"
   output += "<div>" + serchDataTagSplit(jtmp.Tag)
   output +="</div>" + "pdf download" + "zip download"
   output += "<div>"
   output +="</div>" 
   output +="</div>"
   return output
+}
+
+function imageload() {
+  let img_elements = document.querySelectorAll("img");
+	for(let i=0; i<img_elements.length; i++) {
+
+		// 画像読み込み完了したときの処理
+		img_elements[i].addEventListener('load', (e)=> {
+			console.log(e.target.alt + " load");
+		});
+
+		// 遅延読み込み
+		img_elements[i].src = img_elements[i].getAttribute("data-src");
+	}
 }
