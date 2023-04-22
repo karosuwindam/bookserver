@@ -3,3 +3,4 @@ upload/pdf/*
 upload/zip/*
 tmp/*
 db/*
+*debug_bin
