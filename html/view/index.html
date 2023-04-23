@@ -1,0 +1,101 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="css/comic.css">
+        <script src="javascritpt/view.js"></script>
+        <script src="javascritpt/comic-botton.js"></script>
+        <script src="javascritpt/key-event.js"></script>
+        <title></title>
+        <script>
+            window.onload = function() {
+                onTitleData(<%id%>);
+                onZipList(<%id%>, <%page%>);
+                initload();
+                setTimeout(onloadclose, 3000);
+            }
+        </script>
+    </head>
+    <body>
+        <div id="output"></div>
+        
+        <div class="help" style="display: '';">
+            <p class="title">Help</p>
+            <p class="text">本ブラウザはキーボード操作に対応しています。操作方法以下に示す通りです。</p>
+            <table>
+                <caption>キーボード操作方法について</caption>
+                <tr>
+                    <th>Key</th>
+                    <th>説明</th>
+                </tr><tr>
+                    <td>h</td>
+                    <td>ヘルプの表示非表示</td>
+                </tr><tr>
+                    <td>i</td>
+                    <td>info dataの表示非表示</td>
+                </tr><tr>
+                    <td>m</td>
+                    <td>マウスオーバー時の表示非表示</td>
+                </tr><tr>
+                    <td>p</td>
+                    <td>現在のページ表示非表示</td>
+                </tr><tr>
+                    <td>←</td>
+                    <td>2page 進む</td>
+                </tr><tr>
+                    <td>→</td>
+                    <td>2page 戻る</td>
+                </tr><tr>
+                    <td>↑</td>
+                    <td>1page 進む</td>
+                </tr><tr>
+                    <td>↓</td>
+                    <td>1page 戻る</td>
+                </tr><tr>
+                    <td>space</td>
+                    <td>1page/2page 切り替え</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="nowpage" id="nowpage" style="display: '';"></div>
+        <div class="leftT" name="clickA" onclick="onclickevent(lefte[0])"></div>
+        <div class="midT" name="clickA" onclick="onclickevent(mide[0])"></div>
+        <div class="midM" name="clickA" onclick="onclickevent(mide[1])"></div>
+        <div class="midB" name="clickA" onclick="onclickevent(mide[2])"></div>
+        <!-- <div class="leftT" name="clickA" onclick="onclickevent(lefte[0])" onmouseover="mouseover(lefte[0],'leftT');" onmouseout="mouseout(lefte[0],'leftT');"></div>
+        <div class="midT" name="clickA" onclick="onclickevent(mide[0])" onmouseover="mouseover(mide[0],'midT');" onmouseout="mouseout(mide[0],'midT');"></div>
+        <div class="midM" name="clickA" onclick="onclickevent(mide[1])" onmouseover="mouseover(mide[1],'midM');" onmouseout="mouseout(mide[1],'midM');"></div>
+        <div class="midB" name="clickA" onclick="onclickevent(mide[2])" onmouseover="mouseover(mide[2],'midB');" onmouseout="mouseout(mide[2],'midB');"></div>
+        <div class="rightT" name="clickA" onclick="onclickevent(righte[0])"  onmouseover="mouseover(righte[0],'rightT');" onmouseout="mouseout(righte[0],'rightT');"></div> -->
+        <div class="rightT" name="clickA" onclick="onclickevent(righte[0])"></div>
+
+        <div class="listdata" id="listl" style="display: none;">
+        </div>
+        <a class="button" id="list" href=javascript:void(0); onclick="listonoff();return false" style="float:left">list</a><br><br>
+        <a class="button" id="maxmin" href=javascript:void(0); onclick="maxminonoff();return false" style="float:left">Max</a>
+        <div class="sidber" style="display: ;">
+            <input class="sidber" id="pageslider" type="range" value="0" min="1" max="10" step="1"
+            onchange="changeValue(this.value)"
+            oninput="oninputvalue(this.value)">
+            <div class="page_tmp" id="view_tmp_page" style="color: white;">0</div>
+            <script>
+                function oninputvalue(value){
+                    var page = document.getElementById('view_tmp_page');
+                    swapflag=true;
+                    var tmp = value -0;
+                    page.style.display = "";
+                    page.innerHTML = tmp;
+                }
+                function changeValue(value) {
+                    var page = document.getElementById('view_tmp_page');
+                    page.style.display = "none";
+                    loaddata = (value==0);
+                    nowPage(value);
+                }
+                var slider = document.getElementById("pageslider");
+                slider.max = COUNTMAX;
+                changeValue(NowPage);
+            </script>
+        </div>
+
+    </body>
+</html>

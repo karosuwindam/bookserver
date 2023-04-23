@@ -142,10 +142,13 @@ var tmpjdata
 function createViewCell(count) {
   var jtmp = tmpjdata[count]
   var output = ""
+  var pdf_url = HOSTURL + "/v1/download/pdf/" + jtmp.Id
+  var zip_url = HOSTURL + "/v1/download/zip/" + jtmp.Id
+  var view_url = HOSTURL + "/view/" + jtmp.Id
   output += "<div class=\"serchdata\">"
-  output += "<div>"+"<img class='cell' data-src=\"img/"+jtmp.Name+".jpg\" src=\"img/"+jtmp.Name+".jpg\">"+"</div>"
+  output += "<div>"+"<a href=\""+view_url+"\" target=\"_blank\">"+"<img class='cell' data-src=\"img/"+jtmp.Name+".jpg\" src=\"img/"+jtmp.Name+".jpg\">"+"</a>"+"</div>"
   output += "<div>" + serchDataTagSplit(jtmp.Tag)
-  output +="</div>" + "pdf download" + "zip download"
+  output +="</div>" + "<a class=\"button\" href=\""+pdf_url+"\">pdf download</a>" + "<a class=\"button\" href=\""+zip_url+"\">zip download</a>"
   output += "<div>"
   output +="</div>" 
   output +="</div>"
