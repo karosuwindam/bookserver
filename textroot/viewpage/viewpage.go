@@ -1,4 +1,4 @@
-package textroot
+package viewpage
 
 import (
 	"bookserver/textroot/textread"
@@ -13,7 +13,7 @@ const (
 )
 
 // 静的HTMLのページを返す
-func viewhtml(w http.ResponseWriter, r *http.Request) {
+func Viewhtml(w http.ResponseWriter, r *http.Request) {
 	textdata := []string{".html", ".htm", ".css", ".js"}
 	upath := r.URL.Path
 	tmp := map[string]string{}

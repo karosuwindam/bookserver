@@ -20,6 +20,7 @@ func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
 	api.Setup(cfg)
 	transform.Setup(cfg)
 	proffdebug.Setup(cfg)
+	textroot.Setup(cfg)
 	scfg, err := webserverv2.NewSetup(cfg)
 	if err != nil {
 		return nil, err

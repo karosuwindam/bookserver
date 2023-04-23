@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -148,6 +149,28 @@ func addToZip(filename string, zipWriter *zip.Writer) error {
 	return nil
 }
 
+// renameData(dirfolder) = error
+//
+// 4桁時のリネーム処理
+//
+// dirfolder : 対象のフォルダのデータ
+func renameData(dirfolder *dirread.Dirtype) error {
+	if len(dirfolder.Data) > 1000 {
+		//リネーム処理
+		for _, data := range dirfolder.Data {
+			newName := data.Name
+			if j, err := strconv.Atoi(newName[len(newName)-8 : len(newName)-4]); err != nil || j <= 0 {
+				i, _ := strconv.Atoi(newName[len(newName)-7 : len(newName)-4])
+				newName = newName[:len(newName)-7] + fmt.Sprintf("%04d", i) + newName[len(newName)-4:]
+			}
+			if err := os.Rename(data.RootPath+data.Name, data.RootPath+newName); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // imagetoZip(filename, outputFile) = error
 //
 // データのzip圧縮
@@ -161,6 +184,14 @@ func imagetoZip(filename, outputFile string) error {
 	}
 	zipfile := zipPass + outputFile
 	dirfolder, _ := dirread.Setup(tmpPass + filename + "/")
+	if err := dirfolder.Read("./"); err != nil {
+		return err
+	}
+	//4桁を超える場合はリネーム処理
+	if err := renameData(dirfolder); err != nil {
+		return err
+	}
+	dirfolder, _ = dirread.Setup(tmpPass + filename + "/")
 	if err := dirfolder.Read("./"); err != nil {
 		return err
 	}
