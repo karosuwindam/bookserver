@@ -1,3 +1,5 @@
+var tablelist;
+
 function getTablelist(output){
 
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
@@ -6,7 +8,8 @@ function getTablelist(output){
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);		          // 取得した JSON ファイルの中身を表示
-          document.getElementById(output).innerHTML = outputTable(jata.Result)
+          document.getElementById(output).innerHTML = outputTable(jata.Result);
+          tablelist = jata.Result;
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
           var jata = JSON.parse(data);

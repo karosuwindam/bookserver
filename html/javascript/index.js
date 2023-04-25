@@ -76,6 +76,7 @@ function getSearchData(output) {
         console.log(jata);		          // 取得した JSON ファイルの中身を表示
         document.getElementById(output).innerHTML = viewSearchTable(jata.Result, output)
         imageload();
+        ckboxupdate();
     }else if (req.readyState == 4 && req.status != 200){ 
         var data = req.responseText;
         var jata = JSON.parse(data);
@@ -149,8 +150,8 @@ function createViewCell(count) {
   output += "<div>"+"<a href=\""+view_url+"\" target=\"_blank\">"+"<img class='cell' data-src=\"img/"+jtmp.Name+".jpg\" src=\"img/"+jtmp.Name+".jpg\">"+"</a>"+"</div>"
   output += "<div>" + serchDataTagSplit(jtmp.Tag)
   output +="</div>" + "<a class=\"button\" href=\""+pdf_url+"\">pdf download</a>" + "<a class=\"button\" href=\""+zip_url+"\">zip download</a>"
-  output += "<div>"
-  output +="</div>" 
+  output += "<div class=\"copyckbox\">" + jtmp.Id
+  output +="</div>"
   output +="</div>"
   return output
 }

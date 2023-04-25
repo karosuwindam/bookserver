@@ -42,32 +42,37 @@ a.button:before {
     border-style: solid;
     border-color: transparent;
     border-bottom-color: #FFF;
-  }
-  
-  a.button:after {  
-    content: " ";
-    position: absolute;
-    top: -1px;
-    right: -5px;
-    width: 0;
-    height: 0;
-    border-width: 0px 6px 6px 0px;
-    border-style: solid;
-    border-color: #FFF;
-    border-bottom-color: transparent;
-  }
-  a.button:hover{
-      color:black;
-      background-color: #CCCCFF;
+}
 
-  }
-  a.button:active {
-    /*ボタンを押したとき*/
-    border:none;
-    -webkit-transform: translate(6px,6px);
-    transform: translate(6px,6px);
-  }
-  
-  a.button:active:after, a.button:active:before {
-    content: none;/*ボタンを押すと線が消える*/
-  }
+a.button:after {  
+  content: " ";
+  position: absolute;
+  top: -1px;
+  right: -5px;
+  width: 0;
+  height: 0;
+  border-width: 0px 6px 6px 0px;
+  border-style: solid;
+  border-color: #FFF;
+  border-bottom-color: transparent;
+}
+a.button:hover{
+    color:black;
+    background-color: #CCCCFF;
+
+}
+a.button:active {
+  /*ボタンを押したとき*/
+  border:none;
+  -webkit-transform: translate(6px,6px);
+  transform: translate(6px,6px);
+}
+
+a.button:active:after, a.button:active:before {
+  content: none;/*ボタンを押すと線が消える*/
+}
+
+input[type=checkbox] {
+  width: 25px;
+  height: 25px;
+}
