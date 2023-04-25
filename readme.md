@@ -26,6 +26,8 @@ https://github.com/karosuwindam/bookserver2
 |/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得|ADMIN|
 |/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集|ADMIN|
 |/v1/edit/[テーブル]/[id]|DELETE|データベースのデータを削除|ADMIN
+|/v1/copy|POST|コピーするファイル登録を実施||
+|/v1/copy/:id|GET|テーブルからidに設定された情報を取得|
 
 
 # データベースにデータを追加について
@@ -48,6 +50,8 @@ https://github.com/karosuwindam/bookserver2
 |TMP_FILEPASS|テンプレートフォルダとして用意するフォルダ|./tmp|
 |PDF_FILEPASS|PDFを保存するフォルダ|./upload/pdf|
 |ZIP_FILEPASS|ZIPを保存するフォルダ|./upload/zip|
+|IMG_FILEPASS|imageを保存するフォルダ|./html/img|
+|PUBLIC_FILEPASS|公開用のフォルダ|./public|
 
 ## CURLによるテスト
 

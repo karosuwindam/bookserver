@@ -4,6 +4,7 @@ import (
 	"bookserver/api"
 	"bookserver/config"
 	"bookserver/proffdebug"
+	"bookserver/publiccopy"
 	"bookserver/pyroscopesetup"
 	"bookserver/textroot"
 	"bookserver/transform"
@@ -17,6 +18,9 @@ import (
 )
 
 func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
+	if err := publiccopy.Setup(cfg); err != nil {
+		return nil, err
+	}
 	api.Setup(cfg)
 	transform.Setup(cfg)
 	proffdebug.Setup(cfg)
@@ -42,16 +46,26 @@ func Run(ctx context.Context) error {
 		if err == nil {
 
 			go transform.Run(ctx)
-			err = s.Run(ctx)
+			go publiccopy.Loop(ctx)
+			if err = s.Run(ctx); err != nil {
+				log.Println(err)
+			}
 			stop()
-			return err
+			return EndCK()
 		}
 	}
 	return err
 }
 
-func EndCK() {
-	transform.Wait()
+func EndCK() error {
+	var err error = nil
+	if err1 := publiccopy.Wait(); err1 != nil {
+		err = err1
+	}
+	if err1 := transform.Wait(); err1 != nil {
+		err = err1
+	}
+	return err
 }
 func main() {
 	// flag.Parse() //コマンドラインオプションの有効
@@ -62,11 +76,9 @@ func main() {
 	ctx := context.Background()
 	fmt.Println("start")
 	if err := Run(ctx); err != nil {
-		EndCK()
 		log.Println(err)
 		os.Exit(1)
 	}
-	EndCK()
 	fmt.Println("end")
 
 }

@@ -77,7 +77,6 @@ func Run(ctx context.Context) {
 				}
 			}
 		}
-		shutdown <- true
 	}(ctx)
 	go func(ctx context.Context) { //ch1の処理
 		defer wp.Done()
@@ -95,6 +94,7 @@ func Run(ctx context.Context) {
 	}(ctx)
 	wp.Wait()
 	log.Println("Close: transform loop")
+	shutdown <- true
 }
 
 // 処理の追加

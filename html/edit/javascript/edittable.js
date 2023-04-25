@@ -23,7 +23,7 @@ function createAddedForm(output) {
     var list = table_list[selectdata]
     var tablename = searchurl[selectdata]
     data += tablename + "<br>"
-    data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"</tr>"
+    data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"<th>nowinput</th>"+"</tr>"
     for (var i=0;i<list.length;i++) {
         if (list[i] == "Id") {
             continue
@@ -31,13 +31,47 @@ function createAddedForm(output) {
         data += "<tr>"
         data += "<td>" + list[i] + "</td>"
         data += "<td>"
-        data += "<input type=\"text\" id=\""+tablename+"_"+list[i]+"\">"
+        data += "<input type=\"text\" id=\""+tablename+"_"+list[i]+"\" onkeyup=\"serchckbox(this.value,'"+list[i]+"');return\">"
         data += "</td>"
+        data += "<td>"+createlistbox(list[i])+"</td>"
         data += "</tr>"
     }
     data += "</table>"
     data += "<input type=\"button\" value=\"add\" onclick=\"sendAddForm();closeViewForm('"+output+"')\">"
     document.getElementById(output).innerHTML = data
+}
+
+function createlistbox(name) {
+    var output = "<select name=\"\" id=\""+"listbox_"+name+"\">"
+    for (var i=0;i<tablelist.length;i++) {
+        if (tablelist[i][name]!=""){
+            output += "<option value=\""+tablelist[i][name]+"\">"+tablelist[i][name]+"</option>"
+        }
+    }
+    output += "</select>"
+    return output
+}
+
+function serchckbox(key,name){
+    var data = document.getElementById("listbox_"+name)
+    var output = ""
+    if (key=="") {
+        for (var i=0;i<tablelist.length;i++) {
+            if (tablelist[i][name]!=""){
+                output += "<option value=\""+tablelist[i][name]+"\">"+tablelist[i][name]+"</option>"
+            }
+        }
+        data.innerHTML = output
+    }else {
+        for (var i=0;i<tablelist.length;i++) {
+            if (tablelist[i][name].substr(0,key.length).toLowerCase()==key.toLowerCase()){
+                if (tablelist[i][name]!=""){
+                    output += "<option value=\""+tablelist[i][name]+"\">"+tablelist[i][name]+"</option>"
+                }
+            }
+        }
+        data.innerHTML = output
+    }
 }
 
 function sendAddForm() {
