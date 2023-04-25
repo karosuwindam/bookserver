@@ -1,4 +1,4 @@
-FROM golang:1.18 As builder
+FROM golang:GOVERSION As builder
 
 WORKDIR /app
 RUN apt-get update && \
@@ -6,10 +6,10 @@ RUN apt-get update && \
 ADD ./ .
 RUN go build -o app
 
-FROM debian:11
-LABEL version="0.6.0"
-LABEL name="bookserver"
-LABEL goversion="1.18"
+FROM BASE_CONTANER
+LABEL version="TAG"
+LABEL name="APPNAME"
+LABEL goversion="GOVERSION"
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y locales locales-all curl poppler-utils && \
