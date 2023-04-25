@@ -149,7 +149,7 @@ func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
 		return "", nil
 	}
 	readdata := readBaseCreate(tName)
-	skeyword := map[string]string{"name": keyword}
+	skeyword := baseNameMap(tName, keyword)
 	if err := sql.Cfg.Read(tName, readdata, skeyword, sqlite.AND); err != nil {
 		return "", err
 	}
@@ -183,4 +183,17 @@ func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
 		return "", err
 	}
 	return "", nil
+}
+
+func baseNameMap(tName, keyword string) map[string]string {
+	output := map[string]string{}
+	switch tName {
+	case BOOKNAME:
+		output["name"] = keyword
+	case FILELIST:
+		output["name"] = keyword
+	case COPYFILE:
+		output["zippass"] = keyword
+	}
+	return output
 }

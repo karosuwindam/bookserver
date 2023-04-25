@@ -1,6 +1,7 @@
 testcheck*
 upload/pdf/*
 upload/zip/*
+public/*
 tmp/*
 db/*
 *debug_bin

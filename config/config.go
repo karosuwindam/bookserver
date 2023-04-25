@@ -19,10 +19,11 @@ type SetupSql struct {
 }
 
 type SetupFolder struct {
-	Tmp string `env:"TMP_FILEPASS" envDefault:"./tmp"`        //画像を一時保存するパス
-	Img string `env:"IMG_FILEPASS" envDefault:"./html/img"`   //1ページ目の画像ファイルを保存するフォルダ
-	Pdf string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
-	Zip string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
+	Tmp    string `env:"TMP_FILEPASS" envDefault:"./tmp"`        //画像を一時保存するパス
+	Img    string `env:"IMG_FILEPASS" envDefault:"./html/img"`   //1ページ目の画像ファイルを保存するフォルダ
+	Pdf    string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
+	Zip    string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
+	Public string `env:"PUBLIC_FILEPASS" envDefault:"./public"`  //公開用のフォルダ
 }
 
 type SecretKey struct {

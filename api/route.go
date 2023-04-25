@@ -2,6 +2,7 @@ package api
 
 import (
 	"bookserver/api/common"
+	"bookserver/api/copy"
 	"bookserver/api/download"
 	"bookserver/api/login"
 	"bookserver/api/tabledata"
@@ -46,6 +47,12 @@ func Setup(cfg *config.Config) error {
 	}
 	//download
 	if tmp, err := download.Setup(cfg); err != nil {
+		return err
+	} else {
+		Route = append(Route, tmp...)
+	}
+	//copy
+	if tmp, err := copy.Setup(cfg); err != nil {
 		return err
 	} else {
 		Route = append(Route, tmp...)

@@ -2,9 +2,13 @@
     <head>
         <link rel="stylesheet" type="text/css" href="/css/index.css">
         <script src="javascript/index.js"></script>
+        <script src="javascript/copyfile.js"></script>
         <title>図書サーバ</title>
         <script>
             var timer = ""
+            window.onload = function(){
+                ckboxupdate ()
+            }
             function saerch_key(){
                 if (timer !=""){
                     clearTimeout(timer);
@@ -35,6 +39,5 @@
             <div id="output" class="output">test</div>
         </center>
         <hr>
-        
     </body>
 </html>
