@@ -7,7 +7,7 @@ ADD ./ .
 RUN go build -o app
 
 FROM debian:11
-LABEL version="0.6.0"
+LABEL version="0.6.1"
 LABEL name="bookserver"
 LABEL goversion="1.18"
 RUN apt-get update && \
@@ -18,6 +18,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 RUN chown 1000:1000 /app
+ENV PYROSCOPE_FLAG false
 USER 1000
 RUN mkdir -p public upload/pdf upload/zip db tmp html
 ADD ./html ./html

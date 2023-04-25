@@ -44,7 +44,7 @@ rmi:
 	${DOCKER} rmi ${NAME}:${TAG}
 	${DOCKER} image prune -f
 buildkit: create
-        @echo "--- buildkit build --"
-        ${BUILD} --addr ${BUILD_ADDR_ARM} build --output name=${NAME}:${TAG},${BUILD_OPTION} --frontend=dockerfile.v0 --local context=${TARGET_FILE}   --local dockerfile=${TARGET_FILE} --opt source=${TARGET_FILE}${TARGET}
+	@echo "--- buildkit build --"
+	${BUILD} --addr ${BUILD_ADDR_ARM} build --output name=${NAME}:${TAG},${BUILD_OPTION} --frontend=dockerfile.v0 --local context=${TARGET_FILE}   --local dockerfile=${TARGET_FILE} --opt source=${TARGET_FILE}${TARGET}
 help:
 	@echo ""

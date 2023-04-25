@@ -11,7 +11,7 @@ import (
 type PyroScope struct {
 	Hostname      string `env:"HOSTNAME"`
 	DebugFlag     string `env:"DEBUG_FLAG" envDefault:"false"`
-	PyroScopeFlag string `env:"PYROSCOPE_FLAG" envDefault:"TRUE"`
+	PyroScopeFlag string `env:"PYROSCOPE_FLAG" envDefault:"false"`
 	AppName       string `env:"APPLICATION_NAME" envDefault:"bookserver"`                      //pyroscopeの表示名
 	ServerAddress string `env:"SERVER_ADDRESS" envDefault:"http://pyroscorpe.bookserver.home"` //pyroscopeのサーバアドレス
 }
