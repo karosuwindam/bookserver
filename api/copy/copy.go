@@ -5,7 +5,7 @@ import (
 	"bookserver/config"
 	"bookserver/publiccopy"
 	"bookserver/table"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -100,13 +100,13 @@ func webcopy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + apiname, Handler: webcopy},
 	{Pass: "/" + apiname + "/", Handler: webcopy},
 }
 
 // SetupSetup
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	if scfg, err := table.Setup(cfg); err != nil {
 		return route, err
 	} else {

@@ -2,7 +2,7 @@ package login
 
 import (
 	"bookserver/config"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 
 	"github.com/gorilla/sessions"
 )
@@ -34,12 +34,12 @@ var jwtsecretkey string
 var cs *sessions.CookieStore = sessions.NewCookieStore([]byte("secret-key-12345"))
 
 // routeのベースフォルダ
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{"/" + apiname, webServerLogin},
 	{"/" + "logout", webServerLogout},
 }
 
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	psckdata["admin"] = "admin1234"
 	str, _ := createjwt("admin", "admin1234")
 	Unpackjwt(str)

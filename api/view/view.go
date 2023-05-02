@@ -4,8 +4,9 @@ import (
 	"bookserver/api/common"
 	"bookserver/config"
 	"bookserver/table"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -41,6 +42,9 @@ func webzipreadlist(w http.ResponseWriter, r *http.Request) common.Result {
 		} else {
 			if data, ok := table.JsonToStruct(table.FILELIST, []byte(json)).([]table.Filelists); ok {
 				zipname := data[0].Zippass
+				if err := Add(zipname); err != nil {
+					log.Println(err)
+				}
 				f := openfile(zipname)
 				if f.flag {
 					msg.Result = f.convertjson()
@@ -71,13 +75,13 @@ func webzipread(w http.ResponseWriter, r *http.Request) {
 	common.Sqlreadmessageback(msg, w)
 }
 
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + apiname + "/", Handler: webzipread},
 	{Pass: "/" + apinameimage + "/", Handler: webzipreadimage},
 }
 
 // Setup
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	zippath = cfg.Folder.Zip
 	if zippath[len(zippath)-1:] != "/" {
 		zippath += "/"
@@ -87,5 +91,9 @@ func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
 	} else {
 		sql = sqlcfg
 	}
+	cashZip = map[string]*cashZipFile{}
+	cashZipTime = map[string]time.Time{}
+	cashZipSize = map[string]int{}
+	chname = make(chan string, 1)
 	return route, nil
 }

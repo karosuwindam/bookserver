@@ -2,16 +2,16 @@ package proffdebug
 
 import (
 	"bookserver/config"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
 )
 
-var Route []webserverv2.WebConfig = []webserverv2.WebConfig{}
+var Route []webserver.WebConfig = []webserver.WebConfig{}
 
 func Setup(cfg *config.Config) error {
-	tmpRoute := []webserverv2.WebConfig{
+	tmpRoute := []webserver.WebConfig{
 		{Pass: "/", Handler: basepageview},
 		{Pass: "/pprof/", Handler: pprof.Index},
 		{Pass: "/pprof/cmdline", Handler: pprof.Cmdline},

@@ -2,6 +2,7 @@ package transform
 
 import (
 	"bookserver/config"
+	"bookserver/transform/writetable"
 	"context"
 	"testing"
 	"time"
@@ -17,7 +18,8 @@ func TestRun(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	go Run(ctx)
-	samplefile := PdftoZip{
+	samplefile := writetable.PdftoZip{
+		Name:       "testout",
 		InputFile:  "testout.pdf",
 		OutputFile: "test.zip",
 	}

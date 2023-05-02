@@ -2,7 +2,7 @@ package view
 
 import (
 	"bookserver/config"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -16,9 +16,9 @@ func TestViewList(t *testing.T) {
 
 	t.Setenv("ZIP_FILEPASS", "./zip")
 	cfg, _ := config.EnvRead()
-	ss, _ := webserverv2.NewSetup(cfg)
+	ss, _ := webserver.NewSetup(cfg)
 	web, _ := Setup(cfg)
-	webserverv2.Config(ss, web, "")
+	webserver.Config(ss, web, "")
 	s, _ := ss.NewServer()
 	t.Log("----------------- View List Start --------------------------")
 

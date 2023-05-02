@@ -4,15 +4,16 @@ import (
 	"bookserver/api/common"
 	"bookserver/api/copy"
 	"bookserver/api/download"
+	"bookserver/api/listdata"
 	"bookserver/api/login"
 	"bookserver/api/tabledata"
 	"bookserver/api/upload"
 	"bookserver/api/view"
 	"bookserver/config"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 )
 
-var Route []webserverv2.WebConfig = []webserverv2.WebConfig{}
+var Route []webserver.WebConfig = []webserver.WebConfig{}
 
 func Setup(cfg *config.Config) error {
 	//common
@@ -53,6 +54,12 @@ func Setup(cfg *config.Config) error {
 	}
 	//copy
 	if tmp, err := copy.Setup(cfg); err != nil {
+		return err
+	} else {
+		Route = append(Route, tmp...)
+	}
+	//listdata
+	if tmp, err := listdata.Setup(cfg); err != nil {
 		return err
 	} else {
 		Route = append(Route, tmp...)
