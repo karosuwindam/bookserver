@@ -1,0 +1,117 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "bookserver-pdf-pv-volume"
+  namespace: bookserver
+  labels:
+    type: "local"
+spec:
+  storageClassName: "bookserver-pdf"
+  capacity:
+    storage: "512Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/pi/usb/usb1/pdf
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookserver-pdf-pv-claim
+  namespace: bookserver
+spec:
+  storageClassName: bookserver-pdf
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "bookserver-zip-pv-volume"
+  namespace: bookserver
+  labels:
+    type: "local"
+spec:
+  storageClassName: "bookserver-zip"
+  capacity:
+    storage: "512Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/pi/usb/usb2/zip
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookserver-zip-pv-claim
+  namespace: bookserver
+spec:
+  storageClassName: bookserver-zip
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "bookserver-db-pv-volume"
+  namespace: bookserver
+  labels:
+    type: "local"
+spec:
+  storageClassName: "bookserver-db"
+  capacity:
+    storage: "512Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/pi/usb/usb2/db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookserver-db-pv-claim
+  namespace: bookserver
+spec:
+  storageClassName: bookserver-db
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "bookserver-jpg-pv-volume"
+  namespace: bookserver
+  labels:
+    type: "local"
+spec:
+  storageClassName: "bookserver-jpg"
+  capacity:
+    storage: "512Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/pi/usb/usb1/jpg
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookserver-jpg-pv-claim
+  namespace: bookserver
+spec:
+  storageClassName: bookserver-jpg
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Gi
+---
