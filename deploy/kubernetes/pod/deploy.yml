@@ -35,7 +35,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: bookserver
-        image: bookserver2:31000/tool/bookserver:0.6.1
+        image: bookserver2:31000/tool/bookserver:0.7.0
         imagePullPolicy: IfNotPresent
         # imagePullPolicy: Always
         env:
@@ -78,6 +78,6 @@ spec:
     - port: 8080
       targetPort: 8080
       # nodePort: 32200
-  type: LoadBalancer
-  # type: ClusterIP
+  # type: LoadBalancer
+  type: ClusterIP
 
