@@ -4,7 +4,7 @@ import (
 	"bookserver/api/common"
 	"bookserver/config"
 	"bookserver/table"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"fmt"
 	"log"
 	"net/http"
@@ -103,12 +103,12 @@ func webDownload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + apiname + "/", Handler: webDownload},
 }
 
 // Setup
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	zippath = cfg.Folder.Zip
 	if zippath[len(zippath)-1:] != "/" {
 		zippath += "/"

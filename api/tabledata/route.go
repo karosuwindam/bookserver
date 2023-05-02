@@ -7,11 +7,11 @@ import (
 	"bookserver/api/tabledata/search"
 	"bookserver/config"
 	"bookserver/table"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 )
 
 // routeのベースフォルダ
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{}
+var route []webserver.WebConfig = []webserver.WebConfig{}
 
 func sqlSetup(cfg *config.Config) (*table.SQLStatus, error) {
 	var err error
@@ -21,10 +21,10 @@ func sqlSetup(cfg *config.Config) (*table.SQLStatus, error) {
 	return nil, err
 }
 
-// Setup() = []webserverv2.WebConfig
+// Setup() = []webserver.WebConfig
 //
 // セットアップして、HTMLのルートフォルダを用意する
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	var err error
 	if sqlcfg, err := sqlSetup(cfg); err == nil {
 		route = append(route, add.Setup(sqlcfg)...)

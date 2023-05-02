@@ -128,8 +128,9 @@ function serchDataTagSplit(tag){
 }
 
 function updataserch(str){
+  var tmp = str
   for ( var i=1;i<str.length;i++){
-      var tmp = str.slice(-i) -0;
+      tmp = str.slice(-i) -0;
       if (isNaN(tmp)){
           tmp = str.slice(0,str.length-i+1)
           break

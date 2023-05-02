@@ -4,7 +4,7 @@ import (
 	"bookserver/api/common"
 	"bookserver/dirread"
 	"bookserver/transform/writetable"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"errors"
 	"fmt"
 	"log"
@@ -218,7 +218,7 @@ func fileupload(w http.ResponseWriter, r *http.Request) {
 }
 
 // routeのベースフォルダ
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{"/" + apiname, fileupload},
 	{"/" + apiname + "/", fileupload},
 }
@@ -240,10 +240,10 @@ func GetUploadName() (string, error) {
 var setupdata UploadPass = UploadPass{}
 var uploadname chan string = make(chan string, 30)
 
-// Setup() = []webserverv2.WebConfig
+// Setup() = []webserver.WebConfig
 //
 // セットアップして、HTMLのルートフォルダを用意する
-func Setup() ([]webserverv2.WebConfig, error) {
+func Setup() ([]webserver.WebConfig, error) {
 	uploadname = make(chan string, 30)
 	if err := env.Parse(&setupdata); err != nil {
 

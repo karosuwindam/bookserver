@@ -1,4 +1,4 @@
-package webserverv2
+package webserver
 
 import (
 	"bookserver/config"
@@ -98,7 +98,7 @@ func (t *SetupServer) Add(route string, handler func(http.ResponseWriter, *http.
 }
 
 // (*SetupServer) muxHandler()
-// SetupServer内のmuxhandlerを返す関数
+// SetupServer内のmuxHandlerを返す関数
 func (t *SetupServer) muxHandler() http.Handler { return t.mux }
 
 // (s *Server) Run(ctx context.Context) = error

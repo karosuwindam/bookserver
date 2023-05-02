@@ -2,13 +2,16 @@ package main
 
 import (
 	"bookserver/api"
+	"bookserver/api/listdata"
+	"bookserver/api/view"
 	"bookserver/config"
+	"bookserver/health"
 	"bookserver/proffdebug"
 	"bookserver/publiccopy"
 	"bookserver/pyroscopesetup"
 	"bookserver/textroot"
 	"bookserver/transform"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"context"
 	"fmt"
 	"log"
@@ -17,7 +20,10 @@ import (
 	"syscall"
 )
 
-func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
+// Confg(cfg) = (*webserver.SetupServer, error)
+//
+// メイン処理の設定
+func Config(cfg *config.Config) (*webserver.SetupServer, error) {
 	if err := publiccopy.Setup(cfg); err != nil {
 		return nil, err
 	}
@@ -25,15 +31,22 @@ func Config(cfg *config.Config) (*webserverv2.SetupServer, error) {
 	transform.Setup(cfg)
 	proffdebug.Setup(cfg)
 	textroot.Setup(cfg)
-	scfg, err := webserverv2.NewSetup(cfg)
+	scfg, err := webserver.NewSetup(cfg)
 	if err != nil {
 		return nil, err
 	}
-	webserverv2.Config(scfg, api.Route, "/v1")
-	webserverv2.Config(scfg, proffdebug.Route, "/debug")
-	webserverv2.Config(scfg, textroot.Route, "")
+	webserver.Config(scfg, api.Route, "/v1")
+	webserver.Config(scfg, proffdebug.Route, "/debug")
+	if route, err := health.SetUp(cfg); err == nil {
+		webserver.Config(scfg, route, "")
+	}
+	webserver.Config(scfg, textroot.Route, "")
 	return scfg, nil
 }
+
+// Run(ctx) = error
+//
+// メイン処理
 func Run(ctx context.Context) error {
 	var err error
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
@@ -44,7 +57,8 @@ func Run(ctx context.Context) error {
 	if scfg, err := Config(cfg); err == nil {
 		s, err := scfg.NewServer()
 		if err == nil {
-
+			go listdata.Loop(ctx)
+			go view.Loop(ctx)
 			go transform.Run(ctx)
 			go publiccopy.Loop(ctx)
 			if err = s.Run(ctx); err != nil {
@@ -57,6 +71,9 @@ func Run(ctx context.Context) error {
 	return err
 }
 
+// EndCK() = error
+//
+// 終了時の処理
 func EndCK() error {
 	var err error = nil
 	if err1 := publiccopy.Wait(); err1 != nil {
@@ -65,8 +82,15 @@ func EndCK() error {
 	if err1 := transform.Wait(); err1 != nil {
 		err = err1
 	}
+	if err1 := listdata.Wait(); err1 != nil {
+		err = err1
+	}
 	return err
 }
+
+// main()
+//
+// 　メイン処理
 func main() {
 	// flag.Parse() //コマンドラインオプションの有効
 	log.SetFlags(log.Llongfile | log.Flags())

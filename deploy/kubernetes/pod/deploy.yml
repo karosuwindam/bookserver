@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookserver-deploy
+  namespace: bookserver
+spec:
+  selector:
+    matchLabels:
+      app: bookserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bookserver
+      annotations:
+        podinfo: "本や図書の新刊リスト作成について"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: In
+                  values:
+                    - linux
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - arm64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+      containers:
+      - name: bookserver
+        image: bookserver2:31000/tool/bookserver:0.7.0
+        imagePullPolicy: IfNotPresent
+        # imagePullPolicy: Always
+        env:
+          - name: TZ
+            value: 'Asia/Tokyo'
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - mountPath: /app/upload/pdf
+            name: bookserver-pdf
+          - mountPath: /app/upload/zip
+            name: bookserver-zip
+          - mountPath: /app/db
+            name: bookserver-db
+          - mountPath: /app/html/img
+            name: bookserver-jpg
+      volumes:
+        - name: bookserver-pdf
+          persistentVolumeClaim:
+            claimName: bookserver-pdf-pv-claim
+        - name: bookserver-zip
+          persistentVolumeClaim:
+            claimName: bookserver-zip-pv-claim
+        - name: bookserver-jpg
+          persistentVolumeClaim:
+            claimName: bookserver-jpg-pv-claim
+        - name: bookserver-db
+          persistentVolumeClaim:
+            claimName: bookserver-db-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookserver-service
+  namespace: bookserver
+spec:
+  selector:
+    app: bookserver
+  ports:
+    - port: 8080
+      targetPort: 8080
+      # nodePort: 32200
+  # type: LoadBalancer
+  type: ClusterIP
+
