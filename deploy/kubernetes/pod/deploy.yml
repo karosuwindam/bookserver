@@ -15,6 +15,24 @@ spec:
       annotations:
         podinfo: "本や図書の新刊リスト作成について"
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: In
+                  values:
+                    - linux
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - arm64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
       containers:
       - name: bookserver
         image: bookserver2:31000/tool/bookserver:0.6.0
@@ -60,6 +78,6 @@ spec:
     - port: 8080
       targetPort: 8080
       # nodePort: 32200
-  # type: LoadBalancer
-  type: ClusterIP
+  type: LoadBalancer
+  # type: ClusterIP
 
