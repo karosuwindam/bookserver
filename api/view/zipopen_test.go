@@ -2,8 +2,10 @@ package view
 
 import (
 	"bookserver/config"
+	"context"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestZipOpen(t *testing.T) {
@@ -41,4 +43,49 @@ func TestZipOpenFile(t *testing.T) {
 	fmt.Println(f.convertjson())
 	t.Log("------------------------- zip open file end -------------------------------")
 
+}
+
+func TestZipCash(t *testing.T) {
+	t.Setenv("ZIP_FILEPASS", "./zip")
+	cfg, _ := config.EnvRead()
+	Setup(cfg)
+
+	filename := "test.zip"
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Log("------------------------- zip open file cash start -------------------------------")
+	if err := Add(filename); err != nil {
+		t.Fatalf("%v", err)
+		t.FailNow()
+	}
+	t.Log("Add Check OK")
+	if err := Add(filename); err == nil {
+		t.Fatalf("%v", err)
+		t.FailNow()
+	}
+	t.Log("Add Check Time OUT OK")
+	go Loop(ctx)
+	if err := Add(filename); err != nil {
+		t.Fatalf("%v", err)
+	}
+	now := time.Now()
+	time.Sleep(time.Second * 3)
+	if cashZip[filename] == nil {
+		t.Fatalf(filename)
+		cancel()
+		t.FailNow()
+	}
+	t.Log("Check Added OK")
+	fmt.Printf("Sleep Start")
+	for i := 0; time.Now().Sub(now).Minutes() < 1; i++ {
+		time.Sleep(time.Second)
+		fmt.Printf("%d\t", i)
+	}
+	fmt.Printf("\n")
+
+	if cashZip[filename] != nil {
+		t.Fatalf(filename)
+	}
+	t.Log("chash Clear OK")
+	cancel()
+	t.Log("------------------------- zip open file cash end -------------------------------")
 }

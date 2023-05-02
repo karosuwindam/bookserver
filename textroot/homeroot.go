@@ -4,10 +4,10 @@ import (
 	"bookserver/config"
 	"bookserver/textroot/view"
 	"bookserver/textroot/viewpage"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 )
 
-var Route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var Route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/edit/", Handler: viewpage.Viewhtml},
 	{Pass: "/", Handler: viewpage.Viewhtml},
 }

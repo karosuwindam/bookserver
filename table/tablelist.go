@@ -7,6 +7,7 @@ import (
 	"reflect"
 )
 
+// 登録時に参照する書籍情報
 type Booknames struct {
 	Id       int    `json:"Id" db:"id"`
 	Name     string `json:"Name" db:"name"`
@@ -17,6 +18,7 @@ type Booknames struct {
 	Ext      string `json:"Ext" db:"ext"`
 }
 
+// 共有フォルダに登録したファイル情報
 type Copyfile struct {
 	Id       int    `json:"Id" db:"id"`
 	Zippass  string `json:"Zippass" db:"zippass"`
@@ -24,6 +26,7 @@ type Copyfile struct {
 	Copyflag int    `json:"Copyflag" db:"copyflag"`
 }
 
+// 登録したファイル情報
 type Filelists struct {
 	Id      int    `json:"Id" db:"id"`
 	Name    string `json:"Name" db:"name"`

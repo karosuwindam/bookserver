@@ -1,4 +1,4 @@
-package webserverv2
+package webserver
 
 import (
 	"log"

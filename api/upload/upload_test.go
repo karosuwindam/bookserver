@@ -2,7 +2,8 @@ package upload
 
 import (
 	"bookserver/config"
-	"bookserver/webserverv2"
+	"bookserver/transform/writetable"
+	"bookserver/webserver"
 	"bytes"
 	"context"
 	"fmt"
@@ -57,8 +58,8 @@ func TestUploadServerPost(t *testing.T) {
 	web, _ := Setup()
 
 	cfg, _ := config.EnvRead()
-	ss, _ := webserverv2.NewSetup(cfg)
-	webserverv2.Config(ss, web, "")
+	ss, _ := webserver.NewSetup(cfg)
+	webserver.Config(ss, web, "")
 	s, _ := ss.NewServer()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -89,6 +90,7 @@ func TestUploadServerPost(t *testing.T) {
 	if err := eq.Wait(); err != nil {
 		t.Fatal(err)
 	}
+	os.Remove("pdf/test.pdf")
 	t.Log("----------------- upload Server OK --------------------------")
 
 }
@@ -104,8 +106,8 @@ func TestUploadServerList(t *testing.T) {
 	web, _ := Setup()
 
 	cfg, _ := config.EnvRead()
-	ss, _ := webserverv2.NewSetup(cfg)
-	webserverv2.Config(ss, web, "")
+	ss, _ := webserver.NewSetup(cfg)
+	webserver.Config(ss, web, "")
 	s, _ := ss.NewServer()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -130,13 +132,15 @@ func TestUloadServerGet(t *testing.T) {
 	zippass := "zip"
 	t.Setenv("PDF_FILEPASS", pdfpass)
 	t.Setenv("ZIP_FILEPASS", zippass)
+	t.Setenv("DBROOTPASS", "./")
 	t.Log("----------------- upload Server --------------------------")
 
 	web, _ := Setup()
 
 	cfg, _ := config.EnvRead()
-	ss, _ := webserverv2.NewSetup(cfg)
-	webserverv2.Config(ss, web, "")
+	ss, _ := webserver.NewSetup(cfg)
+	webserver.Config(ss, web, "")
+	writetable.Setup(cfg)
 	s, _ := ss.NewServer()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -145,18 +149,10 @@ func TestUloadServerGet(t *testing.T) {
 		return s.Run(ctx)
 	})
 	//処理
-	if uploadFileget("http://localhost:8080/upload", "{\"Name\":\"test.pdf\"}", t) != http.StatusOK {
-		t.Fail()
-	}
-	if uploadFileget("http://localhost:8080/upload", "{\"Name\":\"test.zip\"}", t) != http.StatusOK {
-		t.Fail()
-	}
-	if uploadFileget("http://localhost:8080/upload", "{\"Name\":\"bb.zip\"}", t) != http.StatusOK {
-		t.Fail()
-	}
-	if uploadFileget("http://localhost:8080/upload/zip/bbb", "", t) != http.StatusBadRequest {
-		t.Fail()
-	}
+	getUrldata("http://localhost:8080/upload/test.pdf", t, http.StatusOK)
+	getUrldata("http://localhost:8080/upload/test.zip", t, http.StatusOK)
+	getUrldata("http://localhost:8080/upload/bb.zip", t, http.StatusOK)
+	getUrldata("http://localhost:8080/upload/bbb", t, http.StatusBadRequest)
 	cancel()
 	if err := eq.Wait(); err != nil {
 		t.Fatal(err)
@@ -219,6 +215,33 @@ func listFileget(url string, t *testing.T) {
 		t.Fatalf("status :%v", resp.StatusCode)
 	}
 	t.Logf("%s", b)
+
+}
+
+/*---------------確認用関数----------------*/
+func getUrldata(url string, t *testing.T, code int) {
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf(err.Error())
+		t.FailNow()
+	}
+	if resp.StatusCode != code {
+		t.Fail()
+	}
+	fmt.Printf("%s\n", b)
 
 }
 

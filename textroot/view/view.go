@@ -4,7 +4,7 @@ import (
 	"bookserver/api/common"
 	"bookserver/config"
 	"bookserver/textroot/textread"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"fmt"
 	"log"
 	"net/http"
@@ -93,10 +93,10 @@ func viewhtml(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + Apiname + "/", Handler: viewhtml},
 }
 
-func Setup(cfg *config.Config) ([]webserverv2.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	return route, nil
 }

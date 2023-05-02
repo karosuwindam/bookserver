@@ -3,7 +3,7 @@ package read
 import (
 	"bookserver/api/common"
 	"bookserver/table"
-	"bookserver/webserverv2"
+	"bookserver/webserver"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -103,12 +103,12 @@ func websqlread(w http.ResponseWriter, r *http.Request) {
 	common.Sqlreadmessageback(msg, w)
 }
 
-var route []webserverv2.WebConfig = []webserverv2.WebConfig{
+var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + apiname + "/", Handler: websqlread},
 }
 
 // route動作について
-func Setup(cfg *table.SQLStatus) []webserverv2.WebConfig {
+func Setup(cfg *table.SQLStatus) []webserver.WebConfig {
 	sql = cfg
 	return route
 }
