@@ -3,6 +3,7 @@ package view
 import (
 	"archive/zip"
 	"bookserver/api/common"
+	"bookserver/health/healthmessage"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -109,7 +110,16 @@ type cashZipFile struct { // キャッシュとして保存する構造体
 	buf map[string]*bytes.Buffer //ファイル名とbufデータ
 }
 
+var message healthmessage.HealthMessage //Healthチェック用の変数
+
 var chname chan string //キャッシュを作成するzpiファイルについて
+
+// Health() = healthmessage.HealthMessage
+//
+// ループ状態の性能確認
+func Health() healthmessage.HealthMessage {
+	return message
+}
 
 // Loop(ctx)
 //
@@ -117,23 +127,36 @@ var chname chan string //キャッシュを作成するzpiファイルについ�
 //
 // ctx context.Context: ループ処理を制御するcontextの親情報
 func Loop(ctx context.Context) {
+	tHealth := healthmessage.Create(apiname)
 	if chname == nil {
 		return
 	}
-	fmt.Println("zip chash loop start")
+	tHealth.ChangeMessage("Zip cash loop start", true)
+	message = tHealth.ChangeOut()
+	fmt.Println("zip cash loop start")
 loop:
 	for {
 		select {
 		case <-ctx.Done():
 			break loop
 		case name := <-chname:
+			tHealth.ChangeMessage("Zip Cash Create Start")
+			message = tHealth.ChangeOut()
 			readZipFileAll(name)
+			tHealth.ChangeMessage("OK")
+			message = tHealth.ChangeOut()
 		case <-time.After(time.Second):
+			tHealth.ChangeMessage("Zip Cash Clear Start")
+			message = tHealth.ChangeOut()
 			clearZipFileCash()
+			tHealth.ChangeMessage("OK")
+			message = tHealth.ChangeOut()
 		}
 	}
+	tHealth.ChangeMessage("Zip cash loop End", false)
+	message = tHealth.ChangeOut()
 	close(chname)
-	fmt.Println("zip chash loop end")
+	fmt.Println("zip cash loop end")
 }
 
 // Add(name) = error

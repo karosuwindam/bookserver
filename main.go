@@ -5,6 +5,7 @@ import (
 	"bookserver/api/listdata"
 	"bookserver/api/view"
 	"bookserver/config"
+	"bookserver/health"
 	"bookserver/proffdebug"
 	"bookserver/publiccopy"
 	"bookserver/pyroscopesetup"
@@ -36,6 +37,9 @@ func Config(cfg *config.Config) (*webserver.SetupServer, error) {
 	}
 	webserver.Config(scfg, api.Route, "/v1")
 	webserver.Config(scfg, proffdebug.Route, "/debug")
+	if route, err := health.SetUp(cfg); err == nil {
+		webserver.Config(scfg, route, "")
+	}
 	webserver.Config(scfg, textroot.Route, "")
 	return scfg, nil
 }

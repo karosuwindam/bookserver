@@ -1,4 +1,4 @@
-package health
+package healthmessage
 
 import (
 	"encoding/json"
@@ -50,5 +50,4 @@ func (t *healthMessageMu) ChangeOut() HealthMessage {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	return HealthMessage{Name: t.Name, Flag: t.Flag, Message: t.Message}
-
 }

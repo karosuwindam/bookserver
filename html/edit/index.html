@@ -5,6 +5,7 @@
         <script src="javascript/serchTable.js"></script>
         <script src="javascript/gettable.js"></script>
         <script src="javascript/edittable.js"></script>
+        <script src="javascript/listdata.js"></script>
         <title>編集</title>
         <script>
             window.onload = function () {
@@ -49,6 +50,13 @@
                 closeViewForm("edit");
                 selectTabButton();
             }
+            function listdata(){
+                selectdata = 3;
+                clearSearchText();
+                getListData("output")
+                closeViewForm("edit");
+                selectTabButton();
+            }
             var timer = ""
             var keybackup = ""
             var search = function(output) {
@@ -70,6 +78,7 @@
         <a href=javascript:void(0); onclick="booknames();return false" class="tab-button"name="tab-buttion">bookname</a>
         <a href=javascript:void(0); onclick="filelist();return false" class="tab-button" name="tab-buttion">filelist</a>
         <a href=javascript:void(0); onclick="copyfile();return false" class="tab-button" name="tab-buttion">copyfile</a>
+        <a href=javascript:void(0); onclick="listdata();return false" class="tab-button" name="tab-buttion">listdata</a>
         <input type="text" name="" id="search" onkeyup="searchKeyDown('searchout');return false">
         <input type="button" value="search" onclick="searchGetData('searchout');return false">
         <input type="button" value="clear" onclick="clearSearchText();return false">

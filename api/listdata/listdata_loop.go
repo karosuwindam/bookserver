@@ -2,7 +2,7 @@ package listdata
 
 import (
 	"bookserver/dirread"
-	"bookserver/health"
+	"bookserver/health/healthmessage"
 	"bookserver/table"
 	"context"
 	"fmt"
@@ -26,8 +26,7 @@ var listDataTmp []ListData
 
 var listData_mux sync.Mutex
 
-var message health.HealthMessage
-
+var message healthmessage.HealthMessage
 
 // listDataにデータを登録する
 func addListData(list ListData) {
@@ -36,6 +35,7 @@ func addListData(list ListData) {
 	listDataTmp = append(listDataTmp, list)
 }
 
+// 一時保存のリストデータを出力できるようにする
 func reNewListData() {
 	listData_mux.Lock()
 	defer listData_mux.Unlock()
@@ -53,21 +53,34 @@ func readListData() []ListData {
 	return tmp
 }
 
+// 動作チェック確認用
+func Health() healthmessage.HealthMessage {
+	return message
+}
+
 func Loop(ctx context.Context) {
+	hMessage := healthmessage.Create(apiname)
 	if listData == nil {
 		return
 	}
 	fmt.Println("ListData Loop Start")
+	hMessage.ChangeMessage("Create Loop Start")
+	message = hMessage.ChangeOut()
 loop:
 	for {
 		select {
 		case <-ctx.Done():
 			break loop
 		case <-time.After(time.Second):
+			hMessage.ChangeMessage("Check FileList Table by folder")
+			message = hMessage.ChangeOut()
 			ckFileListTableData()
-
+			hMessage.ChangeMessage("OK", true)
+			message = hMessage.ChangeOut()
 		}
 	}
+	hMessage.ChangeMessage("ListData Loop End", false)
+	message = hMessage.ChangeOut()
 	fmt.Println("ListData Loop End")
 }
 

@@ -3,6 +3,7 @@ package transform
 import (
 	"bookserver/api/upload"
 	"bookserver/config"
+	"bookserver/health/healthmessage"
 	"bookserver/table"
 	"bookserver/transform/pdftozip"
 	"bookserver/transform/writetable"
@@ -30,9 +31,21 @@ func Setup(cfg *config.Config) error {
 var ch1 chan interface{} //処理に向けてデータを
 var ch2 chan table.Filelists
 var shutdown chan bool
+var message healthmessage.HealthMessage //状態記録用
+
+// 動作確認について
+func Health() healthmessage.HealthMessage {
+	return message
+}
 
 // 実行について
 func Run(ctx context.Context) {
+	hMessage := healthmessage.Create("TransForm Loop")
+	if ch1 == nil || ch2 == nil || shutdown == nil {
+		return
+	}
+	hMessage.ChangeMessage("TransForm Loop Start", true)
+	message = hMessage.ChangeOut()
 	fmt.Println("Start: transform loop")
 	var wp sync.WaitGroup
 	wp.Add(3)
@@ -44,6 +57,9 @@ func Run(ctx context.Context) {
 			case <-ctx.Done():
 				break uploadloop
 			case <-time.After(time.Microsecond * 100):
+
+				hMessage.ChangeMessage("Get Upload Data")
+				message = hMessage.ChangeOut()
 				if name, err := upload.GetUploadName(); err == nil {
 					fmt.Println("transform send:", name)
 					if outdata, err := writetable.CreatePdfToZip(name); err == nil {
@@ -53,6 +69,9 @@ func Run(ctx context.Context) {
 						log.Println(err)
 					}
 				}
+
+				hMessage.ChangeMessage("OK")
+				message = hMessage.ChangeOut()
 			}
 		}
 	}(ctx)
@@ -66,12 +85,17 @@ func Run(ctx context.Context) {
 			case tmp := <-ch1:
 				switch tmp.(type) {
 				case writetable.PdftoZip: //PDFをZIPへ変換処理
+
+					hMessage.ChangeMessage("Change PDF to Zip")
+					message = hMessage.ChangeOut()
 					data, _ := tmp.(writetable.PdftoZip)
 					ch2 <- table.Filelists{Name: data.Name, Pdfpass: data.InputFile, Zippass: data.OutputFile, Tag: data.Tag}
 					if err := pdftozip.Pdftoimage(data.InputFile, data.OutputFile); err != nil {
 						fmt.Println(err)
 					}
 					fmt.Println("reseav:", data)
+					hMessage.ChangeMessage("OK")
+					message = hMessage.ChangeOut()
 				default:
 					fmt.Println("transform errdata:", tmp)
 				}
@@ -86,13 +110,20 @@ func Run(ctx context.Context) {
 			case <-ctx.Done():
 				break ch2loop
 			case tmp := <-ch2:
+				hMessage.ChangeMessage("Table Renew Data")
+				message = hMessage.ChangeOut()
+
 				if err := writetable.AddFileTable(&tmp); err != nil {
 					log.Println(err)
 				}
+				hMessage.ChangeMessage("OK")
+				message = hMessage.ChangeOut()
 			}
 		}
 	}(ctx)
 	wp.Wait()
+	hMessage.ChangeMessage("TransForm Loop End", false)
+	message = hMessage.ChangeOut()
 	log.Println("Close: transform loop")
 	shutdown <- true
 }
