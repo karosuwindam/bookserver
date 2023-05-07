@@ -115,3 +115,32 @@ spec:
     requests:
       storage: 512Gi
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "bookserver-pb-pv-volume"
+  namespace: bookserver
+  labels:
+    type: "local"
+spec:
+  storageClassName: "bookserver-pb"
+  capacity:
+    storage: "128Gi"
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/pi/Public
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookserver-pb-pv-claim
+  namespace: bookserver
+spec:
+  storageClassName: bookserver-pb
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Gi
+---
