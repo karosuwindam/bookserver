@@ -28,7 +28,7 @@ func Setup(cfg *config.Config) error {
 	}
 
 	//upload
-	if tmp, err := upload.Setup(); err != nil {
+	if tmp, err := upload.Setup(cfg); err != nil {
 		return err
 	} else {
 		Route = append(Route, tmp...)

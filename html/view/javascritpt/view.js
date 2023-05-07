@@ -251,14 +251,14 @@ function listonoff(){
 }
 
 function createListGet(output,tag) {
-
+    TMP_tag = tag                       //タグ名を一時保存
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
       if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);
-          document.getElementById(output).innerHTML = createListData(jata.Result)
+          document.getElementById(output).innerHTML = createListData(output,jata.Result,0)
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
           var jata = JSON.parse(data);
@@ -268,14 +268,67 @@ function createListGet(output,tag) {
     var jsondata = {};
     var tmp = tag.split(",")
     jsondata["Table"] = "filelists";
-    jsondata["Keyword"] = tmp[0];
+    var keyword = tmp[0]
+
+    for ( var i=1;i<tmp[0].length;i++){
+        keyword = tmp[0].slice(-i) -0;
+        if (isNaN(keyword)){
+            keyword = tmp[0].slice(0,tmp[0].length-i+1)
+            break
+        }
+    }
+    jsondata["Keyword"] = keyword;
     var url = HOSTURL + "/v1/search";
     req.open("POST", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(JSON.stringify(jsondata));					    // 実際にサーバーへリクエストを送信
 }
 
-function createListData(data) {
+var TMP_tag
+
+function createTmpListGet(outid,num) {
+    var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+    req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+      if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+          var data = req.responseText;
+          var jata = JSON.parse(data);
+          console.log(jata);
+          document.getElementById(outid).innerHTML = createListData(outid,jata.Result,num)
+      }else if (req.readyState == 4 && req.status != 200){ 
+          var data = req.responseText;
+          var jata = JSON.parse(data);
+          console.log(jata);		          // 取得した JSON ファイルの中身を表示
+      }
+    };
+    var jsondata = {};
+    var tmp = TMP_tag.split(",")
+    jsondata["Table"] = "filelists";
+    var keyword = tmp[num]
+
+    for ( var i=1;i<tmp[num].length;i++){
+        keyword = tmp[num].slice(-i) -0;
+        if (isNaN(keyword)){
+            keyword = tmp[num].slice(0,tmp[num].length-i+1)
+            break
+        }
+    }
+    jsondata["Keyword"] = keyword;
+    var url = HOSTURL + "/v1/search";
+    req.open("POST", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+    req.send(JSON.stringify(jsondata));					    // 実際にサーバーへリクエストを送信
+}
+
+function createListData(outid,data,num) {
     var output = ""
+    output += "<div>"
+    var tmp = TMP_tag.split(",")
+    for (var i=0;i<tmp.length;i++) {
+        if (i==num){
+            output += "<a href=javascript:void(0); class=\"tab-button-a\" onclick='createTmpListGet(\""+outid+"\","+i+")'>"+tmp[i]+"</a>"
+        }else{
+            output += "<a href=javascript:void(0); class=\"tab-button\" onclick='createTmpListGet(\""+outid+"\","+i+")'>"+tmp[i]+"</a>"
+        }
+    }
+    output += "</div>"
     for (var i=0;i<data.length;i++) {
         var url = "/view/" + data[i].Id
         output += "<div class=\"list\">"+"<a href=\""+url+"\">"+data[i].Zippass+"</a></div>"

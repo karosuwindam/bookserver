@@ -32,6 +32,9 @@ function formdataJSON(inputElement){
     }else if (str.Name.toLowerCase().indexOf('.zip')>0) {
         output += " create file: " + str.ChangeName.Pdf
     }
+    if (str.Overwrite) {
+      output += " テーブル上書きあり"
+    }
     return output
   }
 
