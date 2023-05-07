@@ -26,7 +26,8 @@ func TestUploadSetupt(t *testing.T) {
 
 	t.Log("----------------- Set up --------------------------")
 	u := &setupdata
-	_, err := Setup()
+	cfg, _ := config.EnvRead()
+	_, err := Setup(cfg)
 	if err != nil {
 		t.Errorf("setup error")
 		t.FailNow()
@@ -55,9 +56,8 @@ func TestUploadServerPost(t *testing.T) {
 	t.Setenv("ZIP_FILEPASS", zippass)
 	t.Log("----------------- upload Server --------------------------")
 
-	web, _ := Setup()
-
 	cfg, _ := config.EnvRead()
+	web, _ := Setup(cfg)
 	ss, _ := webserver.NewSetup(cfg)
 	webserver.Config(ss, web, "")
 	s, _ := ss.NewServer()
@@ -103,9 +103,8 @@ func TestUploadServerList(t *testing.T) {
 	t.Setenv("ZIP_FILEPASS", zippass)
 	t.Log("----------------- upload Server --------------------------")
 
-	web, _ := Setup()
-
 	cfg, _ := config.EnvRead()
+	web, _ := Setup(cfg)
 	ss, _ := webserver.NewSetup(cfg)
 	webserver.Config(ss, web, "")
 	s, _ := ss.NewServer()
@@ -135,9 +134,8 @@ func TestUloadServerGet(t *testing.T) {
 	t.Setenv("DBROOTPASS", "./")
 	t.Log("----------------- upload Server --------------------------")
 
-	web, _ := Setup()
-
 	cfg, _ := config.EnvRead()
+	web, _ := Setup(cfg)
 	ss, _ := webserver.NewSetup(cfg)
 	webserver.Config(ss, web, "")
 	writetable.Setup(cfg)

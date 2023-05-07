@@ -28,6 +28,10 @@ spec:
                   operator: In
                   values:
                     - arm64
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                  - bookserver2
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
@@ -35,7 +39,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: bookserver
-        image: bookserver2:31000/tool/bookserver:0.7.0
+        image: bookserver2:31000/tool/bookserver:0.7.1
         imagePullPolicy: IfNotPresent
         # imagePullPolicy: Always
         env:
@@ -43,6 +47,12 @@ spec:
             value: 'Asia/Tokyo'
         ports:
         - containerPort: 8080
+        resources:
+          limits:
+            cpu: 2
+          requests:
+            cpu: 1
+            memory: 2Gi
         volumeMounts:
           - mountPath: /app/upload/pdf
             name: bookserver-pdf
@@ -52,6 +62,8 @@ spec:
             name: bookserver-db
           - mountPath: /app/html/img
             name: bookserver-jpg
+          - mountPath: /app/public
+            name: bookserver-pb
       volumes:
         - name: bookserver-pdf
           persistentVolumeClaim:
@@ -65,6 +77,9 @@ spec:
         - name: bookserver-db
           persistentVolumeClaim:
             claimName: bookserver-db-pv-claim
+        - name: bookserver-pb
+          persistentVolumeClaim:
+            claimName: bookserver-pb-pv-claim
 ---
 apiVersion: v1
 kind: Service
@@ -80,4 +95,25 @@ spec:
       # nodePort: 32200
   # type: LoadBalancer
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bookserver
+  namespace: bookserver
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: book.bookserver.home
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: bookserver-service
+            port: 
+              number: 8080
 

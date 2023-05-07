@@ -2,7 +2,9 @@ package upload
 
 import (
 	"bookserver/api/common"
+	"bookserver/config"
 	"bookserver/dirread"
+	"bookserver/table"
 	"bookserver/transform/writetable"
 	"bookserver/webserver"
 	"errors"
@@ -12,8 +14,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/caarlos0/env/v6"
 )
 
 var apiname string = "upload" //api名
@@ -33,7 +33,7 @@ type UploadFilelist struct {
 
 type UploadFileGet struct {
 	// // 上書き
-	// Overwrite bool `json:overwrite`
+	Overwrite bool `json:Overwrite`
 	// データあり
 	Register bool `json:"Register"`
 	// 書き換え名前
@@ -188,6 +188,10 @@ func upload_get(w http.ResponseWriter, r *http.Request) common.Result {
 		msg.Code = http.StatusBadRequest
 		return msg
 	}
+	//sqlテーブルの検索
+	if jout, err := sql.Search(table.FILELIST, tName); err == nil && jout != "[]" {
+		out.Overwrite = true
+	}
 	msg.Result = out
 	return msg
 }
@@ -243,11 +247,13 @@ var uploadname chan string = make(chan string, 30)
 // Setup() = []webserver.WebConfig
 //
 // セットアップして、HTMLのルートフォルダを用意する
-func Setup() ([]webserver.WebConfig, error) {
+func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	uploadname = make(chan string, 30)
-	if err := env.Parse(&setupdata); err != nil {
+	// if err := env.Parse(&setupdata); err != nil {
 
-	}
+	// }
+	setupdata.Pdf = cfg.Folder.Pdf
+	setupdata.Zip = cfg.Folder.Zip
 	if err := os.MkdirAll(setupdata.Pdf, 0777); err != nil {
 		return nil, err
 	}
@@ -255,6 +261,23 @@ func Setup() ([]webserver.WebConfig, error) {
 	if err := os.MkdirAll(setupdata.Zip, 0777); err != nil {
 		return nil, err
 	}
+
+	if sqlcfg, err := sqlSetup(cfg); err == nil {
+		sql = sqlcfg
+	} else {
+		return nil, err
+	}
 	setupdata.flag = true
 	return route, nil
 }
+
+// sqlのパスのセットアップ
+func sqlSetup(cfg *config.Config) (*table.SQLStatus, error) {
+	var err error
+	if sqlcfg, err := table.Setup(cfg); err == nil {
+		return sqlcfg, err
+	}
+	return nil, err
+}
+
+var sql *table.SQLStatus
