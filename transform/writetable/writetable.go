@@ -33,10 +33,14 @@ type PdftoZip struct {
 func createOutFileNmae(tabledata *table.Booknames, count int) (string, string) {
 	tmpname := ""
 	tmptag := ""
+	tmpcount := ""
 	if tabledata == nil {
 		return tmpname, tmptag
 	}
-	tmp := []string{tabledata.Title, tabledata.Writer, tabledata.Booktype, tabledata.Ext}
+	if count > -1 {
+		tmpcount = fmt.Sprintf("%02d", count)
+	}
+	tmp := []string{tabledata.Title + tmpcount, tabledata.Writer, tabledata.Booktype, tabledata.Ext}
 	if tabledata.Title != "" {
 		tmpname = tabledata.Title
 	}

@@ -64,7 +64,7 @@ func Loop(ctx context.Context) {
 		return
 	}
 	fmt.Println("ListData Loop Start")
-	hMessage.ChangeMessage("Create Loop Start")
+	hMessage.ChangeMessage("Create Loop Start", true)
 	message = hMessage.ChangeOut()
 loop:
 	for {
