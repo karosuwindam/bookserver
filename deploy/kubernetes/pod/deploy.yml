@@ -47,6 +47,12 @@ spec:
             value: 'Asia/Tokyo'
         ports:
         - containerPort: 8080
+        resources:
+          limits:
+            cpu: 2
+          requests:
+            cpu: 1
+            memory: 2Gi
         volumeMounts:
           - mountPath: /app/upload/pdf
             name: bookserver-pdf

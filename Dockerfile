@@ -7,7 +7,7 @@ ADD ./ .
 RUN go build -o app
 
 FROM debian:11
-LABEL version="0.7.0"
+LABEL version="0.7.1"
 LABEL name="bookserver"
 LABEL goversion="1.18"
 RUN apt-get update && \
