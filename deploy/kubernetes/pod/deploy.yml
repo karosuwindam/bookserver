@@ -46,7 +46,7 @@ spec:
           - name: TZ
             value: 'Asia/Tokyo'
           - name: PYROSCOPE_FLAG
-            value: 'TRUE'
+            value: 'FALSE'
         ports:
         - containerPort: 8080
         resources:
