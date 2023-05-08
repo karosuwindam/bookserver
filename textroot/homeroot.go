@@ -18,5 +18,8 @@ func Setup(cfg *config.Config) error {
 	} else {
 		Route = append(Route, route...)
 	}
+	if err := viewpage.Setup(cfg); err != nil {
+		return err
+	}
 	return nil
 }

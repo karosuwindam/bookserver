@@ -36,7 +36,7 @@ func TestWriteTable(t *testing.T) {
 		}
 	}
 	str = "test1.pdf"
-	tt = PdftoZip{Name: "test1", InputFile: str, OutputFile: "[テスト1]テスト01.zip", Tag: "テスト,テスト1,漫画,ああああ"}
+	tt = PdftoZip{Name: "test1", InputFile: str, OutputFile: "[テスト1]テスト01.zip", Tag: "テスト01,テスト1,漫画,ああああ"}
 	if tmp, err := CreatePdfToZip(str); err != nil {
 		t.Fatalf("%v", err.Error())
 		t.FailNow()
@@ -47,7 +47,7 @@ func TestWriteTable(t *testing.T) {
 		}
 	}
 	str = "test01.pdf"
-	tt = PdftoZip{Name: "test01", InputFile: str, OutputFile: "[テスト1]テスト01.zip", Tag: "テスト,テスト1,漫画,ああああ"}
+	tt = PdftoZip{Name: "test01", InputFile: str, OutputFile: "[テスト1]テスト01.zip", Tag: "テスト01,テスト1,漫画,ああああ"}
 	if tmp, err := CreatePdfToZip(str); err != nil {
 		t.Fatalf("%v", err.Error())
 		t.FailNow()
@@ -58,7 +58,7 @@ func TestWriteTable(t *testing.T) {
 		}
 	}
 	str = "aa.pdf"
-	tt = PdftoZip{Name: "aa", InputFile: str, OutputFile: "aa.zip", Tag: ""}
+	tt = PdftoZip{Name: "aa", InputFile: str, OutputFile: "aa.zip", Tag: "aa"}
 	if tmp, err := CreatePdfToZip(str); err != nil {
 		t.Fatalf("%v", err.Error())
 		t.FailNow()
@@ -69,7 +69,7 @@ func TestWriteTable(t *testing.T) {
 		}
 	}
 	str = "aa1.pdf"
-	tt = PdftoZip{Name: "aa1", InputFile: str, OutputFile: "aa1.zip", Tag: ""}
+	tt = PdftoZip{Name: "aa1", InputFile: str, OutputFile: "aa1.zip", Tag: "aa1"}
 	if tmp, err := CreatePdfToZip(str); err != nil {
 		t.Fatalf("%v", err.Error())
 		t.FailNow()
