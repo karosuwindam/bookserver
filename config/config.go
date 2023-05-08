@@ -1,6 +1,12 @@
 package config
 
-import "github.com/caarlos0/env/v6"
+import (
+	"bufio"
+	"os"
+	"regexp"
+
+	"github.com/caarlos0/env/v6"
+)
 
 type SetupServer struct {
 	Protocol string `env:"PROTOCOL" envDefault:"tcp"`
@@ -35,6 +41,27 @@ type Config struct {
 	Sql      *SetupSql
 	SeretKey *SecretKey
 	Folder   *SetupFolder
+	Version  string
+}
+
+// バージョン読み取り
+func versionRead() string {
+	f, err := os.Open("version")
+	output := "0.0.1"
+	if err != nil {
+		return output
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		rg := regexp.MustCompile(`(.*).(.*).(.*)`)
+		tmp := scanner.Text()
+		if rg.MatchString(tmp) {
+			output = tmp
+			break
+		}
+	}
+	return output
 }
 
 // 環境設定
@@ -60,6 +87,7 @@ func EnvRead() (*Config, error) {
 		Sql:      sqlCfg,
 		Folder:   folderCfg,
 		SeretKey: secretCfg,
+		Version:  versionRead(),
 	}, nil
 
 }

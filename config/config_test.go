@@ -205,3 +205,13 @@ func TestEnvReadSecletKey(t *testing.T) {
 	t.Log("----------------- EnvRead OK --------------------------")
 
 }
+
+func TestVersionRead(t *testing.T) {
+	t.Log("----------------- Version Read --------------------------")
+	v := versionRead()
+	if v != "0.0.1a" {
+		t.Fatalf("not %v, 0.0.1a", v)
+	}
+	t.Log("----------------- Version Read OK --------------------------")
+
+}

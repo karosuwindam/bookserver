@@ -1,6 +1,7 @@
 package viewpage
 
 import (
+	"bookserver/config"
 	"bookserver/textroot/textread"
 	"fmt"
 	"log"
@@ -17,6 +18,7 @@ func Viewhtml(w http.ResponseWriter, r *http.Request) {
 	textdata := []string{".html", ".htm", ".css", ".js"}
 	upath := r.URL.Path
 	tmp := map[string]string{}
+	tmp["version"] = version
 	if !strings.HasPrefix(upath, "/") {
 		upath = "/" + upath
 		r.URL.Path = upath
@@ -43,4 +45,11 @@ func Viewhtml(w http.ResponseWriter, r *http.Request) {
 		w.Write(buffer)
 	}
 	return
+}
+
+var version string = "" //バージョン表示
+
+func Setup(cfg *config.Config) error {
+	version = cfg.Version
+	return nil
 }

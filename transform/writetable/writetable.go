@@ -40,7 +40,7 @@ func createOutFileNmae(tabledata *table.Booknames, count int) (string, string) {
 	if count > -1 {
 		tmpcount = fmt.Sprintf("%02d", count)
 	}
-	tmp := []string{tabledata.Title + tmpcount, tabledata.Writer, tabledata.Booktype, tabledata.Ext}
+	tmp := []string{tabledata.Title + tmpcount, tabledata.Writer, tabledata.Burand, tabledata.Booktype, tabledata.Ext}
 	if tabledata.Title != "" {
 		tmpname = tabledata.Title
 	}
@@ -58,6 +58,9 @@ func createOutFileNmae(tabledata *table.Booknames, count int) (string, string) {
 	}
 	if tmpname == "" {
 		return tmpname, tmptag
+	}
+	if tmptag == "" {
+		tmptag = tmpname + tmpcount
 	}
 	if count <= -1 {
 		return fmt.Sprintf("%s.zip", tmpname), tmptag
@@ -113,6 +116,7 @@ func CreatePdfToZip(name string) (PdftoZip, error) {
 		}
 		if output.OutputFile == "" {
 			output.OutputFile = name[:i] + ZIP
+			output.Tag = name[:i]
 		}
 	} else {
 		return output, errors.New("input name is not PDF")
