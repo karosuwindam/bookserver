@@ -51,7 +51,7 @@ function onZipList(id, page) {
 function ViewZipFIle(id, data, page) {
     FILELIST = jpgCount(data.Name)
     COUNTMAX = FILELIST.length
-    
+
     var output = ""
     if (page < 1) {
         page = 1
@@ -151,6 +151,7 @@ function nowPage(nowpage){
         }
     }
     NowPage = nowpage-0;
+
     document.getElementById("pageslider").value=NowPage;
     nowPageView()
 
@@ -284,6 +285,8 @@ function createListGet(output,tag) {
 }
 
 var TMP_tag
+var TmpListData
+var upflag = false
 
 function createTmpListGet(outid,num) {
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
@@ -292,6 +295,7 @@ function createTmpListGet(outid,num) {
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);
+          TmpListData = jata.Result
           document.getElementById(outid).innerHTML = createListData(outid,jata.Result,num)
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
@@ -328,10 +332,24 @@ function createListData(outid,data,num) {
             output += "<a href=javascript:void(0); class=\"tab-button\" onclick='createTmpListGet(\""+outid+"\","+i+")'>"+tmp[i]+"</a>"
         }
     }
+    output += "<a href=javascript:void(0); class=\"tab-button\" onclick='sortListData(\""+outid+"\","+num+")'>"+"sort"+"</a>"
     output += "</div>"
     for (var i=0;i<data.length;i++) {
         var url = "/view/" + data[i].Id
         output += "<div class=\"list\">"+"<a href=\""+url+"\">"+data[i].Zippass+"</a></div>"
     }
     return output
+}
+
+function sortListData(outid,num) {
+    var tmp = TmpListData
+    upflag = !upflag
+    tmp.sort((a, b) => {
+      if (upflag){
+        return a.Zippass < b.Zippass ? -1 : 1;
+      }else {
+        return a.Zippass > b.Zippass ? -1 : 1;
+      }
+    });
+    document.getElementById(outid).innerHTML = createListData(outid,tmp,num)
 }

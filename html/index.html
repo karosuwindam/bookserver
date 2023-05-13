@@ -15,6 +15,10 @@
                 }
                 timer = setTimeout(getSearchData,500,'output');
             }
+            function searchclear(){
+                document.getElementById('keyword').value = "";
+                getSearchData('output');
+            }
         </script>
     </head>
     <body>
@@ -29,10 +33,12 @@
             </div>
             <input type="text" name="search" id="keyword" onkeyup="saerch_key();return false">
             <input type="button" value="search" onclick="getSearchData('output');return false">
+            <input type="button" value="clear" onclick="searchclear();return false">
             <a class="button" href="javascript:void(0);" onclick="updataserch('today');">今日</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('toweek');">今週</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
+            <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
         </div>
         <hr>
         <center>
