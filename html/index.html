@@ -15,6 +15,10 @@
                 }
                 timer = setTimeout(getSearchData,500,'output');
             }
+            function searchclear(){
+                document.getElementById('keyword').value = "";
+                getSearchData('output');
+            }
         </script>
     </head>
     <body>
@@ -23,16 +27,18 @@
         <div>
             <div>
                 <progress id="progress" value="0" max="100"></progress>
-                <input type="file" name="file" onchange="formdataJSON(this);"  id="file">
+                <input type="file" name="file" onchange="formdataJSON(this);"  id="file" multiple>
                 <button type="button" id="post2" onclick="postFile();">送信</button>
                 <div id="fileck" class="fileck"></div><div id="health" class="health"></div><br>
             </div>
             <input type="text" name="search" id="keyword" onkeyup="saerch_key();return false">
             <input type="button" value="search" onclick="getSearchData('output');return false">
+            <input type="button" value="clear" onclick="searchclear();return false">
             <a class="button" href="javascript:void(0);" onclick="updataserch('today');">今日</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('toweek');">今週</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
+            <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
         </div>
         <hr>
         <center>

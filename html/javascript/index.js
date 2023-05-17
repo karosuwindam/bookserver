@@ -1,42 +1,42 @@
-
-
 var HOSTURL = "";        //検索先のURLについて
 var SEARCHTABLE = "filelists";
+var TmpJdata;
+var upflag = true
 
 function formdataJSON(inputElement){
-    var filelist = inputElement.files;
-    var filename = filelist[0].name
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function(){
-      if(req.readyState == 4 && req.status == 200){
-        var data=req.responseText;
-        var tmp = JSON.parse(data)
-        console.log(tmp)
-        document.getElementById("fileck").innerHTML = fileckdata(tmp.Result)
-      }
-    };
-    var url = HOSTURL + "/v1/upload/" + filename
-    req.open("GET",url,true);
-    req.send(null);
-  }
+  var filelist = inputElement.files;
+  var filename = filelist[0].name
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function(){
+    if(req.readyState == 4 && req.status == 200){
+      var data=req.responseText;
+      var tmp = JSON.parse(data)
+      console.log(tmp)
+      document.getElementById("fileck").innerHTML = fileckdata(tmp.Result)
+    }
+  };
+  var url = HOSTURL + "/v1/upload/" + filename
+  req.open("GET",url,true);
+  req.send(null);
+}
   
-  function fileckdata(str){
-    var output = "not file"
-    if (str.Register) {
-        output = str.Name + " 既存ファイルあり"
-    }else {
-        output = str.Name + " file is not"
-    }
-    if (str.Name.toLowerCase().indexOf('.pdf')>0) {
-        output += " create file: " + str.ChangeName.Zip
-    }else if (str.Name.toLowerCase().indexOf('.zip')>0) {
-        output += " create file: " + str.ChangeName.Pdf
-    }
-    if (str.Overwrite) {
-      output += " テーブル上書きあり"
-    }
-    return output
+function fileckdata(str){
+  var output = "not file"
+  if (str.Register) {
+      output = str.Name + " 既存ファイルあり"
+  }else {
+      output = str.Name + " file is not"
   }
+  if (str.Name.toLowerCase().indexOf('.pdf')>0) {
+      output += " create file: " + str.ChangeName.Zip
+  }else if (str.Name.toLowerCase().indexOf('.zip')>0) {
+      output += " create file: " + str.ChangeName.Pdf
+  }
+  if (str.Overwrite) {
+    output += " テーブル上書きあり"
+  }
+  return output
+}
 
 
 function postFile() {
@@ -46,7 +46,9 @@ function postFile() {
   document.getElementById("file").disabled = true;
   document.getElementById("post2").disabled = true;
   var formData = new FormData();
-  formData.append("file", document.getElementById("file").files[0]);
+  for(var i=0;i<document.getElementById("file").files.length;i++){
+      formData.append("file", document.getElementById("file").files[i]);
+  }
   var url = HOSTURL + "/v1/upload"
 
   var request = new XMLHttpRequest();
@@ -77,6 +79,7 @@ function getSearchData(output) {
         var data = req.responseText;
         var jata = JSON.parse(data);
         console.log(jata);		          // 取得した JSON ファイルの中身を表示
+        TmpJdata=jata.Result
         document.getElementById(output).innerHTML = viewSearchTable(jata.Result, output)
         imageload();
         ckboxupdate();
@@ -92,6 +95,25 @@ function getSearchData(output) {
   jsondata["Keyword"] = document.getElementById("keyword").value;
   req.open("POST", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
   req.send(JSON.stringify(jsondata));					    // 実際にサーバーへリクエストを送信
+}
+
+function outputSortData(outid) {
+  var tmp = TmpJdata
+  if ((tmp == undefined||tmp == "")) {
+    return
+  }
+  upflag = !upflag
+  tmp.sort((a, b) => {
+    if (upflag){
+      return a.Zippass < b.Zippass ? -1 : 1;
+    }else {
+      return a.Zippass > b.Zippass ? -1 : 1;
+    }
+  });
+
+  document.getElementById(outid).innerHTML = viewSearchTable(tmp, outid)
+  imageload();
+  ckboxupdate();
 }
 
 function viewSearchTable(jdata, id) {
@@ -117,6 +139,9 @@ function serchDataTagSplit(tag){
   var output = ""
   var tmp = tag.split(",")
   for(var i=0;i<tmp.length;i++){
+    if (tmp[i] == "") {
+      continue;
+    }
     //updataserch
     output += "<a class=\"button\" href='"+"javascript:void(0);"+"'"
     output += " onclick="+"\"updataserch('"+tmp[i]+"');\""
