@@ -9,10 +9,13 @@ import (
 	"bookserver/webserver"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -39,6 +42,80 @@ type UploadFileGet struct {
 	// 書き換え名前
 	Name       string              `json:"Name"`
 	ChangeName writetable.PdftoZip `json:"ChangeName"`
+}
+
+// upload_filses
+//
+// 複数のファイルアップロード
+func upload_files(w http.ResponseWriter, r *http.Request) common.Result {
+	var wg sync.WaitGroup
+	var mux sync.Mutex
+	msg := common.Result{Code: http.StatusOK, Date: time.Now()}
+	// 複数のファイルを取得する
+	r.ParseMultipartForm(32 << 20)
+	files := r.MultipartForm.File["file"]
+	for _, file := range files {
+		wg.Add(1)
+		fmt.Println("receive file for", file.Filename, ",size:", file.Size)
+		go func(file *multipart.FileHeader) {
+			defer wg.Done()
+			filename := file.Filename
+			// ファイルをオープンする
+			f, err := file.Open()
+			if err != nil {
+				mux.Lock()
+				msg.Code = http.StatusAccepted
+				msg.Result = err.Error()
+				mux.Unlock()
+				log.Println(err)
+			}
+			defer f.Close()
+			// ファイルを保存する
+			savepass := ""
+			if strings.Index(strings.ToLower(filename), "pdf") > 0 {
+				savepass = setupdata.Pdf + "/"
+			} else if strings.Index(strings.ToLower(filename), "zip") > 0 {
+				savepass = setupdata.Zip + "/"
+			} else {
+				log.Println("err file:", filename)
+			}
+			out, err := os.Create(savepass + "/" + filename)
+			if err != nil {
+				mux.Lock()
+				msg.Code = http.StatusAccepted
+				msg.Result = err.Error()
+				mux.Unlock()
+				log.Println(err)
+
+			}
+			defer out.Close()
+			// ファイルをコピーする
+			if _, err = f.Seek(0, 0); err != nil {
+				mux.Lock()
+				msg.Code = http.StatusAccepted
+				msg.Result = err.Error()
+				mux.Unlock()
+				log.Println(err)
+				defer os.Remove(savepass + "/" + filename)
+
+			}
+			if _, err = io.Copy(out, f); err != nil {
+				mux.Lock()
+				msg.Code = http.StatusAccepted
+				msg.Result = err.Error()
+				mux.Unlock()
+				log.Println(err)
+				defer os.Remove(savepass + "/" + filename)
+			}
+			uploadname <- filename
+			fmt.Println("Create File End for:", filename)
+		}(file)
+	}
+	wg.Wait()
+	if msg.Code != http.StatusAccepted {
+		msg.Result = "OK"
+	}
+	return msg
 }
 
 // upload_file
@@ -206,7 +283,7 @@ func fileupload(w http.ResponseWriter, r *http.Request) {
 	if common.CkLogin(&msg, w, r) {
 		switch r.Method {
 		case "POST":
-			msg = upload_file(w, r)
+			msg = upload_files(w, r)
 		case "LIST":
 			msg = upload_list(w, r)
 		case "GET":

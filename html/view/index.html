@@ -10,7 +10,12 @@
                 onTitleData(<%id%>);
                 onZipList(<%id%>, <%page%>);
                 initload();
-                setTimeout(onloadclose, 3000);
+                if(localStorage.getItem("close")){
+                    setTimeout(onloadclose, 0);
+                }else{
+                    setTimeout(onloadclose, 3000);
+                }
+                localStorage.setItem("close",true)
             }
         </script>
     </head>
