@@ -52,6 +52,7 @@ https://github.com/karosuwindam/bookserver2
 |ZIP_FILEPASS|ZIPを保存するフォルダ|./upload/zip|
 |IMG_FILEPASS|imageを保存するフォルダ|./html/img|
 |PUBLIC_FILEPASS|公開用のフォルダ|./public|
+|MAX_MULTI_MEMORY|複数アップロード時のメモリ|256M||
 
 ## CURLによるテスト
 
