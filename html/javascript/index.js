@@ -5,19 +5,30 @@ var upflag = true
 
 function formdataJSON(inputElement){
   var filelist = inputElement.files;
-  var filename = filelist[0].name
+  document.getElementById("fileck").innerHTML = ""
+  for(var i=0;i<filelist.length;i++){
+    getformdataJSON(filelist[i].name)
+  }
+}
+
+function getformdataJSON(filename) {
   var req = new XMLHttpRequest();
   req.onreadystatechange = function(){
     if(req.readyState == 4 && req.status == 200){
       var data=req.responseText;
       var tmp = JSON.parse(data)
       console.log(tmp)
-      document.getElementById("fileck").innerHTML = fileckdata(tmp.Result)
+      if (document.getElementById("fileck").innerHTML==""){
+        document.getElementById("fileck").innerHTML = fileckdata(tmp.Result)
+      }else {
+        document.getElementById("fileck").innerHTML += "<br>"+fileckdata(tmp.Result)
+      }
     }
   };
   var url = HOSTURL + "/v1/upload/" + filename
   req.open("GET",url,true);
-  req.send(null);
+  req.send(null);  
+
 }
   
 function fileckdata(str){

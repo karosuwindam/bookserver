@@ -14,12 +14,19 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
 var apiname string = "upload" //api名
+var maxMultiMemory int64
+
+const (
+	MIN_MULTI_MEMORY = 32 << 20  // 32MB
+	MAX_MULTI_MEMORY = 256 << 20 // 256MB
+)
 
 type UploadPass struct {
 	Pdf  string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
@@ -52,7 +59,7 @@ func upload_files(w http.ResponseWriter, r *http.Request) common.Result {
 	var mux sync.Mutex
 	msg := common.Result{Code: http.StatusOK, Date: time.Now()}
 	// 複数のファイルを取得する
-	r.ParseMultipartForm(32 << 20)
+	r.ParseMultipartForm(maxMultiMemory)
 	files := r.MultipartForm.File["file"]
 	for _, file := range files {
 		wg.Add(1)
@@ -338,7 +345,15 @@ func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	if err := os.MkdirAll(setupdata.Zip, 0777); err != nil {
 		return nil, err
 	}
-
+	//マルチアップロードの確保メモリ最大値入力
+	if tmp, err := setupMaxMultiMemory(cfg.Upload.MAX_MULTI_MEMORY); err != nil || tmp < MIN_MULTI_MEMORY {
+		if err != nil {
+			fmt.Println(err)
+		}
+		maxMultiMemory = MIN_MULTI_MEMORY
+	} else {
+		maxMultiMemory = tmp
+	}
 	if sqlcfg, err := sqlSetup(cfg); err == nil {
 		sql = sqlcfg
 	} else {
@@ -358,3 +373,28 @@ func sqlSetup(cfg *config.Config) (*table.SQLStatus, error) {
 }
 
 var sql *table.SQLStatus
+
+// setupMaxMultiMemory(str) = int,error
+//
+// 設定パラメータから確保するメモリ量を設定
+func setupMaxMultiMemory(str string) (int64, error) {
+	output := -1
+	ary := map[string]int{
+		"k": 10,
+		"m": 20,
+		"g": 30,
+		"t": 40,
+	}
+	for s, j := range ary {
+		if i := strings.Index(strings.ToLower(str), s); i > 0 {
+			tstr := str[:i]
+			if num, err := strconv.Atoi(tstr); err == nil {
+				return int64(num) << j, nil
+			}
+		}
+	}
+	if num, err := strconv.Atoi(str); err == nil {
+		return int64(num), nil
+	}
+	return int64(output), errors.New("read error data for:" + str)
+}
