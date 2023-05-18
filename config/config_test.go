@@ -76,6 +76,11 @@ func TestEnvReadDefult(t *testing.T) {
 		t.Errorf("Error Hostname %v = %v", cfg.SeretKey.JwtKey, "SECRET_KEY")
 		t.FailNow()
 	}
+	t.Log("----------------- Upload data --------------------------")
+	if cfg.Upload.MAX_MULTI_MEMORY != "256M" {
+		t.Errorf("Error Hostname %v = %v", cfg.Upload.MAX_MULTI_MEMORY, "256M")
+		t.FailNow()
+	}
 
 	t.Log("----------------- EnvRead OK --------------------------")
 }

@@ -23,6 +23,7 @@ func TestUploadSetupt(t *testing.T) {
 	zippass := "zip"
 	t.Setenv("PDF_FILEPASS", pdfpass)
 	t.Setenv("ZIP_FILEPASS", zippass)
+	t.Setenv("MAX_MULTI_MEMORY", "10k")
 
 	t.Log("----------------- Set up --------------------------")
 	u := &setupdata
@@ -42,6 +43,10 @@ func TestUploadSetupt(t *testing.T) {
 	}
 	if !u.flag {
 		t.Errorf("setup falg %v", u.flag)
+		t.FailNow()
+	}
+	if maxMultiMemory != MIN_MULTI_MEMORY {
+		t.Errorf("Min SetUp Errdata %v = %v", maxMultiMemory, MIN_MULTI_MEMORY)
 		t.FailNow()
 	}
 	t.Log("----------------- Set up OK --------------------------")
@@ -266,5 +271,40 @@ func uploadFileget(url string, sendbyte string, t *testing.T) int {
 	}
 	t.Logf("%s", b)
 	return resp.StatusCode
+
+}
+
+// 文字列から確保メモリを設定
+func TestSetupMaxMultiMemory(t *testing.T) {
+	str := "256M"
+	if i, err := setupMaxMultiMemory(str); err != nil {
+		t.Fatalf("%v", err)
+	} else if i != 256<<20 {
+		t.Fatalf("%v,%v", str, i)
+	}
+	str = "256G"
+	if i, err := setupMaxMultiMemory(str); err != nil {
+		t.Fatalf("%v", err)
+	} else if i != 256<<30 {
+		t.Fatalf("%v,%v", str, i)
+	}
+	str = "256k"
+	if i, err := setupMaxMultiMemory(str); err != nil {
+		t.Fatalf("%v", err)
+	} else if i != 256<<10 {
+		t.Fatalf("%v,%v", str, i)
+	}
+	str = "1024"
+	if i, err := setupMaxMultiMemory(str); err != nil {
+		t.Fatalf("%v", err)
+	} else if i != 1024 {
+		t.Fatalf("%v,%v", str, i)
+	}
+	str = ""
+	if i, err := setupMaxMultiMemory(str); err == nil {
+		t.Fatalf("check err")
+	} else if i != -1 {
+		t.Fatalf("%v,%v", str, i)
+	}
 
 }

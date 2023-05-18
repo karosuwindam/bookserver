@@ -24,6 +24,10 @@ type SetupSql struct {
 	DBROOTPASS string `env:"DB_ROOTPASS" envDefault:"./db/"` //相対パス
 }
 
+type UploadCfg struct {
+	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"256M"`
+}
+
 type SetupFolder struct {
 	Tmp    string `env:"TMP_FILEPASS" envDefault:"./tmp"`        //画像を一時保存するパス
 	Img    string `env:"IMG_FILEPASS" envDefault:"./html/img"`   //1ページ目の画像ファイルを保存するフォルダ
@@ -41,6 +45,7 @@ type Config struct {
 	Sql      *SetupSql
 	SeretKey *SecretKey
 	Folder   *SetupFolder
+	Upload   *UploadCfg
 	Version  string
 }
 
@@ -82,11 +87,16 @@ func EnvRead() (*Config, error) {
 	if err := env.Parse(secretCfg); err != nil {
 		return nil, err
 	}
+	uploadCfg := &UploadCfg{}
+	if err := env.Parse(uploadCfg); err != nil {
+		return nil, err
+	}
 	return &Config{
 		Server:   serverCfg,
 		Sql:      sqlCfg,
 		Folder:   folderCfg,
 		SeretKey: secretCfg,
+		Upload:   uploadCfg,
 		Version:  versionRead(),
 	}, nil
 
