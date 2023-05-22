@@ -1,11 +1,30 @@
 var HOSTURL = "";        //検索先のURLについて
-var SEARCHTABLE = "filelists";
+var SEARCHTABLE = "filelists"; 
 var TmpJdata;
 var upflag = true
+var MAXFILESIZE = "<%uploadsize%>" // 256*1024*1024 //Upload Size : <%uploadsize%>
+
 
 function formdataJSON(inputElement){
   var filelist = inputElement.files;
   document.getElementById("fileck").innerHTML = ""
+  var filelists = document.getElementById("file").files
+  if (filelists.length > 0) {
+    var countsize = 0
+    for(var i=0;i<filelists.length;i++){
+      countsize += filelists[i].size
+    }
+    
+    if (countsize/(1<<30) > 1) {
+      document.getElementById("fileck").innerHTML = "Sum size :" + Math.round(countsize/(1<<30)*10)/10 + "G"
+    }else if (countsize/(1<<20) > 1) {
+      document.getElementById("fileck").innerHTML = "Sum size :" + Math.round(countsize/(1<<20)*10)/10 + "M"
+    }else if (countsize/(1<<10) > 1) {
+      document.getElementById("fileck").innerHTML = "Sum size :" + Math.round(countsize/(1<<10)*10)/10 + "K"
+    }else {
+      document.getElementById("fileck").innerHTML = "Sum size :" + countsize
+    }
+  }
   for(var i=0;i<filelist.length;i++){
     getformdataJSON(filelist[i].name)
   }
@@ -49,23 +68,56 @@ function fileckdata(str){
   return output
 }
 
+var postFileFlag = false
 
-function postFile() {
+function sizeread() {
+  var output = 0
+  var tmp = MAXFILESIZE.toLowerCase()
+  var i =0  
+  if ((i=tmp.indexOf("t"))>0) {
+    output = (tmp.substr(0,i) -0)*(1<<40);
+  }else if ((i=tmp.indexOf("g"))>0) {
+    output = (tmp.substr(0,i) -0)*(1<<30);
+  }else if ((i=tmp.indexOf("m"))>0) {
+    output = (tmp.substr(0,i) -0)*(1<<20);
+  }else if ((i=tmp.indexOf("k"))>0) {
+    output = (tmp.substr(0,i) -0)*(1<<10);
+  }else {
+    output = (tmp -0);
+  }
+  return output
+}
+
+async function postFile() {
   if (document.getElementById("file").files.length == 0){
       return 
   }
   document.getElementById("file").disabled = true;
   document.getElementById("post2").disabled = true;
   var formData = new FormData();
+  var fileSizeSum = 0
+  postFileFlag = true
   for(var i=0;i<document.getElementById("file").files.length;i++){
+      fileSizeSum += document.getElementById("file").files[i].size
+      if (fileSizeSum > sizeread()) {
+        await PostFIleUpload(formData)
+        fileSizeSum = document.getElementById("file").files[i].size
+        formData = new FormData()
+      }
       formData.append("file", document.getElementById("file").files[i]);
   }
+  postFileFlag = false
+  await PostFIleUpload(formData)
+}
+
+function PostFIleUpload(formData) {
   var url = HOSTURL + "/v1/upload"
 
   var request = new XMLHttpRequest();
   request.upload.addEventListener("progress", updateProgress, false);
   request.open("POST", url);
   request.send(formData);
+
 }
 
 function updateProgress(e) {
@@ -73,12 +125,14 @@ function updateProgress(e) {
       var percent = e.loaded / e.total;
       document.getElementById("progress").value = percent * 100;
       if (percent == 1){
-          document.getElementById("file").disabled = false;
-          document.getElementById("post2").disabled = false;
-          document.getElementById("progress").value = 0;
-          document.getElementById("file").value = "";
-          document.getElementById("fileck").innerHTML = "";
-          document.getElementById("health").innerHTML = "";
+        document.getElementById("progress").value = 0;
+          if (!postFileFlag){
+            document.getElementById("file").disabled = false;
+            document.getElementById("post2").disabled = false;
+            document.getElementById("file").value = "";
+            document.getElementById("fileck").innerHTML = "";
+            document.getElementById("health").innerHTML = "";
+          }
       }
   }
 }

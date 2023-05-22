@@ -19,6 +19,7 @@ func Viewhtml(w http.ResponseWriter, r *http.Request) {
 	upath := r.URL.Path
 	tmp := map[string]string{}
 	tmp["version"] = version
+	tmp["uploadsize"] = uploadSize
 	if !strings.HasPrefix(upath, "/") {
 		upath = "/" + upath
 		r.URL.Path = upath
@@ -47,9 +48,11 @@ func Viewhtml(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-var version string = "" //バージョン表示
+var version string = ""    //バージョン表示
+var uploadSize string = "" //アップロードサイズ
 
 func Setup(cfg *config.Config) error {
 	version = cfg.Version
+	uploadSize = cfg.Upload.MAX_MULTI_MEMORY
 	return nil
 }
