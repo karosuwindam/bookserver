@@ -23,7 +23,7 @@ function createAddedForm(output) {
     var list = table_list[selectdata]
     var tablename = searchurl[selectdata]
     data += tablename + "<br>"
-    data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"<th>nowinput</th>"+"</tr>"
+    data += "<table>"+"<tr>"+"<th>Key名</th>"+"<th>値</th>"+"<th>nowinput</th>"+"<th>button</th>"+"</tr>"
     for (var i=0;i<list.length;i++) {
         if (list[i] == "Id") {
             continue
@@ -34,11 +34,18 @@ function createAddedForm(output) {
         data += "<input type=\"text\" id=\""+tablename+"_"+list[i]+"\" onkeyup=\"serchckbox(this.value,'"+list[i]+"');return\">"
         data += "</td>"
         data += "<td>"+createlistbox(list[i])+"</td>"
+        data += "<td>"+"<input type=\"button\" value=\"copy\" onclick=\"copybutton('"+"listbox_"+list[i]+"','"+tablename+"_"+list[i]+"');\">"+"</td>"
         data += "</tr>"
     }
     data += "</table>"
     data += "<input type=\"button\" value=\"add\" onclick=\"sendAddForm();closeViewForm('"+output+"')\">"
     document.getElementById(output).innerHTML = data
+}
+
+function copybutton(inputid,uptputid) {
+    var input = document.getElementById(inputid)
+    var output = document.getElementById(uptputid)
+    output.value = input.value
 }
 
 function createlistbox(name) {
