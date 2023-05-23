@@ -1,6 +1,6 @@
 TAG = ${shell cat version}
 APPNAME = "bookserver"
-GOVERSION = "1.18"
+GOVERSION = "1.19"
 TEMPLATE = ./Dockerfile_tmp
 BASE_CONTANER = "debian:11"
 TARGET = Dockerfile
