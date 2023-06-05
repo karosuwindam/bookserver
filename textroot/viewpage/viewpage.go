@@ -51,6 +51,11 @@ func Viewhtml(w http.ResponseWriter, r *http.Request) {
 var version string = ""    //バージョン表示
 var uploadSize string = "" //アップロードサイズ
 
+// Setup(cfg) = error
+//
+// /配下の静的ページを返す設定
+//
+// cfg : 基本設定
 func Setup(cfg *config.Config) error {
 	version = cfg.Version
 	uploadSize = cfg.Upload.MAX_MULTI_MEMORY

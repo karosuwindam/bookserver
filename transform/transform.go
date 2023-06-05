@@ -7,13 +7,33 @@ import (
 	"bookserver/table"
 	"bookserver/transform/pdftozip"
 	"bookserver/transform/writetable"
+	"bookserver/transform/ziptopdf"
 	"context"
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
+
+type fileType int
+
+type fileData struct {
+	file     fileType
+	fileData string
+}
+
+const (
+	otherType fileType = 0
+	pdf       fileType = 1
+	zip       fileType = 1 << 1
+)
+
+var fData []fileData = []fileData{
+	fileData{file: pdf, fileData: ".pdf"},
+	fileData{file: zip, fileData: ".zip"},
+}
 
 func Setup(cfg *config.Config) error {
 	ch1 = make(chan interface{}, 5)
@@ -23,6 +43,9 @@ func Setup(cfg *config.Config) error {
 		return err
 	}
 	if err := pdftozip.SetUp(cfg); err != nil {
+		return err
+	}
+	if err := ziptopdf.SetUp(cfg); err != nil {
 		return err
 	}
 	return nil
@@ -62,14 +85,24 @@ func Run(ctx context.Context) {
 				message = hMessage.ChangeOut()
 				if name, err := upload.GetUploadName(); err == nil {
 					fmt.Println("transform send:", name)
-					if outdata, err := writetable.CreatePdfToZip(name); err == nil {
-						Add(outdata)
-
-					} else {
-						log.Println(err)
+					//ファイルタイプの確認
+					switch checkFileType(name) {
+					case pdf: //pdfのときの処理
+						if outdata, err := writetable.CreatePdfToZip(name); err == nil {
+							Add(outdata) //テーブルへ登録処理
+						} else {
+							log.Println(err)
+						}
+					case zip: //zipのときの処理
+						if outdata, err := writetable.CreateZipToPdf(name); err == nil {
+							Add(outdata)
+						} else {
+							log.Println(err)
+						}
+					case otherType: //対象外
+						log.Println(name, "is not ")
 					}
 				}
-
 				hMessage.ChangeMessage("OK")
 				message = hMessage.ChangeOut()
 			}
@@ -85,17 +118,28 @@ func Run(ctx context.Context) {
 			case tmp := <-ch1:
 				switch tmp.(type) {
 				case writetable.PdftoZip: //PDFをZIPへ変換処理
-
 					hMessage.ChangeMessage("Change PDF to Zip")
 					message = hMessage.ChangeOut()
 					data, _ := tmp.(writetable.PdftoZip)
 					ch2 <- table.Filelists{Name: data.Name, Pdfpass: data.InputFile, Zippass: data.OutputFile, Tag: data.Tag}
+					//PDFからZIPを作成する処理
 					if err := pdftozip.Pdftoimage(data.InputFile, data.OutputFile); err != nil {
 						fmt.Println(err)
 					}
 					fmt.Println("reseav:", data)
 					hMessage.ChangeMessage("OK")
 					message = hMessage.ChangeOut()
+				case writetable.ZipToPdf: //ZIPをPDFへ変換処理
+					hMessage.ChangeMessage("Change Zip to PDF")
+					message = hMessage.ChangeOut()
+					data, _ := tmp.(writetable.ZipToPdf)
+					ch2 <- table.Filelists{Name: data.Name, Zippass: data.InputFile, Pdfpass: data.OutputFile, Tag: data.Tag}
+					//ZIPからPDFを作成する処理
+					// To Do
+					fmt.Println("reseav:", data)
+					hMessage.ChangeMessage("OK")
+					message = hMessage.ChangeOut()
+
 				default:
 					fmt.Println("transform errdata:", tmp)
 				}
@@ -112,7 +156,7 @@ func Run(ctx context.Context) {
 			case tmp := <-ch2:
 				hMessage.ChangeMessage("Table Renew Data")
 				message = hMessage.ChangeOut()
-
+				//テーブルへデータを登録する
 				if err := writetable.AddFileTable(&tmp); err != nil {
 					log.Println(err)
 				}
@@ -150,4 +194,14 @@ func Wait() error {
 		return errors.New("time out")
 
 	}
+}
+
+// ファイルタイプの確認処理
+func checkFileType(name string) fileType {
+	for _, f := range fData {
+		if strings.Index(strings.ToLower(name), f.fileData) > 0 {
+			return f.file
+		}
+	}
+	return otherType
 }

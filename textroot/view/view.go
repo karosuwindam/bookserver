@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// Api名 : 初期値:view
 var Apiname string = "view"
 
 const (
@@ -97,6 +98,11 @@ var route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/" + Apiname + "/", Handler: viewhtml},
 }
 
+// Setup(cfg) = ([]webserver.WebConfig, error)
+//
+// /view/内の静的ページを返す基本設定
+//
+// cfg : 設定ファイル
 func Setup(cfg *config.Config) ([]webserver.WebConfig, error) {
 	return route, nil
 }

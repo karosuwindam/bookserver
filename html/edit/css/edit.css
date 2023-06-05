@@ -35,9 +35,10 @@ div.table {
 div.edit{
     position: absolute;
     top: 10%;
-    left: 20%;
+    left: 10%;
     max-height: 90%;
-    width: 50%;
+    max-width: 80%;
+    padding: 2px 10px;
     color:white;
     overflow-x: auto;
     background-color: rgb(213 134 208 / 70%)
@@ -116,3 +117,6 @@ a.link-button:active{
     transform: translateY(4px);
 }
 
+select {
+    max-width: 400px;
+}

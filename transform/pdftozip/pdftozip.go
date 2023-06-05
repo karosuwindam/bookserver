@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bookserver/config"
 	"bookserver/dirread"
+	"bookserver/transform/pnmtojpg"
 	"errors"
 	"fmt"
 	"io"
@@ -19,6 +20,8 @@ import (
 const (
 	JPG string = ".jpg"
 	PNG string = ".png"
+	PBM string = ".pbm"
+	PPM string = ".ppm"
 )
 
 var pdfimages string = "pdfimages" //pdfからイメージを取り出すコマンド
@@ -34,9 +37,12 @@ var tmpPass string //画像を一時保存するパス
 var pdfPass string //pdfの参照フォルダ
 var zipPass string //zipの参照フォルダ
 var imgPass string //画像を保存するフォルダパス
+
 // Setup(cfg) = error
 //
 // コマンド確認とフォルダ設定
+//
+// cfg : 設定
 func SetUp(cfg *config.Config) error {
 	var err error
 	if err = cmdck(); err != nil {
@@ -76,9 +82,13 @@ func SetUp(cfg *config.Config) error {
 	return err
 }
 
+// removeimage(foldername) = error
+//
 // フォルダ内のデータ削除
-func removeimage(filename string) error {
-	dirfolder, err := dirread.Setup(tmpPass + filename + "/")
+//
+// foldername : フォルダ名
+func removeimage(foldername string) error {
+	dirfolder, err := dirread.Setup(tmpPass + foldername + "/")
 	if err != nil {
 		return err
 	}
@@ -94,13 +104,18 @@ func removeimage(filename string) error {
 		}(filedata.RootPath + filedata.Name)
 	}
 	wp.Wait()
-	if err := os.Remove(tmpPass + filename); err != nil {
+	if err := os.Remove(tmpPass + foldername); err != nil {
 		return err
 	}
 	return nil
 }
 
 // imageCopy(filename, inputpass) = error
+//
+// 表紙に使用する画像ファイルを対象のフォルダにコピーする
+//
+// filename : コピー先のファイル名
+// inputpass : コピーもとのファイル名
 func imageCopy(filename, inputpass string) error {
 	outname := filename
 	if strings.Index(strings.ToLower(inputpass), JPG) > 0 {
@@ -171,6 +186,41 @@ func renameData(dirfolder *dirread.Dirtype) error {
 	return nil
 }
 
+// imgToJpg(dirfolder) = error
+//
+// pbmやppm形式のファイルをjpgへ変換する
+//
+// dirfolder : 対象のフォルダのデータ
+func imgToJpg(dirfolder *dirread.Dirtype) error {
+	var ch chan bool = make(chan bool, 10)
+	var wg sync.WaitGroup
+	for _, data := range dirfolder.Data {
+		go func(inputName string) {
+			ch <- true
+			wg.Add(1)
+			if i := strings.Index(strings.ToLower(inputName), PBM); i > 0 {
+				outputName := inputName[:i] + JPG
+				if err := pnmtojpg.Pbm2jpg(inputName, outputName); err != nil {
+					log.Println("err", inputName, outputName)
+				} else {
+					os.Remove(inputName)
+				}
+			} else if i := strings.Index(strings.ToLower(inputName), PPM); i > 0 {
+				outputName := inputName[:i] + JPG
+				if err := pnmtojpg.Ppm2jpg(inputName, outputName); err != nil {
+					log.Println("err", inputName, outputName)
+				} else {
+					os.Remove(inputName)
+				}
+			}
+			<-ch
+			wg.Done()
+		}(data.RootPath + data.Name)
+	}
+	wg.Wait()
+	return nil
+}
+
 // imagetoZip(filename, outputFile) = error
 //
 // データのzip圧縮
@@ -191,6 +241,12 @@ func imagetoZip(filename, outputFile string) error {
 	if err := renameData(dirfolder); err != nil {
 		return err
 	}
+	dirfolder, _ = dirread.Setup(tmpPass + filename + "/")
+	if err := dirfolder.Read("./"); err != nil {
+		return err
+	}
+	//pbmファイルを全てjpgへ変換する
+	imgToJpg(dirfolder)
 	dirfolder, _ = dirread.Setup(tmpPass + filename + "/")
 	if err := dirfolder.Read("./"); err != nil {
 		return err
@@ -220,17 +276,26 @@ func imagetoZip(filename, outputFile string) error {
 	fmt.Println("create zip file to", zipfile)
 	return nil
 }
+
+// Pdftoimage(inputFile, outputFIle) = error
+//
+// pdfファイルから画像ファイルを取り出して、zipファイルを作る
+//
+// imputFile : 入力ファイル名
+// outputFile : 出力ファイル名
 func Pdftoimage(inputFile, outputFile string) error {
 	if i := strings.Index(strings.ToLower(inputFile), ".pdf"); i > 0 {
 		filename := inputFile[:i]
-		cmdArry := []string{
+		cmdArry := []string{ //pdfimageコマンドのオプションを生成
 			pdfPass + inputFile,
 			tmpPass + filename + "/" + filename,
 			"-j",
 		}
+		// 一時保存用のフォルダを作成
 		if err := os.MkdirAll(tmpPass+filename, 0777); err != nil {
 			return err
 		}
+		//pdfimageコマンドの実行
 		if err := exec.Command(pdfimages, cmdArry...).Run(); err != nil {
 			//失敗
 			return err
@@ -238,6 +303,7 @@ func Pdftoimage(inputFile, outputFile string) error {
 			//成功
 			//zipファイルの作成
 			if err := imagetoZip(filename, outputFile); err != nil { //失敗時の処理
+				removeimage((filename))
 				return err
 			}
 			//pdfimagesのファイル削除

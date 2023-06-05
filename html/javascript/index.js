@@ -57,9 +57,9 @@ function fileckdata(str){
   }else {
       output = str.Name + " file is not"
   }
-  if (str.Name.toLowerCase().indexOf('.pdf')>0) {
+  if (str.Name.toLowerCase().indexOf('.pdf')>0) {       //.pdfは含まない
       output += " create file: " + str.ChangeName.Zip
-  }else if (str.Name.toLowerCase().indexOf('.zip')>0) {
+  }else if (str.Name.toLowerCase().indexOf('.zip')>0) { //.zipは含まない
       output += " create file: " + str.ChangeName.Pdf
   }
   if (str.Overwrite) {
@@ -74,7 +74,7 @@ function sizeread() {
   var output = 0
   var tmp = MAXFILESIZE.toLowerCase()
   var i =0  
-  if ((i=tmp.indexOf("t"))>0) {
+  if ((i=tmp.indexOf("t"))>0) { //tだけは含まない
     output = (tmp.substr(0,i) -0)*(1<<40);
   }else if ((i=tmp.indexOf("g"))>0) {
     output = (tmp.substr(0,i) -0)*(1<<30);
@@ -99,7 +99,7 @@ async function postFile() {
   postFileFlag = true
   for(var i=0;i<document.getElementById("file").files.length;i++){
       fileSizeSum += document.getElementById("file").files[i].size
-      if (fileSizeSum > sizeread()) {
+      if ((fileSizeSum > sizeread())&&(i!=0)) {
         await PostFIleUpload(formData)
         fileSizeSum = document.getElementById("file").files[i].size
         formData = new FormData()
@@ -111,12 +111,16 @@ async function postFile() {
 }
 
 function PostFIleUpload(formData) {
-  var url = HOSTURL + "/v1/upload"
+  const p = new Promise((resolve, reject) => {
+    var url = HOSTURL + "/v1/upload"
 
-  var request = new XMLHttpRequest();
-  request.upload.addEventListener("progress", updateProgress, false);
-  request.open("POST", url);
-  request.send(formData);
+    var request = new XMLHttpRequest();
+    request.upload.addEventListener("progress", updateProgress, false);
+    request.open("POST", url);
+    request.send(formData);
+  });
+
+  return p;
 
 }
 
