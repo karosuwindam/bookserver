@@ -38,3 +38,20 @@ func TestRun(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestChackType(t *testing.T) {
+	name := "test.pdf"
+	if checkFileType(name) != pdf {
+		t.Errorf("%v is not %v", name, pdf)
+	}
+
+	name = "test.Zip"
+	if checkFileType(name) != zip {
+		t.Errorf("%v is not %v", name, pdf)
+	}
+	name = "test.jpg"
+	if checkFileType(name) != otherType {
+		t.Errorf("%v is not %v", name, otherType)
+	}
+
+}

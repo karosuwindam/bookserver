@@ -24,6 +24,16 @@ type PdftoZip struct {
 	Tag        string `json:"Tag"`  //検索用のタグ情報
 }
 
+// ZipToPdf
+//
+// データ登録用で、zipからpdfファイルを作成する
+type ZipToPdf struct {
+	Name       string `json:"Name"` //登録用の名称(巻数情報も含む)
+	InputFile  string `json:"Zip"`  //入力ファイル(pdf)
+	OutputFile string `json:"Pdf"`  //出力ファイル(zip)
+	Tag        string `json:"Tag"`  //検索用のタグ情報
+}
+
 // createOutFileNmae(tabledata , count) = (string, string)
 //
 // # Booknamesのデータから、Zip出力用のファイル名とタグ情報を作る
@@ -120,6 +130,70 @@ func CreatePdfToZip(name string) (PdftoZip, error) {
 		}
 	} else {
 		return output, errors.New("input name is not PDF")
+	}
+	return output, nil
+}
+
+// CreatePdfToZip(name) = PdfToZip, error
+//
+// ファイル名からPdftozipの情報を作成する。
+//
+// name(string) : 対象となるzipのファイル名
+func CreateZipToPdf(name string) (ZipToPdf, error) {
+	var output ZipToPdf
+	if name == "" {
+		return output, errors.New("name is not data")
+	}
+	output.InputFile = name
+	tmpname := strings.ToLower(name)
+	if i := strings.Index(tmpname, ZIP); i > 0 {
+		tmpname = name[:i]
+		tmpary := []string{}
+		if ta, n := removeParentheses(tmpname); len(ta) > 0 {
+			tmpname = n
+			tmpary = append(tmpary, ta...)
+		}
+		if ta, n := removeBrackets(tmpname); len(ta) > 0 {
+			tmpname = n
+			tmpary = append(tmpary, ta...)
+		}
+		output.Name = tmpname
+		count := -1
+		if tmpst := createBooknamesCount(tmpname); tmpst != nil {
+			output.OutputFile, output.Tag = createOutFileNmae(tmpst, count)
+		} else {
+			for j := 3; j > 0; j-- {
+				if len(tmpname) < j {
+					continue
+				}
+				tt := tmpname[len(tmpname)-j:]
+				if cc, err := strconv.Atoi(tt); err == nil {
+					count = cc
+					tmpname = tmpname[:len(tmpname)-j]
+					break
+				}
+			}
+			if tmpst := createBooknamesCount(tmpname); tmpst != nil {
+				output.OutputFile, output.Tag = createOutFileNmae(tmpst, count)
+			}
+		}
+		if output.OutputFile == "" {
+			output.OutputFile = name[:i] + PDF
+			output.Tag = name[:i]
+		}
+		if len(tmpary) > 0 {
+			tmpary = append(tmpary, output.Tag)
+			output.Tag = ""
+			for _, tName := range tmpary {
+				if output.Tag == "" {
+					output.Tag = tName
+				} else {
+					output.Tag += "," + tName
+				}
+			}
+		}
+	} else {
+		return output, errors.New("input name is not ZIP")
 	}
 	return output, nil
 }

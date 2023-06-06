@@ -35,7 +35,9 @@ func Setup(cfg *config.Config) (*SQLStatus, error) {
 	return output, nil
 }
 
-// CreateTable ()
+// (sql)CreateTable ()
+//
+// テーブルを作成する
 func (sql *SQLStatus) CreateTable() {
 
 	for name, typedata := range tablelist {
@@ -43,12 +45,19 @@ func (sql *SQLStatus) CreateTable() {
 	}
 }
 
-// Close ()
+// (sql)Close ()
+//
+// sqlを閉じる
 func (sql *SQLStatus) Close() {
 	sql.Cfg.Close()
 }
 
-// Add (tName, writedata)
+// (sql)Add (tName, writedata) = error
+//
+// 対象のテーブルにデータを書き込む
+//
+// tName : 対象テーブル
+// writedata : 書き込むデータの構造体
 func (sql *SQLStatus) Add(tName string, writedata interface{}) error {
 	if !ckType(writedata) {
 		return errors.New("input write type error")
@@ -59,7 +68,14 @@ func (sql *SQLStatus) Add(tName string, writedata interface{}) error {
 	return nil
 }
 
-// Edit (tName, writedata, id)
+// (sql)Edit (tName, writedata, id) = (string, error)
+//
+// 対象のテーブルでidを指定してデータを編集する
+// 編集した結果をjson形式で返す
+//
+// tName : 対象テーブル
+// writedata : 書き込むデータの構造体
+// id : 対象のid
 func (sql *SQLStatus) Edit(tName string, writedata interface{}, id int) (string, error) {
 	readdata := readBaseCreate(tName)
 	key := map[string]string{"id": strconv.Itoa(id)}
@@ -82,7 +98,13 @@ func (sql *SQLStatus) Edit(tName string, writedata interface{}, id int) (string,
 	return string(bJSON), nil
 }
 
-// ReadID (tName,id)
+// (sql)ReadID (tName,id) = (string, error)
+//
+// 対象のテーブルからidを指定してデータを参照する
+// その結果をjson形式で返す
+//
+// tName : 対象テーブル
+// id : 対象のid
 func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
 	readdata := readBaseCreate(tName)
 	key := map[string]string{"id": strconv.Itoa(id)}
@@ -97,7 +119,12 @@ func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
 	return string(bJSON), nil
 }
 
-// ReadAll (tName)
+// (sql)ReadAll (tName) = (string, error)
+//
+// 対象のテーブルデータをすべて参照する
+// その結果をjson形式で返す
+//
+// tName : 対象テーブル
 func (sql *SQLStatus) ReadAll(tName string) (string, error) {
 	readdata := readBaseCreate(tName)
 	if readdata == nil {
@@ -114,8 +141,12 @@ func (sql *SQLStatus) ReadAll(tName string) (string, error) {
 	return string(bJSON), nil
 }
 
-// ReadWhileTime (tName, datetype)
-// datetype(string) : today, toweek, tomonth
+// (sql)ReadWhileTime (tName, datetype) = (string, error)
+//
+// 特殊検索で、キーワードによって日付ごとの更新時刻データを取得
+//
+// tName : 対象テーブル
+// datetype(string) : 対象の特殊キーワード today, toweek, tomonth
 func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
 	readdata := readBaseCreate(tName)
 
@@ -143,7 +174,12 @@ func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
 
 }
 
-// 一致するファイルを探す
+// (sql) ReadName(tName, keyword) = (string, error)
+//
+// 名前キーで一致するファイルを探す
+//
+// tName : 対象テーブル
+// keyword : 名前キーで検索するキーワード
 func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
 	if keyword == "" {
 		return "", nil
@@ -160,7 +196,12 @@ func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
 	return string(bJSON), nil
 }
 
+// (sql) Search(tName, keyword) = (string, error)
+//
 // キーワードを検索する
+//
+// tName : 対象テーブル
+// keyword : 検索するキーワード
 func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	if keyword == "" {
 		return "", nil
@@ -177,7 +218,12 @@ func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
 	return string(bJSON), nil
 }
 
+// (sql) Delete(tName, id) = (string, error)
+//
 // idを指定して削除する。
+//
+// tName : 対象テーブル
+// id : 対象ID
 func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
 	if err := sql.Cfg.Delete(tName, id); err != nil {
 		return "", err
@@ -185,6 +231,12 @@ func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
 	return "", nil
 }
 
+// baseNameMap(tName, keyword) = map[string]string
+//
+// 検索用のデータで基本となる部分をテーブルから作成
+//
+// tName : 対象テーブル
+// keyword : 検索のキーワード
 func baseNameMap(tName, keyword string) map[string]string {
 	output := map[string]string{}
 	switch tName {
