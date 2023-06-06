@@ -49,7 +49,7 @@ function onZipList(id, page) {
 }
 
 function ViewZipFIle(id, data, page) {
-    FILELIST = jpgCount(data.Name)
+    FILELIST = imgCount(data.Name)
     COUNTMAX = FILELIST.length
 
     var output = ""
@@ -65,10 +65,12 @@ function ViewZipFIle(id, data, page) {
     imageload(page)
 }
 
-function jpgCount(data) {
+function imgCount(data) {
     var tmp = []
     for (var i=0;i<data.length;i++) {
-        if (data[i].toLowerCase().indexOf(".jpg")>0){
+        if (data[i].toLowerCase().indexOf(".jpg")>0){       //.jpgは含まないこと
+            tmp.push(data[i])
+        }else if (data[i].toLowerCase().indexOf(".png")>0){       //.pngは含まないこと
             tmp.push(data[i])
         }
     }

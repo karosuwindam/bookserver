@@ -12,6 +12,11 @@ var Route []webserver.WebConfig = []webserver.WebConfig{
 	{Pass: "/", Handler: viewpage.Viewhtml},
 }
 
+// Setup(cfg) = error
+//
+// セットアップ設定
+//
+// cfg : 基本設定
 func Setup(cfg *config.Config) error {
 	if route, err := view.Setup(cfg); err != nil {
 		return err

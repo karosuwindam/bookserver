@@ -114,7 +114,9 @@ func upload_files(w http.ResponseWriter, r *http.Request) common.Result {
 				log.Println(err)
 				defer os.Remove(savepass + "/" + filename)
 			}
+			mux.Lock()
 			uploadname <- filename
+			mux.Unlock()
 			fmt.Println("Create File End for:", filename)
 		}(file)
 	}
