@@ -137,6 +137,8 @@ func CreatePdfToZip(name string) (PdftoZip, error) {
 // CreatePdfToZip(name) = PdfToZip, error
 //
 // ファイル名からPdftozipの情報を作成する。
+//
+// name(string) : 対象となるzipのファイル名
 func CreateZipToPdf(name string) (ZipToPdf, error) {
 	var output ZipToPdf
 	if name == "" {
@@ -146,6 +148,15 @@ func CreateZipToPdf(name string) (ZipToPdf, error) {
 	tmpname := strings.ToLower(name)
 	if i := strings.Index(tmpname, ZIP); i > 0 {
 		tmpname = name[:i]
+		tmpary := []string{}
+		if ta, n := removeParentheses(tmpname); len(ta) > 0 {
+			tmpname = n
+			tmpary = append(tmpary, ta...)
+		}
+		if ta, n := removeBrackets(tmpname); len(ta) > 0 {
+			tmpname = n
+			tmpary = append(tmpary, ta...)
+		}
 		output.Name = tmpname
 		count := -1
 		if tmpst := createBooknamesCount(tmpname); tmpst != nil {
@@ -169,6 +180,17 @@ func CreateZipToPdf(name string) (ZipToPdf, error) {
 		if output.OutputFile == "" {
 			output.OutputFile = name[:i] + PDF
 			output.Tag = name[:i]
+		}
+		if len(tmpary) > 0 {
+			tmpary = append(tmpary, output.Tag)
+			output.Tag = ""
+			for _, tName := range tmpary {
+				if output.Tag == "" {
+					output.Tag = tName
+				} else {
+					output.Tag += "," + tName
+				}
+			}
 		}
 	} else {
 		return output, errors.New("input name is not ZIP")

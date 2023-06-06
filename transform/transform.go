@@ -121,10 +121,11 @@ func Run(ctx context.Context) {
 					hMessage.ChangeMessage("Change PDF to Zip")
 					message = hMessage.ChangeOut()
 					data, _ := tmp.(writetable.PdftoZip)
-					ch2 <- table.Filelists{Name: data.Name, Pdfpass: data.InputFile, Zippass: data.OutputFile, Tag: data.Tag}
 					//PDFからZIPを作成する処理
 					if err := pdftozip.Pdftoimage(data.InputFile, data.OutputFile); err != nil {
 						fmt.Println(err)
+					} else {
+						ch2 <- table.Filelists{Name: data.Name, Pdfpass: data.InputFile, Zippass: data.OutputFile, Tag: data.Tag}
 					}
 					fmt.Println("reseav:", data)
 					hMessage.ChangeMessage("OK")
@@ -133,9 +134,12 @@ func Run(ctx context.Context) {
 					hMessage.ChangeMessage("Change Zip to PDF")
 					message = hMessage.ChangeOut()
 					data, _ := tmp.(writetable.ZipToPdf)
-					ch2 <- table.Filelists{Name: data.Name, Zippass: data.InputFile, Pdfpass: data.OutputFile, Tag: data.Tag}
 					//ZIPからPDFを作成する処理
-					// To Do
+					if err := ziptopdf.ZipToPdf(data); err != nil {
+						fmt.Println(err)
+					} else {
+						ch2 <- table.Filelists{Name: data.Name, Zippass: data.InputFile, Pdfpass: data.OutputFile, Tag: data.Tag}
+					}
 					fmt.Println("reseav:", data)
 					hMessage.ChangeMessage("OK")
 					message = hMessage.ChangeOut()
@@ -146,7 +150,7 @@ func Run(ctx context.Context) {
 			}
 		}
 	}(ctx)
-	go func(ctx context.Context) { //ch1の処理
+	go func(ctx context.Context) { //ch2の処理 テーブルにデータ登録
 		defer wp.Done()
 	ch2loop:
 		for {
