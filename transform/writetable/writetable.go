@@ -157,6 +157,7 @@ func CreateZipToPdf(name string) (ZipToPdf, error) {
 			tmpname = n
 			tmpary = append(tmpary, ta...)
 		}
+		tmpary = append(tmpary, tmpname)
 		output.Name = tmpname
 		count := -1
 		if tmpst := createBooknamesCount(tmpname); tmpst != nil {
@@ -182,7 +183,7 @@ func CreateZipToPdf(name string) (ZipToPdf, error) {
 			output.Tag = name[:i]
 		}
 		if len(tmpary) > 0 {
-			tmpary = append(tmpary, output.Tag)
+			// tmpary = append(tmpary, output.Tag)
 			output.Tag = ""
 			for _, tName := range tmpary {
 				if output.Tag == "" {

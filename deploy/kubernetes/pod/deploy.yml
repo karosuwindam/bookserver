@@ -39,7 +39,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: bookserver
-        image: bookserver2:31000/tool/bookserver:0.9.0
+        image: bookserver2:31000/tool/bookserver:0.9.1
         imagePullPolicy: IfNotPresent
         # imagePullPolicy: Always
         env:
@@ -53,7 +53,7 @@ spec:
           limits:
             cpu: 2
           requests:
-            cpu: 1
+            cpu: 0.5
             memory: 2Gi
         volumeMounts:
           - mountPath: /app/upload/pdf
