@@ -203,12 +203,10 @@ func (t *zipFolder) imgCopy(imgName string) (string, error) {
 // image(png,jpg)ファイルからpdfファイルを作成する
 //
 // pdfFile : pdf出力先のファイルパス
-// ToDo: サイズが固定なのでこの部分を後で修正する
 func (t *zipFolder) img2pdf(pdfFile string) error {
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
 	for _, imgFile := range t.ziplist {
-		pdf.AddPage()
 		//画像ファイルを読み込む
 		f, err := os.Open(t.outFolder + imgFile)
 		if err != nil {
@@ -216,14 +214,21 @@ func (t *zipFolder) img2pdf(pdfFile string) error {
 			continue
 		}
 		defer f.Close()
-		_, format, err := image.DecodeConfig(f)
+		img, format, err := image.DecodeConfig(f)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 		//フォーマットチェック
 		if format == "jpeg" || format == "jpg" || format == "png" {
-			pdf.Image(t.outFolder+imgFile, 0, 0, gopdf.PageSizeA4)
+			//画像ファイルのサイズを取得する
+			width := float64(img.Width)
+			height := float64(img.Height)
+			//サイズに応じてページサイズを変更する
+			rect := &gopdf.Rect{H: height, W: width}
+			rect = rect.UnitsToPoints(gopdf.UnitPT)
+			pdf.AddPageWithOption(gopdf.PageOption{PageSize: rect})
+			pdf.Image(t.outFolder+imgFile, 0, 0, rect)
 		}
 	}
 	return pdf.WritePdf(pdfPass + pdfFile)
