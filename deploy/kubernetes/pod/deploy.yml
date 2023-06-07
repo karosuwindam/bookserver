@@ -53,7 +53,7 @@ spec:
           limits:
             cpu: 2
           requests:
-            cpu: 1
+            cpu: 0.5
             memory: 2Gi
         volumeMounts:
           - mountPath: /app/upload/pdf
