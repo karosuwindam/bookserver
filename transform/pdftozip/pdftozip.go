@@ -195,9 +195,9 @@ func imgToJpg(dirfolder *dirread.Dirtype) error {
 	var ch chan bool = make(chan bool, 10)
 	var wg sync.WaitGroup
 	for _, data := range dirfolder.Data {
+		wg.Add(1)
 		go func(inputName string) {
 			ch <- true
-			wg.Add(1)
 			if i := strings.Index(strings.ToLower(inputName), PBM); i > 0 {
 				outputName := inputName[:i] + JPG
 				if err := pnmtojpg.Pbm2jpg(inputName, outputName); err != nil {

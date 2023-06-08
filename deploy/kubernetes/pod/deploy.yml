@@ -39,7 +39,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: bookserver
-        image: bookserver2:31000/tool/bookserver:0.9.1
+        image: bookserver2:31000/tool/bookserver:0.9.2
         imagePullPolicy: IfNotPresent
         # imagePullPolicy: Always
         env:

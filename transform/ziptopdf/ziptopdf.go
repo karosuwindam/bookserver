@@ -122,6 +122,15 @@ func unzip(zipFile string) (zipFolder, error) {
 
 	// zipファイル内のファイルを展開する
 	for _, f := range r.File {
+		//フォルダの確認
+		if f.FileInfo().IsDir() {
+			if _, err := os.Stat(tmpZipFolder + f.Name); err != nil {
+				if err := os.MkdirAll(tmpZipFolder+f.Name, 0777); err != nil {
+					return output, err
+				}
+			}
+			continue
+		}
 		// 出力先ファイルを作成する
 		outFile, err := os.Create(tmpZipFolder + f.Name)
 		output.ziplist = append(output.ziplist, f.Name)
