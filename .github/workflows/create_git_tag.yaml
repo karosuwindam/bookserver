@@ -1,16 +1,51 @@
- name: Create Git Tag
- 
- on:
-   push:
-     branches:
-       - main
- 
- jobs:
-   create_git_tag:
-     runs-on: ubuntu-latest
-     steps:
-       - uses: actions/checkout@v2
-       - run: |
-           cat version > TAG_NAME
-           git tag $(cat TAG_NAME)
-           git push origin $(cat TAG_NAME)
+name: Create Git Tag
+on:
+  push:
+    branches:
+      - main
+jobs:
+  create_git_tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Read Version
+        run: |
+          cat version > TAG_NAME
+          export TAG_NAME=$(cat TAG_NAME)
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+      - name: Create Git Tag    
+        run: |
+          git tag ${{ env.TAG_NAME }}
+          git push origin ${{ env.TAG_NAME }}
+      - name: Generate release note
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          generate_release_notes: true
+      - name: Create SBOM
+        run: |
+          curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
+          chmod +x $RUNNER_TEMP/sbom-tool
+          $RUNNER_TEMP/sbom-tool generate -b . -bc . -pn $ -pv 1.0.0 -ps OwnerName -nsb https://github.com/karosuwindam/bookserver -V Verbose
+          ls _manifest/spdx_2.2/
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: _manifest/spdx_2.2/manifest.spdx.json
+          asset_name: manifest.spdx.json
+          asset_content_type: application/json
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: _manifest/spdx_2.2/manifest.spdx.json.sha256
+          asset_name: manifest.spdx.json.sha256
+          asset_content_type: application/json
+      
