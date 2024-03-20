@@ -16,7 +16,18 @@
                 timer = setTimeout(getSearchData,500,'output');
             }
             function searchclear(){
+                if (timer !=""){
+                    clearTimeout(timer);
+                    timer = "";
+                }
                 document.getElementById('keyword').value = "";
+                getSearchData('output');
+            }
+            function searchButton(){
+                if (timer !=""){
+                    clearTimeout(timer);
+                    timer = "";
+                }
                 getSearchData('output');
             }
         </script>
@@ -32,7 +43,7 @@
                 <div id="fileck" class="fileck"></div><div id="health" class="health"></div><br>
             </div>
             <input type="text" name="search" id="keyword" onkeyup="saerch_key();return false">
-            <input type="button" value="search" onclick="getSearchData('output');return false">
+            <input type="button" value="search" onclick="searchButton();return false">
             <input type="button" value="clear" onclick="searchclear();return false">
             <a class="button" href="javascript:void(0);" onclick="updataserch('today');">今日</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('toweek');">今週</a>
