@@ -12,8 +12,8 @@ function onTitleData(id) {
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);
-          applyTileData(jata.Result[0])
-          createListGet("listl", jata.Result[0].Tag)
+          applyTileData(jata.Result)
+          createListGet("listl", jata.Result.Tag)
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
           var jata = JSON.parse(data);
@@ -43,7 +43,7 @@ function onZipList(id, page) {
           console.log(jata);		          // 取得した JSON ファイルの中身を表示
       }
     };
-    var url = HOSTURL + "/v1/view/" + id;
+    var url = HOSTURL + "/v1/list/" + id;
     req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
 }
@@ -306,6 +306,10 @@ function createTmpListGet(outid,num) {
       }
     };
     var jsondata = {};
+    if (typeof TMP_tag === 'undefined'){
+        return;
+    }
+
     var tmp = TMP_tag.split(",")
     jsondata["Table"] = "filelists";
     var keyword = tmp[num]

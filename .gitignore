@@ -1,6 +1,7 @@
 testcheck*
 upload/pdf/*
 upload/zip/*
+html/img/*
 public/*
 tmp/*
 db/*

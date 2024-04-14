@@ -27,6 +27,7 @@ ENV PYROSCOPE_FLAG false
 USER 1000
 RUN mkdir -p public upload/pdf upload/zip db tmp html
 ADD ./html ./html
+RUN rm -rf ./html/img/*
 ADD ./version ./
 COPY --from=builder /app/app /app
 CMD ["./app"]

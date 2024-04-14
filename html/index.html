@@ -3,6 +3,7 @@
         <link rel="stylesheet" type="text/css" href="/css/index.css">
         <script src="javascript/index.js"></script>
         <script src="javascript/copyfile.js"></script>
+        <script src="javascript/health.js"></script>
         <title>図書サーバ</title>
         <script>
             var timer = ""
@@ -50,12 +51,13 @@
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
             <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
+            <a class="button" href="javascript:void(0);" onclick="healthckeck('health')">health</a>
         </div>
         <hr>
         <center>
             <div id="output" class="output">test</div>
         </center>
         <hr>
-        <div style="text-align: right"><%version%></div>        
+        <div style="text-align: right">{{ .version }}</div>        
     </body>
 </html>

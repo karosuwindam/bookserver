@@ -7,8 +7,8 @@
         <title></title>
         <script>
             window.onload = function() {
-                onTitleData(<%id%>);
-                onZipList(<%id%>, <%page%>);
+                onTitleData({{.id}});
+                onZipList({{.id}}, {{.page}});
                 createTmpListGet("listl",0);
                 initload();
                 if(localStorage.getItem("close")){

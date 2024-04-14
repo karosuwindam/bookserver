@@ -17,7 +17,7 @@ function getTablelist(output){
       }
     };
     var url = HOSTURL + "/v1/read/" + searchurl[selectdata];
-    req.open("LIST", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+    req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
   }
   

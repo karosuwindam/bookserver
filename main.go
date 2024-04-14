@@ -1,108 +1,77 @@
 package main
 
 import (
-	"bookserver/api"
-	"bookserver/api/listdata"
-	"bookserver/api/view"
 	"bookserver/config"
-	"bookserver/health"
-	"bookserver/proffdebug"
-	"bookserver/publiccopy"
-	"bookserver/pyroscopesetup"
-	"bookserver/textroot"
-	"bookserver/transform"
+	"bookserver/controller"
+	"bookserver/table"
 	"bookserver/webserver"
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+
+	"github.com/comail/colog"
 )
 
-// Confg(cfg) = (*webserver.SetupServer, error)
-//
-// メイン処理の設定
-func Config(cfg *config.Config) (*webserver.SetupServer, error) {
-	if err := publiccopy.Setup(cfg); err != nil {
-		return nil, err
+func Init() {
+	if err := config.Init(); err != nil {
+		panic(err)
 	}
-	api.Setup(cfg)
-	transform.Setup(cfg)
-	proffdebug.Setup(cfg)
-	textroot.Setup(cfg)
-	scfg, err := webserver.NewSetup(cfg)
-	if err != nil {
-		return nil, err
+	colog.SetDefaultLevel(colog.LDebug)
+	colog.SetMinLevel(colog.LTrace)
+	colog.SetFormatter(&colog.StdFormatter{
+		Colors: config.Log.Colors,
+		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
+	})
+	colog.Register()
+	if err := table.Init(); err != nil {
+		panic(err)
 	}
-	webserver.Config(scfg, api.Route, "/v1")
-	webserver.Config(scfg, proffdebug.Route, "/debug")
-	if route, err := health.SetUp(cfg); err == nil {
-		webserver.Config(scfg, route, "")
+	if err := webserver.Init(); err != nil {
+		panic(err)
 	}
-	webserver.Config(scfg, textroot.Route, "")
-	return scfg, nil
+	if err := controller.Init(); err != nil {
+		panic(err)
+	}
 }
 
-// Run(ctx) = error
-//
-// メイン処理
-func Run(ctx context.Context) error {
-	var err error
-	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	cfg, err := config.EnvRead()
-	if err != nil {
-		return nil
-	}
-	if scfg, err := Config(cfg); err == nil {
-		s, err := scfg.NewServer()
-		if err == nil {
-			go listdata.Loop(ctx)
-			go view.Loop(ctx)
-			go transform.Run(ctx)
-			go publiccopy.Loop(ctx)
-			if err = s.Run(ctx); err != nil {
-				log.Println(err)
-			}
-			stop()
-			return EndCK()
+func Start() {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Add(1)
+	go func(ctx context.Context) { //コントローラの開始
+		defer wg.Done()
+		if err := controller.Run(ctx); err != nil {
+			panic(err)
 		}
-	}
-	return err
+	}(ctx)
+	go func() { //Webサーバの開始処理
+		defer wg.Done()
+		if err := webserver.Start(); err != nil {
+			panic(err)
+		}
+	}()
+
+	<-sigs
+	cancel()
+	Stop()
+	wg.Wait()
 }
 
-// EndCK() = error
-//
-// 終了時の処理
-func EndCK() error {
-	var err error = nil
-	if err1 := publiccopy.Wait(); err1 != nil {
-		err = err1
+func Stop() {
+	webserver.Stop()
+	if err := controller.Stop(); err != nil {
+		panic(err)
 	}
-	if err1 := transform.Wait(); err1 != nil {
-		err = err1
-	}
-	if err1 := listdata.Wait(); err1 != nil {
-		err = err1
-	}
-	return err
 }
 
-// main()
-//
-// 　メイン処理
 func main() {
-	// flag.Parse() //コマンドラインオプションの有効
-	log.SetFlags(log.Llongfile | log.Flags())
-	pyro := pyroscopesetup.Setup()
-	pyroscopesetup.Add("status", "debug")
-	pyro.Run()
-	ctx := context.Background()
-	fmt.Println("start")
-	if err := Run(ctx); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println("end")
 
+	Init()
+	Start()
 }
