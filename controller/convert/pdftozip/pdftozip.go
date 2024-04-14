@@ -2,7 +2,7 @@ package pdftozip
 
 import (
 	"archive/zip"
-	"bookserver/backup/transform/pnmtojpg"
+	"bookserver/controller/convert/pnmtojpg"
 	"bookserver/table/booknames"
 	"bookserver/table/filelists"
 	"io"

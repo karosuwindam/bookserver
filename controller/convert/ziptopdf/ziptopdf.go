@@ -2,7 +2,7 @@ package ziptopdf
 
 import (
 	"archive/zip"
-	"bookserver/backup/transform/pnmtojpg"
+	"bookserver/controller/convert/pnmtojpg"
 	"image"
 	"io"
 	"io/ioutil"
