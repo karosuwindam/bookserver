@@ -23,6 +23,7 @@ function onTitleData(id) {
     var url = HOSTURL + "/v1/read/filelists/" + id;
     req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
+    return req
 }
 
 function applyTileData(data) {
@@ -46,6 +47,7 @@ function onZipList(id, page) {
     var url = HOSTURL + "/v1/list/" + id;
     req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
+    return req
 }
 
 function ViewZipFIle(id, data, page) {
@@ -359,3 +361,13 @@ function sortListData(outid,num) {
     });
     document.getElementById(outid).innerHTML = createListData(outid,tmp,num)
 }
+
+// モバイルのチェック
+function isSmartPhone() {
+    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  

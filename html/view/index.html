@@ -7,16 +7,25 @@
         <title></title>
         <script>
             window.onload = function() {
-                onTitleData({{.id}});
-                onZipList({{.id}}, {{.page}});
-                createTmpListGet("listl",0);
-                initload();
-                if(localStorage.getItem("close")){
-                    setTimeout(onloadclose, 0);
-                }else{
-                    setTimeout(onloadclose, 3000);
+                var req = onTitleData({{.id}});
+                var req1 = onZipList({{.id}}, {{.page}});
+                req1.onload = (e) =>{
+                    createTmpListGet("listl",0);
+                    if (isSmartPhone()){
+                        chPageOneTwe(1)
+                    }
                 }
-                localStorage.setItem("close",true)
+                req.onload = (e) =>{
+                
+                    initload();
+                    if(localStorage.getItem("close")){
+                        setTimeout(onloadclose, 0);
+                    }else{
+                        setTimeout(onloadclose, 3000);
+                    }
+                    localStorage.setItem("close",true)
+                }
+
             }
         </script>
     </head>
