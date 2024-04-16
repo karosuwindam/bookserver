@@ -15,7 +15,7 @@ function viewckbox(output,id) {
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);		          // 取得した JSON ファイルの中身を表示
-          output.innerHTML = creatckbox(jata.Result[0],id)
+          output.innerHTML = creatckbox(jata.Result,id)
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
           var jata = JSON.parse(data);

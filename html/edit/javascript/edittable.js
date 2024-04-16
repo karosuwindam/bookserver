@@ -83,6 +83,7 @@ function serchckbox(key,name){
 
 function sendAddForm() {
     var list = table_list[selectdata]
+    var type = table_list_type[selectdata]
     var tablename = searchurl[selectdata]
     var jsondata = {};
     for (var i=0;i<list.length;i++) {
@@ -90,6 +91,9 @@ function sendAddForm() {
             continue
         }
         jsondata[list[i]] = document.getElementById(tablename+"_"+list[i]).value
+        if (type[i] != "string") {
+            jsondata[list[i]] = jsondata[list[i]] -0
+        }
     }
     var url = HOSTURL + "/v1/add/"+tablename
 
@@ -147,7 +151,7 @@ function vieweditforms(output,id) {
             var data = req.responseText;
             var jata = JSON.parse(data);
             console.log(jata);		          // 取得した JSON ファイルの中身を表示
-            createEditform(output,jata.Result[0])
+            createEditform(output,jata.Result)
         }else if (req.readyState == 4 && req.status != 200){ 
             var data = req.responseText;
             var jata = JSON.parse(data);
@@ -193,6 +197,7 @@ function createEditform(output,jdata) {
 function sendEditForm(id){
     var list = table_list[selectdata]
     var tablename = searchurl[selectdata]
+    var tabletype = table_list_type[selectdata]
     var jsondata = {};
     for (var i=0;i<list.length;i++) {
         if (list[i] == "Id") {
@@ -200,6 +205,9 @@ function sendEditForm(id){
             continue
         }
         jsondata[list[i]] = document.getElementById(tablename+"_"+list[i]).value
+        if (tabletype[i] != "string") {
+            jsondata[list[i]] = jsondata[list[i]] -0;
+        }
     }
     var url = HOSTURL + "/v1/edit/"+tablename+"/"+id
 

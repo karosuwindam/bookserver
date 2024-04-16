@@ -3,8 +3,10 @@ var COUNTMAX = 0    //表示ファイルの最大数
 var FILELIST = {}   //表示ファイルリスト
 var NowPage     //現在の表示ページ
 var modeonetwe = true;      //2 page view
+var VieWID = 0
 
 function onTitleData(id) {
+    VieWID = id
 
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
@@ -12,8 +14,8 @@ function onTitleData(id) {
           var data = req.responseText;
           var jata = JSON.parse(data);
           console.log(jata);
-          applyTileData(jata.Result[0])
-          createListGet("listl", jata.Result[0].Tag)
+          applyTileData(jata.Result)
+          createListGet("listl", jata.Result.Tag)
       }else if (req.readyState == 4 && req.status != 200){ 
           var data = req.responseText;
           var jata = JSON.parse(data);
@@ -23,6 +25,7 @@ function onTitleData(id) {
     var url = HOSTURL + "/v1/read/filelists/" + id;
     req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
+    return req
 }
 
 function applyTileData(data) {
@@ -43,9 +46,10 @@ function onZipList(id, page) {
           console.log(jata);		          // 取得した JSON ファイルの中身を表示
       }
     };
-    var url = HOSTURL + "/v1/view/" + id;
+    var url = HOSTURL + "/v1/list/" + id;
     req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
     req.send(null);					    // 実際にサーバーへリクエストを送信
+    return req
 }
 
 function ViewZipFIle(id, data, page) {
@@ -231,6 +235,9 @@ function chPageOneTwe(mode) {
 }
 
 function nowPageView() {
+    if (!isNaN(NowPage)){
+        localStorage.setItem("view"+VieWID+"_page",NowPage)
+    }
     var maxup = 0
     if (modeonetwe) {
         maxup = 1
@@ -306,6 +313,10 @@ function createTmpListGet(outid,num) {
       }
     };
     var jsondata = {};
+    if (typeof TMP_tag === 'undefined'){
+        return;
+    }
+
     var tmp = TMP_tag.split(",")
     jsondata["Table"] = "filelists";
     var keyword = tmp[num]
@@ -355,3 +366,13 @@ function sortListData(outid,num) {
     });
     document.getElementById(outid).innerHTML = createListData(outid,tmp,num)
 }
+
+// モバイルのチェック
+function isSmartPhone() {
+    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  

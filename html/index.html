@@ -3,17 +3,26 @@
         <link rel="stylesheet" type="text/css" href="/css/index.css">
         <script src="javascript/index.js"></script>
         <script src="javascript/copyfile.js"></script>
+        <script src="javascript/health.js"></script>
         <title>図書サーバ</title>
         <script>
             var timer = ""
             window.onload = function(){
                 ckboxupdate ()
             }
-            function saerch_key(){
-                if (timer !=""){
-                    clearTimeout(timer);
+            function saerch_key(e){
+                e.onkeyup = function(event) {
+                    var keyEvent = event||window.event;
+                    if (keyEvent.keyCode == 13) {
+                        getSearchData('output');
+                    }
                 }
-                timer = setTimeout(getSearchData,500,'output');
+                if (!isSmartPhone()){
+                    if (timer !=""){
+                        clearTimeout(timer);
+                    }
+                    timer = setTimeout(getSearchData,500,'output');
+                }
             }
             function searchclear(){
                 if (timer !=""){
@@ -42,7 +51,7 @@
                 <button type="button" id="post2" onclick="postFile();">送信</button>
                 <div id="fileck" class="fileck"></div><div id="health" class="health"></div><br>
             </div>
-            <input type="text" name="search" id="keyword" onkeyup="saerch_key();return false">
+            <input type="text" name="search" id="keyword" onkeyup="saerch_key(this);return false">
             <input type="button" value="search" onclick="searchButton();return false">
             <input type="button" value="clear" onclick="searchclear();return false">
             <a class="button" href="javascript:void(0);" onclick="updataserch('today');">今日</a>
@@ -50,12 +59,13 @@
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
             <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
+            <a class="button" href="javascript:void(0);" onclick="healthckeck('health')">health</a>
         </div>
         <hr>
         <center>
             <div id="output" class="output">test</div>
         </center>
         <hr>
-        <div style="text-align: right"><%version%></div>        
+        <div style="text-align: right">{{ .version }}</div>        
     </body>
 </html>

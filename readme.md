@@ -9,25 +9,25 @@ https://github.com/karosuwindam/bookserver2
 
 * 機能APIについて
 
-|url|Method|説明|必要権限|備考|
+|url|Method|説明|権限|備考|
 |--|--|--|--|--|
-|/health|*|healthチェック機能||未実装|
-|/login||未実装|
-|/logout||未実装|
-|/v1/view/[id]|*|idと連携したzipファイルのファイル情報を取得する||
-|/v1/image/[id]/[ファイル名]|*|zip内のファイルをダウンロードを取得||
-|/v1/upload|POST|ファイルのアップロード機能||
-|/v1/upload/[フォルダ名]|LIST|アップロードフォルダ内のファイルリスト表示||
-|/v1/upload|GET|{"Name":"ファイル名"}のjsonを送るファイル名が保存されているか確認できる||
-|/v1/read/[テーブル]/|LIST|データベース内のテーブルデータすべて読み取り|GUEST|
-|/v1/read/[テーブル]/[id]/GET|データベース内のIDを指定して読み取る|GUEST|
-|/v1/search/[テーブル]/[keyword]|GET|検索ワードを指定して読み取る|GUEST|
-|/v1/add/[テーブル]/|POST|データベースにデータを追加|ADMIN|
-|/v1/edit/[テーブル]/[id]|GET|データベースのデータを取得|ADMIN|
-|/v1/edit/[テーブル]/[id]|POST|データベースのデータを編集|ADMIN|
-|/v1/edit/[テーブル]/[id]|DELETE|データベースのデータを削除|ADMIN
-|/v1/copy|POST|コピーするファイル登録を実施||
-|/v1/copy/:id|GET|テーブルからidに設定された情報を取得|
+|/health|*|現時点の動作状態を確認|||
+|/v1/image/:id/:filename|GET|ファイル名とidを指定してidと連携したzipファイル名内のファイルを読み取る||
+|/v1/search|POST|送信したJSONデータをもとにデータベースから検索する|
+|/v1/search/:table/:keyword|GET|keywordとテーブルを指定してデータベースから検索する|
+|/v1/copy/:id|GET|copyfileテーブル内をidを指定してデータを読み取る|
+|/v1/copy|POST|jsonデータを受け取ってその結果からファイルを共有フォルダへ追加削除を行う|
+|/v1/add/:table|POST|テーブルを指定してデータベースにデータを追加
+|/v1/read/:table|GET|テーブルを指定してデータベースのデータをすべて取得
+|/v1/read/:table/:id|GET|テーブルとIDを指定してデータを取得
+|/v1/edit/:table/:id|GET|テーブルとIDを指定してデータを取得
+|/v1/edit/:table/:id|POST|テーブルとIDを指定してデータを更新
+|/v1/edit/:table/:id|DELETE|テーブルとIDを指定してデータを削除
+|/v1/delete/:table/:id|GET|テーブルとIDを指定してデータを削除できるか確認
+|/v1/delete/:table/:id|DELETE|テーブルとIDを指定してデータを削除
+|/v1/upload|POST|ファイルを送信することでデータを特定フォルダに保管したりアップロードテーブルを更新する|
+|/v1/upload/:filename|GET|ファイル名に連携したファイル出力について返す|||
+|/v1/upload/:filetype/:filename|GET|ファイルの種類とファイ名を指定して特定場所に保存していることを確認|
 
 
 # データベースにデータを追加について
@@ -37,7 +37,7 @@ https://github.com/karosuwindam/bookserver2
 
 |名前|説明|初期値|備考|
 |--|--|--|--|
-|PROTOCOL|プロトコル名|tcp||
+|WEB_PROTOCOL|プロトコル名|tcp||
 |WEB_HOST|ホスト名|空白||
 |WEB_PORT|解放ポート|8080||
 |DB_NAME|SQLのデータベースタイプ|mysql|sqlite3も可能|

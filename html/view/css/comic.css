@@ -192,3 +192,6 @@ a.tab-button-a:active{
   border-bottom: none;
 
 }
+html {
+  touch-action: manipulation;
+}

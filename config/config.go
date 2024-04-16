@@ -8,48 +8,46 @@ import (
 	"github.com/caarlos0/env/v6"
 )
 
-type SetupServer struct {
-	Protocol string `env:"PROTOCOL" envDefault:"tcp"`
-	Hostname string `env:"WEB_HOST" envDefault:""`
-	Port     string `env:"WEB_PORT" envDefault:"8080"`
+// Webサーバの設定
+type WebConfig struct {
+	Protocol   string `env:"WEB_PROTOCOL" envDefault:"tcp"`  //接続プロトコル
+	Hostname   string `env:"WEB_HOST" envDefault:""`         //接続DNS名
+	Port       string `env:"WEB_PORT" envDefault:"8080"`     //接続ポート
+	StaticPage string `env:"WEB_FOLDER" envDefault:"./html"` //静的ページの参照先
 }
 
 type SetupSql struct {
-	DBNAME     string `env:"DB_NAME" envDefault:"sqlite3"`
-	DBHOST     string `env:"DB_HOST" envDefault:"127.0.0.1"`
-	DBPORT     string `env:"DB_PORT" envDefault:"3306"`
-	DBUSER     string `env:"DB_USER" envDefault:""`
-	DBPASS     string `env:"DB_PASS" envDefault:""`
+	DBNAME     string `env:"DB_NAME" envDefault:"sqlite3"`   //SQLの種類
+	DBHOST     string `env:"DB_HOST" envDefault:"127.0.0.1"` //接続先のip
+	DBPORT     string `env:"DB_PORT" envDefault:"3306"`      //接続ポート
+	DBUSER     string `env:"DB_USER" envDefault:""`          //接続ユーザ名
+	DBPASS     string `env:"DB_PASS" envDefault:""`          //接続のパス
 	DBFILE     string `env:"DB_FILE" envDefault:"test.db"`   //ファイル名
 	DBROOTPASS string `env:"DB_ROOTPASS" envDefault:"./db/"` //相対パス
 }
 
-type UploadCfg struct {
-	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"256M"`
+// 図書サーバで使用するフォルダ設定
+type BookserverConfig struct {
+	Tmp              string `env:"TMP_FILEPASS" envDefault:"./tmp"`        //画像を一時保存するパス
+	Img              string `env:"IMG_FILEPASS" envDefault:"./html/img"`   //1ページ目の画像ファイルを保存するフォルダ
+	Pdf              string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
+	Zip              string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
+	Public           string `env:"PUBLIC_FILEPASS" envDefault:"./public"`  //ファイル共有で使用するフォルダ
+	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"256M"`     //アップロード時のメモリ制限
+	RandamRead       int    `env:"RAND_COUNT" envDefault:"5"`              //ランダムの読み取り最大数
+	ConvertCountMax  int    `env:"MAX_CONVERT_COUNT" envDefault:"3"`
 }
 
-type SetupFolder struct {
-	Tmp    string `env:"TMP_FILEPASS" envDefault:"./tmp"`        //画像を一時保存するパス
-	Img    string `env:"IMG_FILEPASS" envDefault:"./html/img"`   //1ページ目の画像ファイルを保存するフォルダ
-	Pdf    string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
-	Zip    string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
-	Public string `env:"PUBLIC_FILEPASS" envDefault:"./public"`  //公開用のフォルダ
-}
-
-type SecretKey struct {
+// 認証関連の設定ファイル
+type AuthConfig struct {
 	JwtKey string `env:"JWT_KEY" envDefault:"SECRET_KEY"`
 }
 
-type Config struct {
-	Server   *SetupServer
-	Sql      *SetupSql
-	SeretKey *SecretKey
-	Folder   *SetupFolder
-	Upload   *UploadCfg
-	Version  string
+type LogConfig struct {
+	Colors bool `env:"LOG_COLORS" envDefault:"true"`
 }
 
-// バージョン読み取り
+// versionファイルによるバージョン読み取り
 func versionRead() string {
 	f, err := os.Open("version")
 	output := "0.0.1"
@@ -69,35 +67,30 @@ func versionRead() string {
 	return output
 }
 
-// 環境設定
-func EnvRead() (*Config, error) {
-	serverCfg := &SetupServer{}
-	if err := env.Parse(serverCfg); err != nil {
-		return nil, err
-	}
-	sqlCfg := &SetupSql{}
-	if err := env.Parse(sqlCfg); err != nil {
-		return nil, err
-	}
-	folderCfg := &SetupFolder{}
-	if err := env.Parse(folderCfg); err != nil {
-		return nil, err
-	}
-	secretCfg := &SecretKey{}
-	if err := env.Parse(secretCfg); err != nil {
-		return nil, err
-	}
-	uploadCfg := &UploadCfg{}
-	if err := env.Parse(uploadCfg); err != nil {
-		return nil, err
-	}
-	return &Config{
-		Server:   serverCfg,
-		Sql:      sqlCfg,
-		Folder:   folderCfg,
-		SeretKey: secretCfg,
-		Upload:   uploadCfg,
-		Version:  versionRead(),
-	}, nil
+var Web WebConfig
+var DB SetupSql
+var BScfg BookserverConfig
+var Version string
+var Auth AuthConfig
+var Log LogConfig
 
+// 環境設定
+func Init() error {
+	if err := env.Parse(&Web); err != nil {
+		return err
+	}
+	if err := env.Parse(&DB); err != nil {
+		return err
+	}
+	if err := env.Parse(&BScfg); err != nil {
+		return err
+	}
+	if err := env.Parse(&Auth); err != nil {
+		return err
+	}
+	if err := env.Parse(&Log); err != nil {
+		return err
+	}
+	Version = versionRead()
+	return nil
 }

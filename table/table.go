@@ -2,250 +2,136 @@ package table
 
 import (
 	"bookserver/config"
-	"encoding/json"
-	"errors"
+	"bookserver/dbconvert"
+	"bookserver/table/booknames"
+	"bookserver/table/copyfiles"
+	"bookserver/table/filelists"
+	"bookserver/table/uploadtmp"
+	"fmt"
+	"io"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/karosuwindam/sqlite"
+	"github.com/pkg/errors"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-// SQLStatus SQLの状態を渡すデータ
-type SQLStatus struct {
-	//SQLの読み取り設定
-	Cfg sqlite.SqliteConfig
-	//
-	flag bool
-}
+var db *gorm.DB
 
-// Setup (*config.Config) = *SQLStatus, error
-//
-// セットアップ情報
-//
-// cfg(*config.Config) : 設定情報
-func Setup(cfg *config.Config) (*SQLStatus, error) {
-	output := &SQLStatus{}
-	output.Cfg = sqlite.Setup(cfg.Sql.DBROOTPASS + cfg.Sql.DBFILE)
-	if err := output.Cfg.Open(); err != nil {
-		return nil, err
+func Init() error {
+	var err error
+	if config.DB.DBNAME == "sqlite3" {
+		db, err = openSqlite3()
+	} else {
+		return errors.New("Not Db type")
 	}
-	tablelistsetup()
-	output.CreateTable()
-	output.flag = true
-	return output, nil
-}
-
-// (sql)CreateTable ()
-//
-// テーブルを作成する
-func (sql *SQLStatus) CreateTable() {
-
-	for name, typedata := range tablelist {
-		sql.Cfg.CreateTable(name, typedata)
-	}
-}
-
-// (sql)Close ()
-//
-// sqlを閉じる
-func (sql *SQLStatus) Close() {
-	sql.Cfg.Close()
-}
-
-// (sql)Add (tName, writedata) = error
-//
-// 対象のテーブルにデータを書き込む
-//
-// tName : 対象テーブル
-// writedata : 書き込むデータの構造体
-func (sql *SQLStatus) Add(tName string, writedata interface{}) error {
-	if !ckType(writedata) {
-		return errors.New("input write type error")
-	}
-	if err := sql.Cfg.Add(tName, writedata); err != nil {
+	if err != nil {
 		return err
+	}
+	if err = tableInit(db); err != nil {
+		return errors.Wrap(err, "tableInit")
 	}
 	return nil
 }
 
-// (sql)Edit (tName, writedata, id) = (string, error)
-//
-// 対象のテーブルでidを指定してデータを編集する
-// 編集した結果をjson形式で返す
-//
-// tName : 対象テーブル
-// writedata : 書き込むデータの構造体
-// id : 対象のid
-func (sql *SQLStatus) Edit(tName string, writedata interface{}, id int) (string, error) {
-	readdata := readBaseCreate(tName)
-	key := map[string]string{"id": strconv.Itoa(id)}
-
-	if err := sql.Cfg.Read(tName, readdata, key); err != nil {
-		return "", err
+func openSqlite3() (*gorm.DB, error) {
+	filepass := config.DB.DBROOTPASS
+	if filepass[len(filepass)-1:] != "/" {
+		filepass += "/"
 	}
-	// wv := reflect.ValueOf(writedata)
-	if err := sql.Cfg.Update(tName, writedata); err != nil {
-		return "", err
+	if f, err := os.Stat(filepass); os.IsNotExist(err) || !f.IsDir() {
+		os.MkdirAll(filepass, 0766)
 	}
-	readdata = readBaseCreate(tName)
-	if err := sql.Cfg.Read(tName, readdata, key); err != nil {
-		return "", err
-	}
-	bJSON, err := json.Marshal(readdata)
-	if err != nil {
-		return "", err
-	}
-	return string(bJSON), nil
-}
-
-// (sql)ReadID (tName,id) = (string, error)
-//
-// 対象のテーブルからidを指定してデータを参照する
-// その結果をjson形式で返す
-//
-// tName : 対象テーブル
-// id : 対象のid
-func (sql *SQLStatus) ReadID(tName string, id int) (string, error) {
-	readdata := readBaseCreate(tName)
-	key := map[string]string{"id": strconv.Itoa(id)}
-
-	if err := sql.Cfg.Read(tName, readdata, key); err != nil {
-		return "", err
-	}
-	bJSON, err := json.Marshal(readdata)
-	if err != nil {
-		return "", err
-	}
-	return string(bJSON), nil
-}
-
-// (sql)ReadAll (tName) = (string, error)
-//
-// 対象のテーブルデータをすべて参照する
-// その結果をjson形式で返す
-//
-// tName : 対象テーブル
-func (sql *SQLStatus) ReadAll(tName string) (string, error) {
-	readdata := readBaseCreate(tName)
-	if readdata == nil {
-		return "", errors.New("Not found Table")
-	}
-
-	if err := sql.Cfg.Read(tName, readdata); err != nil {
-		return "", err
-	}
-	bJSON, err := json.Marshal(readdata)
-	if err != nil {
-		return "", err
-	}
-	return string(bJSON), nil
-}
-
-// (sql)ReadWhileTime (tName, datetype) = (string, error)
-//
-// 特殊検索で、キーワードによって日付ごとの更新時刻データを取得
-//
-// tName : 対象テーブル
-// datetype(string) : 対象の特殊キーワード today, toweek, tomonth
-func (sql *SQLStatus) ReadWhileTime(tName, datetype string) (string, error) {
-	readdata := readBaseCreate(tName)
-
-	switch strings.ToLower(datetype) {
-	case "today":
-		if err := sql.Cfg.ReadToday(tName, readdata); err != nil {
-			return "", err
+	filepass += config.DB.DBFILE
+	if _, err := os.Stat(filepass); err != nil {
+		fmt.Println("Create sqlite3 file: ", filepass)
+	} else { //ファイルがある場合の処理
+		tmpdb, err := gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+		if err != nil {
+			return nil, err
 		}
-	case "toweek":
-		if err := sql.Cfg.ReadToWeek(tName, readdata); err != nil {
-			return "", err
+		tableVersion := 0
+		if d, err := ReadTableVersion(tmpdb); err != nil {
+			//読み取りに失敗する場合はv0として判断
+		} else {
+			tableVersion = d.TableVersion
 		}
-	case "tomonth":
-		if err := sql.Cfg.ReadToMonth(tName, readdata); err != nil {
-			return "", err
+		//バージョン情報を読み取り
+		if VersionChack() != tableVersion {
+			//バージョンが異なる場合
+			tmpFIlePass := ""
+			//ファイルのバックアップ
+			if i := strings.LastIndex(filepass, "."); i > 0 {
+				tmpFIlePass = filepass[:i]
+				tmpFIlePass += "_v" + strconv.Itoa(tableVersion) + "_" + time.Now().Format("20060102")
+				tmpFIlePass += filepass[i:]
+			}
+			if err := fileCopy(filepass, tmpFIlePass); err != nil {
+				return nil, errors.Wrap(err, fmt.Sprintf("file Copy error %v to %v", filepass, tmpFIlePass))
+			}
+			tmpdb = nil
+			os.Remove(filepass)
+			tmpdb, _ = gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+			if err := tableInit(tmpdb); err != nil {
+				os.Remove(filepass)
+				fileCopy(tmpFIlePass, filepass)
+				os.Remove(tmpFIlePass)
+				return nil, errors.Wrap(err, fmt.Sprintf("taible Init err"))
+			}
+			//データのコンバート処理
+			if err := dbconvert.DbConvertSQL3(tmpFIlePass, filepass, tableVersion, VersionChack()); err != nil {
+				return nil, err
+			}
+
 		}
-	default:
-		return "", errors.New("datetype err :" + datetype)
+
 	}
-	bJSON, err := json.Marshal(readdata)
+
+	return gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+
+}
+
+func tableInit(db *gorm.DB) error {
+	if err := booknames.Init(db); err != nil {
+		return errors.Wrap(err, "booknames table init error")
+	}
+	if err := filelists.Init(db); err != nil {
+		return errors.Wrap(err, "filelists table init error")
+	}
+	if err := copyfiles.Init(db); err != nil {
+		return errors.Wrap(err, "copyfiles table init error")
+	}
+	if err := uploadtmp.Init(db); err != nil {
+		return errors.Wrap(err, "uploadtmp table init error")
+	}
+	//テーブルバージョン初期化
+	if err := InitVTable(db); err != nil {
+		return errors.Wrap(err, "bookservers table init error")
+	}
+	return nil
+}
+
+func fileCopy(srcName, dstName string) error {
+
+	src, err := os.Open(srcName)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(bJSON), nil
+	defer src.Close()
 
-}
-
-// (sql) ReadName(tName, keyword) = (string, error)
-//
-// 名前キーで一致するファイルを探す
-//
-// tName : 対象テーブル
-// keyword : 名前キーで検索するキーワード
-func (sql *SQLStatus) ReadName(tName, keyword string) (string, error) {
-	if keyword == "" {
-		return "", nil
-	}
-	readdata := readBaseCreate(tName)
-	skeyword := baseNameMap(tName, keyword)
-	if err := sql.Cfg.Read(tName, readdata, skeyword, sqlite.AND); err != nil {
-		return "", err
-	}
-	bJSON, err := json.Marshal(readdata)
+	dst, err := os.Create(dstName)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(bJSON), nil
-}
+	defer dst.Close()
 
-// (sql) Search(tName, keyword) = (string, error)
-//
-// キーワードを検索する
-//
-// tName : 対象テーブル
-// keyword : 検索するキーワード
-func (sql *SQLStatus) Search(tName, keyword string) (string, error) {
-	if keyword == "" {
-		return "", nil
-	}
-	readdata := readBaseCreate(tName)
-	skeyword := createSerchText(tName, keyword)
-	if err := sql.Cfg.Read(tName, readdata, skeyword, sqlite.ORLike); err != nil {
-		return "", err
-	}
-	bJSON, err := json.Marshal(readdata)
+	_, err = io.Copy(dst, src)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(bJSON), nil
-}
-
-// (sql) Delete(tName, id) = (string, error)
-//
-// idを指定して削除する。
-//
-// tName : 対象テーブル
-// id : 対象ID
-func (sql *SQLStatus) Delete(tName string, id int) (string, error) {
-	if err := sql.Cfg.Delete(tName, id); err != nil {
-		return "", err
-	}
-	return "", nil
-}
-
-// baseNameMap(tName, keyword) = map[string]string
-//
-// 検索用のデータで基本となる部分をテーブルから作成
-//
-// tName : 対象テーブル
-// keyword : 検索のキーワード
-func baseNameMap(tName, keyword string) map[string]string {
-	output := map[string]string{}
-	switch tName {
-	case BOOKNAME:
-		output["name"] = keyword
-	case FILELIST:
-		output["name"] = keyword
-	case COPYFILE:
-		output["zippass"] = keyword
-	}
-	return output
+	return nil
 }
