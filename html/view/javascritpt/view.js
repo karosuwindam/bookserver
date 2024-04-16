@@ -3,8 +3,10 @@ var COUNTMAX = 0    //表示ファイルの最大数
 var FILELIST = {}   //表示ファイルリスト
 var NowPage     //現在の表示ページ
 var modeonetwe = true;      //2 page view
+var VieWID = 0
 
 function onTitleData(id) {
+    VieWID = id
 
     var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
     req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
@@ -233,6 +235,9 @@ function chPageOneTwe(mode) {
 }
 
 function nowPageView() {
+    if (!isNaN(NowPage)){
+        localStorage.setItem("view"+VieWID+"_page",NowPage)
+    }
     var maxup = 0
     if (modeonetwe) {
         maxup = 1

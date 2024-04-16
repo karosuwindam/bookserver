@@ -7,15 +7,27 @@
         <title></title>
         <script>
             window.onload = function() {
+                var tmppage = localStorage.getItem("view"+{{.id}}+"_page")
+                if (tmppage == null) {
+                    tmppage = 1
+                }
                 var req = onTitleData({{.id}});
                 var req1 = onZipList({{.id}}, {{.page}});
-                req1.onload = (e) =>{
+                req1.onloadend = (e) =>{
                     createTmpListGet("listl",0);
                     if (isSmartPhone()){
                         chPageOneTwe(1)
                     }
+                    if (tmppage > 1) {
+                        console.log("move",tmppage)
+                        var checkSaveFlg = confirm(""+tmppage+'へ移動しますか？');
+                        if (checkSaveFlg){
+                            nowPage(tmppage)
+                        }
+
+                    }
                 }
-                req.onload = (e) =>{
+                req.onloadend = (e) =>{
                 
                     initload();
                     if(localStorage.getItem("close")){
@@ -25,7 +37,6 @@
                     }
                     localStorage.setItem("close",true)
                 }
-
             }
         </script>
     </head>
