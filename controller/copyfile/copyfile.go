@@ -119,6 +119,7 @@ func ChackCopyFileTableDataAll() error {
 			if _, err := os.Stat(publicFilePass); err == nil {
 				continue
 			}
+			log.Println("info:", fmt.Sprintln("Not file %v"), publicFilePass)
 			//ファイルが存在しないものは無効にする
 			if err := d.OFF(); err != nil {
 				log.Println("error:", err)
