@@ -2,7 +2,11 @@ version: '2'
 services:
   web:
     build: ../../
-    # volumes:
-    #   - ./config:/app/config
+    # image: bookserver2:31000/tool/bookserver:0.10.0
+    volumes:
+      - ./upload:/app/upload
+      - ./img:/app/html/img
+      - ./public:/app/public
+      - ./db:/app/db
     ports:
       - "8080:8080"

@@ -1,6 +1,6 @@
 TAG = ${shell cat version}
 APPNAME = "bookserver"
-GOVERSION = "1.19.12"
+GOVERSION = "1.22.1"
 TEMPLATE = ./Dockerfile_tmp
 BASE_CONTANER = "debian:11"
 TARGET = Dockerfile
@@ -11,8 +11,8 @@ MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 DOCKER = docker
 
 BUILD = buildctl
-BUILD_ADDR = tcp://buildkit.bookserver.home:1234 #arm64
-BUILD_ADDR_ARM = tcp://buildkit-arm.bookserver.home:1235 #arm
+BUILD_ADDR = tcp://buildkit.bookserver.home:1234 #aarch64
+BUILD_ADDR_ARM = tcp://buildkit-arm.bookserver.home:1235 #armv6l
 BUILD_OPTION = "type=image,push=true,registry.insecure=true"
 
 
@@ -22,7 +22,7 @@ ifeq (${ARCH},x86_64)
 ARCH = amd64
 BASECONTANA = ubuntu
 else
-ARCH = armv6l
+ARCH = aarch64
 BASECONTANA = ubuntu
 endif
 
