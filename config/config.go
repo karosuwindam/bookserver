@@ -33,7 +33,7 @@ type BookserverConfig struct {
 	Pdf              string `env:"PDF_FILEPASS" envDefault:"./upload/pdf"` //PDFのアップロード先フォルダ
 	Zip              string `env:"ZIP_FILEPASS" envDefault:"./upload/zip"` //ZIPのアップロード先フォルダ
 	Public           string `env:"PUBLIC_FILEPASS" envDefault:"./public"`  //ファイル共有で使用するフォルダ
-	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"256M"`     //アップロード時のメモリ制限
+	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"512M"`     //アップロード時のメモリ制限
 	RandamRead       int    `env:"RAND_COUNT" envDefault:"5"`              //ランダムの読み取り最大数
 	ConvertCountMax  int    `env:"MAX_CONVERT_COUNT" envDefault:"3"`
 }
