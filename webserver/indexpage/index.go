@@ -31,6 +31,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			tmp := make(map[string]string)
 			tmp["base_title"] = "新刊取得"
+			tmp["maxfilesize"] = config.BScfg.MAX_MULTI_MEMORY
 			title := os.Getenv("WEB_TITLE")
 			if title != "" {
 				tmp["base_title"] = title
