@@ -2,7 +2,7 @@ var HOSTURL = "";        //検索先のURLについて
 var SEARCHTABLE = "filelists"; 
 var TmpJdata;
 var upflag = true
-var MAXFILESIZE = "<%uploadsize%>" // 256*1024*1024 //Upload Size : <%uploadsize%>
+var MAXFILESIZE = "512m" // 256*1024*1024 //Upload Size : <%uploadsize%>
 
 
 function formdataJSON(inputElement){
@@ -86,6 +86,77 @@ function sizeread() {
     output = (tmp -0);
   }
   return output
+}
+
+
+function postFile2(outid) {
+  var files = document.getElementById("file").files
+  if (files.length == 0){
+    return 
+  }
+  var htmlout = document.getElementById(outid)
+  htmlout.innerHTML = ""
+  for (var i=0;i<files.length;i++){
+    if (i==0){
+      htmlout.innerHTML = createProgress(files[i].name,files[i].size,i)
+    }
+    else{
+      htmlout.innerHTML += "<br>"+createProgress(files[i].name,files[i].size,i)
+    }
+  }
+  document.getElementById("file").disabled = true;
+  document.getElementById("post2").disabled = true;
+  var formData = new FormData();
+  var count = 0
+  for(var i=0;i<files.length;i++){
+    var formData = new FormData();
+    formData.append("file", files[i]);
+    var postdate = PostFileUpload2(formData,i)
+    postdate.onloadend = () => {
+      count++
+      document.getElementById("progress").value = count/ files.length* 100;
+      if (count === files.length) {
+        document.getElementById("file").disabled = false;
+        document.getElementById("post2").disabled = false;
+        document.getElementById("file").value = "";
+        document.getElementById("fileck").innerHTML = "";
+        document.getElementById("health").innerHTML = "";
+        document.getElementById("progress").value = 0;
+      }
+    }
+  }
+}
+
+function createProgress(filename,size,i){
+  var output = ""
+  output = '<progress id="progress'+i+'" value="0" max="100"></progress>'
+  output += filename+"\t"
+  if (size/(1<<30) > 1) {
+    output += Math.round(size/(1<<30)*10)/10 + "G"
+  }else if (size/(1<<20) > 1) {
+    output += Math.round(size/(1<<20)*10)/10 + "M"
+  }else if (size/(1<<10) > 1) {
+    output += Math.round(size/(1<<10)*10)/10 + "K"
+  }else {
+    output += size
+  }
+  return output
+}
+
+//:ToDo
+function PostFileUpload2(formData,i){
+  var request = new XMLHttpRequest();
+  
+  var url = HOSTURL + "/v1/upload"
+
+  var request = new XMLHttpRequest();
+    request.upload.addEventListener("progress", (e)=>{
+    var percent = e.loaded / e.total;
+    document.getElementById("progress"+i).value = percent * 100;
+  }, false);
+  request.open("POST", url);
+  request.send(formData);
+  return request
 }
 
 async function postFile() {

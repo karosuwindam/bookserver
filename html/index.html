@@ -8,6 +8,7 @@
         <script>
             var timer = ""
             window.onload = function(){
+                MAXFILESIZE = {{.maxfilesize}}
                 ckboxupdate ()
             }
             function saerch_key(e){
@@ -48,7 +49,7 @@
             <div>
                 <progress id="progress" value="0" max="100"></progress>
                 <input type="file" name="file" onchange="formdataJSON(this);"  id="file" multiple>
-                <button type="button" id="post2" onclick="postFile();">送信</button>
+                <button type="button" id="post2" onclick="postFile2('health');">送信</button>
                 <div id="fileck" class="fileck"></div><div id="health" class="health"></div><br>
             </div>
             <input type="text" name="search" id="keyword" onkeyup="saerch_key(this);return false">
