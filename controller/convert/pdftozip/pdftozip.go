@@ -81,8 +81,8 @@ func ConvertPdfToZipChack(filepath string) (filelists.Filelists, error) {
 				output.Zippass = output.Zippass + tmp
 
 			}
+			tmpAry = append(tmpAry, output.Zippass)
 			output.Zippass = output.Zippass + ".zip"
-			tmpAry = append(tmpAry, d.Title)
 		}
 		if d.Writer != "" {
 			output.Zippass = "[" + d.Writer + "]" + output.Zippass

@@ -20,6 +20,9 @@ func Init() error {
 	if err := ziptopdf.Init(); err != nil {
 		return err
 	}
+	if err := DataStoreInit(); err != nil {
+		return err
+	}
 	count_error = config.BScfg.ConvertCountMax
 	if count_error == 0 {
 		count_error = ERROR_COUNT_MAX

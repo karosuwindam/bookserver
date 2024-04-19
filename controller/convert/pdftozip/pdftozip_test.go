@@ -147,7 +147,7 @@ func TestPdfToZipChangeName_1(t *testing.T) {
 	if d, err := filelists.Search("testout"); err != nil {
 		t.Fatal(err)
 	} else {
-		if d[0].Pdfpass != "testout1.pdf" || d[0].Zippass != "[bb]aa01.zip" || d[0].Tag != "aa,bb,gg,ee,cc,dd" {
+		if d[0].Pdfpass != "testout1.pdf" || d[0].Zippass != "[bb]aa01.zip" || d[0].Tag != "aa01,bb,gg,ee,cc,dd" {
 			t.Fatal("Error write table data")
 		}
 	}
