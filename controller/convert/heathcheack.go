@@ -1,12 +1,16 @@
 package convert
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type dataStore struct {
-	Status    bool
-	Startfile map[string]string
-	Endfile   map[string]string
-	mu        sync.Mutex
+	Status     bool
+	Startfile  map[string]string
+	Endfile    map[string]string
+	StatusTIme map[string]time.Time
+	mu         sync.Mutex
 }
 
 type DataStoreOutput struct {
@@ -34,6 +38,13 @@ func CheackHealth() DataStoreOutput {
 
 var statusData dataStore = dataStore{}
 
+func DataStoreInit() error {
+	statusData.Startfile = make(map[string]string)
+	statusData.Endfile = make(map[string]string)
+	statusData.StatusTIme = make(map[string]time.Time)
+	return nil
+}
+
 func (t *dataStore) On() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -48,14 +59,21 @@ func (t *dataStore) Off() {
 func (t *dataStore) Clear() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.Startfile = make(map[string]string)
-	t.Endfile = make(map[string]string)
+	for s, ts := range t.StatusTIme {
+		if time.Now().Sub(ts) > 1*time.Minute { //1分を超えたとき
+			delete(t.Startfile, s)
+			delete(t.Endfile, s)
+		}
+	}
+	// t.Startfile = make(map[string]string)
+	// t.Endfile = make(map[string]string)
 }
 
 func (t *dataStore) Add(s string) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.Startfile[s] = s
+	t.StatusTIme[s] = time.Now()
 }
 
 func (t *dataStore) Change(s string) {
@@ -63,6 +81,7 @@ func (t *dataStore) Change(s string) {
 	defer t.mu.Unlock()
 	delete(t.Startfile, s)
 	t.Endfile[s] = s
+	t.StatusTIme[s] = time.Now()
 }
 
 //状態を返すための処理プログラム
