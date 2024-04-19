@@ -50,7 +50,7 @@
                 <progress id="progress" value="0" max="100"></progress>
                 <input type="file" name="file" onchange="formdataJSON(this);"  id="file" multiple>
                 <button type="button" id="post2" onclick="postFile2('health');">送信</button>
-                <div id="fileck" class="fileck"></div><div id="health" class="health"></div><br>
+                <div id="fileck" class="fileck"></div><div id="health" class="health"></div><div id="status" class="status"></div><br>
             </div>
             <input type="text" name="search" id="keyword" onkeyup="saerch_key(this);return false">
             <input type="button" value="search" onclick="searchButton();return false">
@@ -60,7 +60,7 @@
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
             <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
-            <a class="button" href="javascript:void(0);" onclick="healthckeck('health')">health</a>
+            <a class="button" href="javascript:void(0);" onclick="healthckeck('status')">health</a>
         </div>
         <hr>
         <center>

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestHealth(t *testing.T) {
-	statusData.Clear()
+	DataStoreInit()
 	statusData.On()
 	if statusData.Status != true {
 		t.Fatal(fmt.Sprintln("error change data to true =", statusData.Status))
@@ -41,6 +42,16 @@ func TestHealth(t *testing.T) {
 	}
 	statusData.Clear()
 	statusData.On()
+	s = CheackHealth()
+	if b, err := json.Marshal(&s); err != nil {
+		t.Fatal(err)
+	} else {
+		if string(b) != "{\"Status\":true,\"Startfile\":[],\"Endfile\":[\"aa\"]}" {
+			t.Fatal("errordata", string(b))
+		}
+	}
+	statusData.StatusTIme["aa"] = time.Now().Add(-1 * time.Minute)
+	statusData.Clear()
 	s = CheackHealth()
 	if b, err := json.Marshal(&s); err != nil {
 		t.Fatal(err)
