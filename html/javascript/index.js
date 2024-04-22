@@ -143,7 +143,7 @@ function createProgress(filename,size,i){
   return output
 }
 
-//:ToDo
+
 function PostFileUpload2(formData,i){
   var request = new XMLHttpRequest();
   
@@ -154,6 +154,13 @@ function PostFileUpload2(formData,i){
     var percent = e.loaded / e.total;
     document.getElementById("progress"+i).value = percent * 100;
   }, false);
+  request.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+    if(request.readyState == 4 && request.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+       var data = request.responseText;
+       var jata = JSON.parse(data);
+       console.log(jata);		          // 取得した JSON ファイルの中身を表示
+    }
+  }
   request.open("POST", url);
   request.send(formData);
   return request
@@ -337,4 +344,27 @@ function imageload() {
 		// 遅延読み込み
 		img_elements[i].src = img_elements[i].getAttribute("data-src");
 	}
+}
+
+function historyview(output) {
+  var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+  req.onreadystatechange = function() {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+    if(req.readyState == 4 && req.status == 200){ // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+        var data = req.responseText;
+        var jata = JSON.parse(data);
+        console.log(jata);		          // 取得した JSON ファイルの中身を表示
+        TmpJdata=jata.Result
+        document.getElementById(output).innerHTML = viewSearchTable(jata.Result, output)
+        imageload();
+        ckboxupdate();
+    }else if (req.readyState == 4 && req.status != 200){ 
+        var data = req.responseText;
+        var jata = JSON.parse(data);
+        console.log(jata);		          // 取得した JSON ファイルの中身を表示
+    }
+  };
+  var url = HOSTURL + "/v1/history"
+  req.open("GET", url, true); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+  req.send(null);					    // 実際にサーバーへリクエストを送信
+
 }

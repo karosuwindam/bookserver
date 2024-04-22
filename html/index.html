@@ -8,6 +8,19 @@
         <script>
             var timer = ""
             window.onload = function(){
+                if (isSmartPhone()) {
+                    var body = document.querySelectorAll("body")
+                    body[0].style.fontSize = "x-large"
+                    var edit1 = document.getElementById("edit1")
+                    var edit2 = document.getElementById("edit2")
+                    var health1 = document.getElementById("health_b")
+                    var output1 = document.getElementById("output")
+                    edit1.style.display = "none"
+                    edit2.style.display = "none"
+                    health1.style.display = "none"
+                    output1.style.height = "90%"
+
+                }
                 MAXFILESIZE = {{.maxfilesize}}
                 ckboxupdate ()
             }
@@ -43,10 +56,10 @@
         </script>
     </head>
     <body>
-        <div> <a href="/edit/">編集ページ</a></div>
+        <div id="edit1"> <a href="/edit/">編集ページ</a></div>
 
         <div>
-            <div>
+            <div id="edit2">
                 <progress id="progress" value="0" max="100"></progress>
                 <input type="file" name="file" onchange="formdataJSON(this);"  id="file" multiple>
                 <button type="button" id="post2" onclick="postFile2('health');">送信</button>
@@ -60,7 +73,8 @@
             <a class="button" href="javascript:void(0);" onclick="updataserch('tomonth');">今月</a>
             <a class="button" href="javascript:void(0);" onclick="updataserch('rand');">rand</a>
             <a class="button" href="javascript:void(0);" onclick="outputSortData('output');">Sort</a>
-            <a class="button" href="javascript:void(0);" onclick="healthckeck('status')">health</a>
+            <a class="button" id="health_b" href="javascript:void(0);" onclick="healthckeck('status')">health</a>
+            <a class="button" href="javascript:void(0);" onclick="historyview('output')">history</a>
         </div>
         <hr>
         <center>

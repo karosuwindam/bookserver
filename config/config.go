@@ -35,7 +35,8 @@ type BookserverConfig struct {
 	Public           string `env:"PUBLIC_FILEPASS" envDefault:"./public"`  //ファイル共有で使用するフォルダ
 	MAX_MULTI_MEMORY string `env:"MAX_MULTI_MEMORY" envDefault:"512M"`     //アップロード時のメモリ制限
 	RandamRead       int    `env:"RAND_COUNT" envDefault:"5"`              //ランダムの読み取り最大数
-	ConvertCountMax  int    `env:"MAX_CONVERT_COUNT" envDefault:"3"`
+	ConvertCountMax  int    `env:"MAX_CONVERT_COUNT" envDefault:"3"`       //アップロードされたファイルの失敗回数
+	HistoryMax       int    `env:"MAX_HISTORY" envDefault:"100"`           //履歴を読み取る際の最大数
 }
 
 // 認証関連の設定ファイル

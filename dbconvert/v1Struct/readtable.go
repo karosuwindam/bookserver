@@ -56,3 +56,18 @@ func ReadUploadTmp(db *gorm.DB) ([]UploadTmp_sql, error) {
 	}
 	return tmps, nil
 }
+
+func (t *HistoryViews_sql) Write(db *gorm.DB) error {
+	if results := db.Create(t); results.Error != nil {
+		return results.Error
+	}
+	return nil
+}
+func ReadHistoryViewTmp(db *gorm.DB) ([]HistoryViews_sql, error) {
+	tmps := []HistoryViews_sql{}
+
+	if results := db.Find(&tmps); results.Error != nil {
+		return tmps, results.Error
+	}
+	return tmps, nil
+}
