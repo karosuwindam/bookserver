@@ -11,6 +11,10 @@
                 if (tmppage == null) {
                     tmppage = 1
                 }
+                if (isSmartPhone()) {
+                    var body = document.querySelectorAll("body")
+                    body[0].style.fontSize = "x-large"
+                }
                 var req = onTitleData({{.id}});
                 var req1 = onZipList({{.id}}, {{.page}});
                 req1.onloadend = (e) =>{

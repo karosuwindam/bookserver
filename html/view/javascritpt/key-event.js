@@ -131,7 +131,7 @@ function setSwipe() {
 	// タッチ終了時： スワイプした距離から左右どちらにスワイプしたかを判定する/距離が短い場合何もしない
 	window.addEventListener("touchend", function(e) {
 		//スワイプ移動しない場合の処理
-		if ((sflag)||(swapflag)){
+		if ((sflag)||(swapflag)||(list_flag)){
 			moveX = startX;
 			moveY = startY;
 		}

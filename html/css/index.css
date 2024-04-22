@@ -76,3 +76,21 @@ input[type=checkbox] {
   width: 25px;
   height: 25px;
 }
+
+input[type=text]{
+  /* min-width: 300px; */
+  min-height: 40px;
+  font-size: medium;
+}
+
+input[type=button]{
+  font-size: larger;
+}
+
+input[type=file]{
+  font-size: large;
+}
+
+button {
+  font-size: large;
+}
