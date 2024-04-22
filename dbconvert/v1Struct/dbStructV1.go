@@ -75,3 +75,21 @@ type UploadTmp_sql struct {
 func (o UploadTmp_sql) TableName() string {
 	return "uploadtmps"
 }
+
+// アクセスファイル登録情報
+type HistoryViews struct {
+	Id     uint   `json:"Id" gorm:"primarykey"` //ID
+	FileId int    `json:"FileId"`               //アクセスしたファイルのID
+	Ip     string `json:"Ip"`                   //アクセス元のIPアドレス
+	User   string `json:"User"`                 //アクセスしたユーザアカウントID 未実装
+}
+
+type HistoryViews_sql struct {
+	HistoryViews
+	CreateAt time.Time
+	UpdateAt time.Time
+}
+
+func (o HistoryViews_sql) TableName() string {
+	return "historyviews"
+}

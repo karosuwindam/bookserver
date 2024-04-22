@@ -1,6 +1,7 @@
 package viewpage
 
 import (
+	"bookserver/table/historyviews"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,11 @@ import (
 func GetIdView(w http.ResponseWriter, r *http.Request) {
 	log.Println("info:", r.URL, r.Method)
 	tmpid := r.PathValue("id")
-	_, err := strconv.Atoi(tmpid)
+	id, err := strconv.Atoi(tmpid)
 	if err != nil {
 		htmlPageView(w, r)
 	} else {
+		addhistory(id, r)
 		filepath := htmlpass + baseurl + "/index.html"
 		tmp := make(map[string]string)
 		tmp["id"] = tmpid
@@ -27,6 +29,17 @@ func GetIdView(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+func addhistory(id int, r *http.Request) {
+	tmp := historyviews.HistoryViews{
+		FileId: id,
+		Ip:     r.RemoteAddr,
+		User:   "guest",
+	}
+	if err := tmp.Add(); err != nil {
+		log.Println("error:", err)
+	}
 }
 
 func htmlPageView(w http.ResponseWriter, r *http.Request) {

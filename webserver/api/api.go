@@ -2,7 +2,9 @@ package api
 
 import (
 	copyfilepublic "bookserver/webserver/api/CopyFIlePublic"
+	filedownload "bookserver/webserver/api/FileDownload"
 	fileupload "bookserver/webserver/api/FileUpload"
+	historyview "bookserver/webserver/api/HistoryVIew"
 	tableadd "bookserver/webserver/api/TableAdd"
 	tabledelete "bookserver/webserver/api/TableDelete"
 	tableedit "bookserver/webserver/api/TableEdit"
@@ -28,6 +30,8 @@ var v1apis = []api{
 	{"/edit", tableedit.Init},
 	{"/image", zipfileimageview.Init},
 	{"/copy", copyfilepublic.Init},
+	{"/download", filedownload.Init},
+	{"/history", historyview.Init},
 }
 
 func Init(mux *http.ServeMux) error {

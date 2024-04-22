@@ -28,6 +28,9 @@ https://github.com/karosuwindam/bookserver2
 |/v1/upload|POST|ファイルを送信することでデータを特定フォルダに保管したりアップロードテーブルを更新する|
 |/v1/upload/:filename|GET|ファイル名に連携したファイル出力について返す|||
 |/v1/upload/:filetype/:filename|GET|ファイルの種類とファイ名を指定して特定場所に保存していることを確認|
+|/v1/download/:filetype/:id|GET|対象のファイルをダウンロード|
+|/v1/history|GET|/view/:idにアクセスしたときの履歴を表示|
+|/v1/history?n=x|GET|/view/:idにアクセスしたときの履歴をx個表示|
 
 
 # データベースにデータを追加について

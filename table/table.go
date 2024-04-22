@@ -6,6 +6,7 @@ import (
 	"bookserver/table/booknames"
 	"bookserver/table/copyfiles"
 	"bookserver/table/filelists"
+	"bookserver/table/historyviews"
 	"bookserver/table/uploadtmp"
 	"fmt"
 	"io"
@@ -107,6 +108,9 @@ func tableInit(db *gorm.DB) error {
 	}
 	if err := uploadtmp.Init(db); err != nil {
 		return errors.Wrap(err, "uploadtmp table init error")
+	}
+	if err := historyviews.Init(db); err != nil {
+		return errors.Wrap(err, "historyviews table init error")
 	}
 	//テーブルバージョン初期化
 	if err := InitVTable(db); err != nil {
