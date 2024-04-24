@@ -35,7 +35,7 @@ func Init() error {
 func Run(ctx context.Context) error {
 	var wg sync.WaitGroup
 	log.Println("info:", "controller Start")
-	ctx, cancel := context.WithCancel(ctx)
+
 	wg.Add(1)
 	go func(ctx context.Context) {
 		defer wg.Done()
@@ -68,7 +68,6 @@ func Run(ctx context.Context) error {
 			}
 		}
 	}()
-	cancel()
 	wg.Wait()
 	log.Println("info:", "controller ShutDown")
 	return nil
@@ -77,6 +76,9 @@ func Run(ctx context.Context) error {
 func Stop() error {
 	shutdown <- true
 	if err := readzipfile.Stop(); err != nil {
+		return err
+	}
+	if err := copyfile.Stop(); err != nil {
 		return err
 	}
 	select {
