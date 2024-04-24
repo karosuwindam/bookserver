@@ -43,8 +43,14 @@ function healthcheckout(json) {
 }
 
 function isSmartPhone() {
+      const ua = navigator.userAgent;
+      var width = window.innerWidth
+      var hight = window.innerHeight
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       return true;
+      
+    } else if ((width<hight))   {
+        return true
     } else {
       return false;
     }
