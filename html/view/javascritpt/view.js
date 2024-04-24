@@ -369,9 +369,13 @@ function sortListData(outid,num) {
 
 // モバイルのチェック
 function isSmartPhone() {
+    var width = window.innerWidth
+    var hight = window.innerHeight
     if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
       return true;
-    } else {
+    } else if ((width<hight))   {
+        return true
+    }else{
       return false;
     }
   }
