@@ -58,13 +58,13 @@ func Start() {
 	}()
 
 	<-sigs
+	Stop(ctx)
 	cancel()
-	Stop()
 	wg.Wait()
 }
 
-func Stop() {
-	webserver.Stop()
+func Stop(ctx context.Context) {
+	webserver.Stop(ctx)
 	if err := controller.Stop(); err != nil {
 		panic(err)
 	}

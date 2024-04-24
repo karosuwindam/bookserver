@@ -9,6 +9,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"sync"
 
 	"log"
 
@@ -25,19 +26,9 @@ type SetupServer struct {
 	mux *http.ServeMux //webサーバのmux
 }
 
-// Server
-// Webサーバの管理情報
-type Server struct {
-	// Webサーバの管理関数
-	srv *http.Server
-	// 解放の管理関数
-	l net.Listener
-}
+var srv *http.Server // Webサーバの管理関数
 
 var cfg SetupServer
-
-var ctx context.Context
-var cancel context.CancelFunc
 
 func HelloWeb(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
@@ -52,7 +43,6 @@ func Init() error {
 		port:     config.Web.Port,
 		mux:      http.NewServeMux(),
 	}
-	ctx, cancel = context.WithCancel(context.Background())
 	api.Init(cfg.mux)
 	if err := healthcheck.Init(cfg.mux); err != nil {
 		return errors.Wrap(err, "healthcheck.Init()")
@@ -66,7 +56,8 @@ func Init() error {
 
 func Start() error {
 	var err error = nil
-	srv := &http.Server{
+	var wg sync.WaitGroup
+	srv = &http.Server{
 		Addr:    cfg.hostname + ":" + cfg.port,
 		Handler: cfg.mux,
 	}
@@ -75,19 +66,26 @@ func Start() error {
 		return err
 	}
 	log.Println("info: Start Server", cfg.hostname+":"+cfg.port)
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err = srv.Serve(l); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		} else {
 			err = nil
 		}
 	}()
-	<-ctx.Done()
+	wg.Wait()
 	log.Println("info: Server Stop")
 	return err
 }
 
-func Stop() error {
-	cancel()
+func Stop(ctx context.Context) error {
+	if srv == nil {
+		return nil
+	}
+	if err := srv.Shutdown(ctx); err != nil {
+		return err
+	}
 	return nil
 }
