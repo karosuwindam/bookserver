@@ -48,6 +48,12 @@ type LogConfig struct {
 	Colors bool `env:"LOG_COLORS" envDefault:"true"`
 }
 
+type TracerData struct {
+	GrpcURL     string `env:"TRACER_GRPC_URL" envDefault:"otel-grpc.bookserver.home:4317"`
+	ServiceName string `env:"TRACER_SERVICE_URL" envDefault:"bookserver-test"`
+	TracerUse   bool   `env:"TRACER_ON" envDefault:"true"`
+}
+
 // versionファイルによるバージョン読み取り
 func versionRead() string {
 	f, err := os.Open("version")
@@ -74,6 +80,7 @@ var BScfg BookserverConfig
 var Version string
 var Auth AuthConfig
 var Log LogConfig
+var TraData TracerData
 
 // 環境設定
 func Init() error {
@@ -90,6 +97,9 @@ func Init() error {
 		return err
 	}
 	if err := env.Parse(&Log); err != nil {
+		return err
+	}
+	if err := env.Parse(&TraData); err != nil {
 		return err
 	}
 	Version = versionRead()

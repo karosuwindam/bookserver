@@ -1,13 +1,17 @@
 package copyfile
 
 import (
+	"bookserver/config"
 	"bookserver/table/copyfiles"
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type CopyFIleData struct {
@@ -16,9 +20,14 @@ type CopyFIleData struct {
 }
 
 // idと状態を指定してその状態をテーブルに登録する
-func (t *CopyFIleData) AddTable() error {
+func (t *CopyFIleData) AddTable(ctx context.Context) error {
+
+	ctx, span := config.TracerS(ctx, "Add Table", "AddTable Main")
+	defer span.End()
+
 	tmp := copyfiles.Copyfile{}
 	if d, err := ReadCopyFIleFlagById(t.id); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	} else {
 		tmp = d.Copyfile
@@ -44,13 +53,18 @@ func (t *CopyFIleData) AddTable() error {
 	}
 	if tmp.Id != 0 {
 		if err := tmp.Update(); err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 	} else {
 		if err := tmp.Add(); err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 	}
+	span.SetAttributes(attribute.String("Name", tmp.Zippass))
+	span.SetAttributes(attribute.Int("Id", int(tmp.Id)))
+	span.SetAttributes(attribute.Int("Flag", tmp.Copyflag))
 	return nil
 }
 

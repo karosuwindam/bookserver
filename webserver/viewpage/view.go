@@ -11,7 +11,6 @@ import (
 
 // /view/:idで呼び出される
 // もしidの値が数列に変換できない場合は、静的ページのviewフォルダから対象ファイル名を読み取る
-
 func GetIdView(w http.ResponseWriter, r *http.Request) {
 	log.Println("info:", r.URL, r.Method)
 	tmpid := r.PathValue("id")

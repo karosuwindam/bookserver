@@ -51,13 +51,13 @@ loop:
 			wg.Add(1)
 			go func(filename string) {
 				defer wg.Done()
-				if err := readZipFileAll(filename); err != nil {
+				if err := readZipFileAll(filename, context.TODO()); err != nil {
 					log.Println("error:", err)
 				}
 			}(filename)
 		case <-time.After(1 * time.Second):
 			//１秒ごとの処理
-			if err := clearZipFileCash(); err != nil { //キャッシュ定期削除処理
+			if err := clearZipFileCash(context.TODO()); err != nil { //キャッシュ定期削除処理
 				log.Println("error:", err)
 			}
 		}

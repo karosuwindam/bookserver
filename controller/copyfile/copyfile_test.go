@@ -5,6 +5,7 @@ import (
 	"bookserver/table"
 	"bookserver/table/copyfiles"
 	"bookserver/table/filelists"
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -65,7 +66,7 @@ func TestCopyFileTable(t *testing.T) {
 		id:   1,
 		flag: true,
 	}
-	if err := cp.AddTable(); err != nil {
+	if err := cp.AddTable(context.TODO()); err != nil {
 		t.Fatal(err)
 	}
 	if err := ChackCopyFileTableDataAll(); err != nil {

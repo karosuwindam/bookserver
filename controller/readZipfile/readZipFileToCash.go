@@ -2,7 +2,9 @@ package readzipfile
 
 import (
 	"archive/zip"
+	"bookserver/config"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +13,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 const (
@@ -121,15 +125,21 @@ func renewCashZipTime(filename string) {
 // 対象のファイル名のキャッシュをクリアする
 //
 // filename string:ファイル名
-func clearAddCashZip(filename string) {
+func clearAddCashZip(filename string, ctx context.Context) {
+	ctx, span := config.TracerS(ctx, "Convet", "clearAddCashZip")
+	defer span.End()
 	if dataStore.cashZip != nil {
 		if dataStore.cashZip[filename] != nil {
 			dataStore.mu.Lock()
 			defer dataStore.mu.Unlock()
-			dataStore.cashZip[filename] = nil
-			dataStore.cashZipSize[filename] = 0
-			dataStore.cashZipTime[filename] = time.Time{}
+			// dataStore.cashZip[filename] = nil
+			// dataStore.cashZipSize[filename] = 0
+			// dataStore.cashZipTime[filename] = time.Time{}
+			delete(dataStore.cashZip, filename)
+			delete(dataStore.cashZipSize, filename)
+			delete(dataStore.cashZipTime, filename)
 		}
+		span.SetAttributes(attribute.String("Name", filename))
 	}
 }
 
@@ -138,8 +148,12 @@ func clearAddCashZip(filename string) {
 // 対象のファイル内ファイルをキャッシュに登録する
 //
 // name string: キャッシュ登録するzipファイル
-func readZipFileAll(name string) error {
+func readZipFileAll(name string, ctx context.Context) error {
+
+	ctx, span := config.TracerS(ctx, "readCash", "readZipFileAll")
+	defer span.End()
 	if dataStore.cashZip == nil {
+		span.SetStatus(codes.Error, "error clear cash")
 		return errors.New("error clear cash")
 	}
 	if dataStore.cashZip[name] == nil {
@@ -150,6 +164,7 @@ func readZipFileAll(name string) error {
 		if _, err := os.Stat(pass); err == nil {
 			//zipファイルの読み取り
 			if r, err := zip.OpenReader(pass); err != nil {
+				span.SetStatus(codes.Error, err.Error())
 				return err
 			} else {
 				defer r.Close()
@@ -162,7 +177,7 @@ func readZipFileAll(name string) error {
 				}
 				//キャッシュ容量を確認してクリア
 				if getZipFileCashSize() > CASH_MAX {
-					clearZipFileCash()
+					clearZipFileCash(ctx)
 				}
 				//キャッシュファイル登録
 				for _, f := range r.File {
@@ -191,6 +206,7 @@ func readZipFileAll(name string) error {
 		//キャッシュの登録時刻更新
 		renewCashZipTime(name)
 	}
+	span.SetAttributes(attribute.String("Name", name))
 	return nil
 }
 
@@ -237,8 +253,11 @@ func getZipFileCashSize() int {
 // clearZipFileCash
 //
 // 古いキャッシュを削除する
-func clearZipFileCash() error {
+func clearZipFileCash(ctx context.Context) error {
+	ctx, span := config.TracerS(ctx, "clear cash", "clearZipFileCash")
+	defer span.End()
 	size := getZipFileCashSize()
+	span.SetAttributes(attribute.Int("cash size", size))
 	if size > CASH_MAX {
 		str := ""
 		bt := time.Time{}
@@ -252,13 +271,13 @@ func clearZipFileCash() error {
 			}
 		}
 		log.Println("info:", "Clear Cash", str)
-		clearAddCashZip(str)
+		clearAddCashZip(str, ctx)
 	}
 	for s, t := range dataStore.cashZipTime {
 		if t.Minute() != 0 {
 			if time.Now().Sub(t).Minutes() > CASH_TIMEMAX {
 				log.Println("info:", "Clear Cash", s)
-				clearAddCashZip(s)
+				clearAddCashZip(s, ctx)
 			}
 		}
 	}
