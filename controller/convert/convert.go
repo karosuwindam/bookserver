@@ -5,8 +5,12 @@ import (
 	"bookserver/controller/convert/pdftozip"
 	"bookserver/controller/convert/ziptopdf"
 	"bookserver/table/uploadtmp"
+	"context"
 	"fmt"
 	"log"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 const ERROR_COUNT_MAX = 3
@@ -32,6 +36,9 @@ func Init() error {
 }
 
 func CheckCovertData() error {
+	ctx := context.TODO()
+	ctx, span := config.TracerS(ctx, "Convet", "CheckCovertData")
+	defer span.End()
 	//処理中にステータスを切り替える
 	statusData.On()
 	defer statusData.Off()
@@ -39,6 +46,7 @@ func CheckCovertData() error {
 	//uploadtmpテーブルから未処理のリストを取得
 	lists, err := uploadtmp.GetAllbyFlag(false)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	//処理予定ファイルを登録
@@ -46,15 +54,29 @@ func CheckCovertData() error {
 		statusData.Add(list.Name)
 	}
 	for _, list := range lists {
+
+		ctx, spanList := config.TracerS(ctx, "CheckCovertData", "Listdata")
+		defer spanList.End()
+		spanList.SetAttributes(attribute.String("Pdf", list.SavePdf))
+		spanList.SetAttributes(attribute.String("Zip", list.SaveZip))
+
 		if list.SavePdf != "" && list.SaveZip == "" { //ZipからPDFへ変換する
+			_, spanConvert := config.TracerS(ctx, "CheckCovertData", "ConvertPdfToZip")
+			defer spanConvert.End()
 			if err := pdftozip.ConvertPdfToZip(list.Name); err != nil {
-				log.Panicln("error:", err)
+				spanConvert.SetStatus(codes.Error, err.Error())
+				log.Println("error:", err)
 			} else {
 				//コンバート成功時の処理
 				data, _ := pdftozip.ConvertPdfToZipChack(list.Name)
 				if err := list.SetZipPath(data.Zippass); err != nil {
+					spanConvert.SetStatus(codes.Error, err.Error())
 					log.Println("debug:", err)
 				}
+				spanConvert.SetAttributes(attribute.String("Name", data.Name))
+				spanConvert.SetAttributes(attribute.String("Pdf", data.Pdfpass))
+				spanConvert.SetAttributes(attribute.String("Zip", data.Zippass))
+				spanConvert.SetAttributes(attribute.String("Tag", data.Tag))
 			}
 		}
 		if list.SavePdf == "" && list.SaveZip != "" { //PDFからZipへ変換する

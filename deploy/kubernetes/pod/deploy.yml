@@ -39,14 +39,14 @@ spec:
         effect: NoSchedule
       containers:
       - name: bookserver
-        image: bookserver2:31000/tool/bookserver:0.11.1
+        image: bookserver2:31000/tool/bookserver:0.11.2
         imagePullPolicy: IfNotPresent
         # imagePullPolicy: Always
         env:
           - name: TZ
             value: 'Asia/Tokyo'
-          - name: PYROSCOPE_FLAG
-            value: 'TRUE'
+          - name: 'TRACER_SERVICE_URL'
+            value: 'bookserver'
         ports:
         - containerPort: 8080
         resources:

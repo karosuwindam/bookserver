@@ -51,7 +51,7 @@ loop:
 			shutdown_back <- true
 			break loop
 		case data := <-copythread:
-			if err := data.AddTable(); err != nil {
+			if err := data.AddTable(ctx); err != nil {
 				log.Println("error:", err)
 			}
 		case <-time.After(20 * time.Second):
