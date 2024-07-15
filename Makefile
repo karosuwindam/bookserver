@@ -2,7 +2,7 @@ TAG = ${shell cat version}
 APPNAME = "bookserver"
 GOVERSION = "1.22.1"
 TEMPLATE = ./Dockerfile_tmp
-BASE_CONTANER = "debian:11"
+BASE_CONTANER = "debian:12.6"
 TARGET = Dockerfile
 NAME = bookserver2:31000/tool/${APPNAME}
 TARGET_FILE = ./
@@ -40,6 +40,9 @@ create:
 build: create
 	@echo build
 	${DOCKER} build -t ${NAME}:${TAG} ${TARGET_FILE}
+run:
+	@echo run
+	${DOCKER} run --rm -p 8080:8080 -e TRACER_ON:false ${NAME}:${TAG}
 rmi:
 	${DOCKER} rmi ${NAME}:${TAG}
 	${DOCKER} image prune -f

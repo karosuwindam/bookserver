@@ -1,6 +1,7 @@
 package readzipfile
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"testing"
@@ -27,7 +28,7 @@ func TestCashTest(t *testing.T) {
 		log.Println("info:", err)
 	}
 
-	if err := readZipFileAll("test.zip"); err != nil {
+	if err := readZipFileAll("test.zip", context.TODO()); err != nil {
 		t.Fatal(err)
 	}
 	if dataStore.cashZipSize["test.zip"] != 23002 {
@@ -47,7 +48,7 @@ func TestCashTest(t *testing.T) {
 			t.Fatal(fmt.Sprintf("error data %v != %v", tmp[i], tt))
 		}
 	}
-	if err := clearZipFileCash(); err != nil {
+	if err := clearZipFileCash(context.TODO()); err != nil {
 		t.Fatal(err)
 	}
 	if dataStore.cashZip["test.zip"] == nil {
@@ -57,7 +58,7 @@ func TestCashTest(t *testing.T) {
 	// time.Sleep(1 * time.Minute) //1分経過待ち
 	dataStore.cashZipTime["test.zip"] = time.Now().Add(-2 * time.Minute)
 
-	if err := clearZipFileCash(); err != nil {
+	if err := clearZipFileCash(context.TODO()); err != nil {
 		t.Fatal(err)
 	}
 	if dataStore.cashZip["test.zip"] != nil {

@@ -15,17 +15,24 @@ import (
 	"github.com/comail/colog"
 )
 
+func logConfig() error {
+	colog.SetDefaultLevel(colog.LDebug)
+	colog.SetMinLevel(colog.LTrace)
+	colog.SetFormatter(&colog.StdFormatter{
+		Colors: true,
+		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
+	})
+	colog.Register()
+	return nil
+}
+
 func Init() {
 	if err := config.Init(); err != nil {
 		panic(err)
 	}
-	colog.SetDefaultLevel(colog.LDebug)
-	colog.SetMinLevel(colog.LTrace)
-	colog.SetFormatter(&colog.StdFormatter{
-		Colors: config.Log.Colors,
-		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
-	})
-	colog.Register()
+	if err := logConfig(); err != nil {
+		panic(err)
+	}
 	if err := table.Init(); err != nil {
 		panic(err)
 	}
@@ -41,6 +48,8 @@ func Start() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	ctx, cancel := context.WithCancel(context.Background())
+	config.TracerStart(config.TraData.GrpcURL, config.TraData.ServiceName, ctx)
+	defer config.TracerStop(ctx)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	wg.Add(1)
@@ -52,13 +61,13 @@ func Start() {
 	}(ctx)
 	go func() { //Webサーバの開始処理
 		defer wg.Done()
-		if err := webserver.Start(); err != nil {
+		if err := webserver.Start(ctx); err != nil {
 			panic(err)
 		}
 	}()
 
 	<-sigs
-	Stop(ctx)
+	Stop(context.Background())
 	cancel()
 	wg.Wait()
 }

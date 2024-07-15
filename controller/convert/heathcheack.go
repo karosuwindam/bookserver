@@ -60,9 +60,10 @@ func (t *dataStore) Clear() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	for s, ts := range t.StatusTIme {
-		if time.Now().Sub(ts) > 1*time.Minute { //1分を超えたとき
+		if time.Now().Sub(ts) > 5*time.Minute { //5分を超えたとき
 			delete(t.Startfile, s)
 			delete(t.Endfile, s)
+			delete(t.StatusTIme, s)
 		}
 	}
 	// t.Startfile = make(map[string]string)
