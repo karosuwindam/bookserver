@@ -1,6 +1,7 @@
 package fileupload
 
 import (
+	"bookserver/config"
 	"bookserver/controller/convert/pdftozip"
 	"bookserver/table/uploadtmp"
 	"bookserver/webserver/api/common"
@@ -14,26 +15,44 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // ファイルのアップロード処理
 func PostUploadFile(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ctx, span := config.TracerS(ctx, "PostUploadFile", r.URL.Path)
+	defer span.End()
+
 	var wg sync.WaitGroup
 	//複数のファイルを取得する
-	r.ParseMultipartForm(maxMultiMemory)
+	if err := r.ParseMultipartForm(maxMultiMemory); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		log.Println("error:", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
 	files := r.MultipartForm.File["file"]
 	list := []string{}
 	for _, file := range files {
 		list = append(list, fmt.Sprintf("file=%v size=%v", file.Filename, file.Size))
 	}
+	span.SetAttributes(attribute.StringSlice("list", list))
 	log.Println("info:", r.URL, r.Method, "File=", list)
 	for _, file := range files {
 		wg.Add(1)
 		go func(file *multipart.FileHeader) {
+			_, span2 := config.TracerS(ctx, "saveFileData "+file.Filename, "saveFileData")
+			defer span2.End()
 			defer wg.Done()
 			if err := saveFileData(file); err != nil {
+				span2.SetStatus(codes.Error, err.Error())
 				log.Println("Not Save Error :", file.Filename)
 			}
+			span2.SetAttributes(attribute.String("filename", file.Filename))
+			span2.SetAttributes(attribute.Int64("fileSize", file.Size))
 		}(file)
 	}
 	wg.Wait()
