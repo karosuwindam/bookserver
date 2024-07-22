@@ -67,15 +67,15 @@ func Start(ctx context.Context) error {
 		srv = &http.Server{
 			Addr:         cfg.hostname + ":" + cfg.port,
 			Handler:      hander,
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
+			ReadTimeout:  30 * time.Second,
+			WriteTimeout: 60 * time.Second,
 		}
 	} else {
 		srv = &http.Server{
 			Addr:         cfg.hostname + ":" + cfg.port,
 			Handler:      cfg.mux,
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
+			ReadTimeout:  30 * time.Second,
+			WriteTimeout: 60 * time.Second,
 		}
 	}
 	l, err := net.Listen(cfg.protocol, srv.Addr)
