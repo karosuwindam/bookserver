@@ -14,6 +14,7 @@ import (
 
 	"log"
 
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -59,11 +60,14 @@ func Init() error {
 func Start(ctx context.Context) error {
 	var err error = nil
 	var wg sync.WaitGroup
-
 	if config.TraData.TracerUse {
 		hander := otelhttp.NewHandler(cfg.mux, "http-server",
 			otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
 		)
+
+		// if config.NewRelic.App != nil {
+		// 	_, hander = newrelic.WrapHandle(config.NewRelic.App, "http-server", hander)
+		// }
 		srv = &http.Server{
 			Addr:         cfg.hostname + ":" + cfg.port,
 			Handler:      hander,
@@ -71,12 +75,27 @@ func Start(ctx context.Context) error {
 			WriteTimeout: 60 * time.Second,
 		}
 	} else {
+
+		// if config.NewRelic.App != nil {
+		// 	_, hander := newrelic.WrapHandle(config.NewRelic.App, "http-server", cfg.mux)
+
+		// 	srv = &http.Server{
+		// 		Addr:         cfg.hostname + ":" + cfg.port,
+		// 		Handler:      hander,
+		// 		ReadTimeout:  30 * time.Second,
+		// 		WriteTimeout: 60 * time.Second,
+		// 	}
+		// } else {
 		srv = &http.Server{
 			Addr:         cfg.hostname + ":" + cfg.port,
 			Handler:      cfg.mux,
 			ReadTimeout:  30 * time.Second,
 			WriteTimeout: 60 * time.Second,
 		}
+		// }
+	}
+	if config.NewRelic.App != nil {
+		_, srv.Handler = newrelic.WrapHandle(config.NewRelic.App, "http-server", srv.Handler)
 	}
 	l, err := net.Listen(cfg.protocol, srv.Addr)
 	if err != nil {

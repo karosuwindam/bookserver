@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 // Webサーバの設定
@@ -54,6 +55,11 @@ type TracerData struct {
 	TracerUse   bool   `env:"TRACER_ON" envDefault:"true"`
 }
 
+type NewRelicConf struct {
+	LicenseKey string `env:"NEWRELICCONFKEY" envDefault:""`
+	App        *newrelic.Application
+}
+
 // versionファイルによるバージョン読み取り
 func versionRead() string {
 	f, err := os.Open("version")
@@ -81,6 +87,7 @@ var Version string
 var Auth AuthConfig
 var Log LogConfig
 var TraData TracerData
+var NewRelic NewRelicConf
 
 // 環境設定
 func Init() error {
@@ -100,6 +107,9 @@ func Init() error {
 		return err
 	}
 	if err := env.Parse(&TraData); err != nil {
+		return err
+	}
+	if err := env.Parse(&NewRelic); err != nil {
 		return err
 	}
 	Version = versionRead()

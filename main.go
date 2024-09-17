@@ -42,6 +42,9 @@ func Init() {
 	if err := controller.Init(); err != nil {
 		panic(err)
 	}
+	if err := config.Init_newreclic(); err != nil {
+		panic(err)
+	}
 }
 
 func Start() {

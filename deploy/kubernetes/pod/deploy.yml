@@ -47,6 +47,8 @@ spec:
             value: 'Asia/Tokyo'
           - name: 'TRACER_SERVICE_URL'
             value: 'bookserver'
+          # - name: 'NEWRELICCONFKEY'
+          #   value: ''
         ports:
         - containerPort: 8080
         resources:
