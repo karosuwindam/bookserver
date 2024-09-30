@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -50,7 +50,7 @@ func TracerStart(urldata, serviceName string, ctx context.Context) error {
 	if !TraData.TracerUse {
 		return nil
 	}
-	log.Println("info:", "Tracer Start url", urldata, "service", serviceName)
+	slog.InfoContext(ctx, "Tracer Start", "url", urldata, "service", serviceName)
 	conn, err := initConn(urldata)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func TracerStop(ctx context.Context) {
 		return
 	}
 	if err := tracer_ch(ctx); err != nil {
-		log.Printf("error:", "failed to shutdown TracerProvider: %v", err)
+		slog.ErrorContext(ctx, "failed to shutdown TracerProvider", "err", err.Error())
 	}
 }
 

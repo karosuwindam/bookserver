@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/pkg/errors"
@@ -102,7 +102,7 @@ func copyFileForZipToPublic(str string) error {
 	if _, err := io.Copy(fp, f); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("io.Copy(%v,%v)", publicFilePass, zipFilePass))
 	}
-	log.Println("info:", "Copyfile", str)
+	slog.Info("Copyfile", "name", str)
 	return nil
 
 }
@@ -116,7 +116,7 @@ func removeFileFromPublic(str string) error {
 	if err := os.Remove(publicFilePass); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("os.Remove(%v)", publicFilePass))
 	}
-	log.Println("info:", "Remove file", str)
+	slog.Info("removeFileFromPublic", "name", str)
 
 	return nil
 }
@@ -133,10 +133,10 @@ func ChackCopyFileTableDataAll() error {
 			if _, err := os.Stat(publicFilePass); err == nil {
 				continue
 			}
-			log.Println("info:", fmt.Sprintf("Not file %v", publicFilePass))
+			slog.Info("Not file", "name", publicFilePass)
 			//ファイルが存在しないものは無効にする
 			if err := d.OFF(); err != nil {
-				log.Println("error:", err)
+				slog.Warn("not off", "error", err.Error())
 			}
 		}
 	}

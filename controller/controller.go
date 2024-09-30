@@ -6,7 +6,7 @@ import (
 	readzipfile "bookserver/controller/readZipfile"
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 )
@@ -34,7 +34,7 @@ func Init() error {
 
 func Run(ctx context.Context) error {
 	var wg sync.WaitGroup
-	log.Println("info:", "controller Start")
+	slog.InfoContext(ctx, "controller Start")
 
 	wg.Add(1)
 	go func(ctx context.Context) {
@@ -45,7 +45,7 @@ func Run(ctx context.Context) error {
 	go func(ctx context.Context) {
 		defer wg.Done()
 		if err := copyfile.Run(ctx); err != nil {
-			log.Println("error", err)
+			slog.ErrorContext(ctx, "Copyfile Run", "error", err.Error())
 		}
 	}(ctx)
 	wg.Add(1)
@@ -59,17 +59,17 @@ func Run(ctx context.Context) error {
 				break loop
 			case <-run:
 				if err := convert.CheckCovertData(); err != nil {
-					log.Println("error:", err)
+					slog.ErrorContext(ctx, "CheckCovertData", "error", err.Error())
 				}
 			case <-time.After(5 * time.Second):
 				if err := convert.CheckCovertData(); err != nil {
-					log.Println("error:", err)
+					slog.ErrorContext(ctx, "CheckCovertData", "error", err.Error())
 				}
 			}
 		}
 	}()
 	wg.Wait()
-	log.Println("info:", "controller ShutDown")
+	slog.InfoContext(ctx, "controller Stop")
 	return nil
 }
 

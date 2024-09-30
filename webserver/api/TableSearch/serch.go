@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -26,7 +27,7 @@ var keynames []string = []string{
 
 // Getにより受けったURLをベースにデータ検索を実施してJSON形式を返す
 func GetSearchTable(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	table := r.PathValue("table")
 	keyword := r.PathValue("keyword")
 	if checkTableData(table) != nil || keyword == "" {
@@ -54,11 +55,11 @@ func GetSearchTable(w http.ResponseWriter, r *http.Request) {
 // Postにより受け取ったJSONデータをベースに検索を実施しての結果をJSON形式で返す
 func PostSerchTable(w http.ResponseWriter, r *http.Request) {
 	b, _ := io.ReadAll(r.Body)
-	log.Println("info:", r.URL, r.Method, string(b))
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method, "body", string(b))
 	jout := SearchKey{}
 	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" {
 		//入力データを異常やテーブル指定されていないときの処理
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "PostSerchTable", "error", err.Error())
 	} else {
 		if checkTableData(jout.Table) != nil {
 			w.WriteHeader(http.StatusNotFound)

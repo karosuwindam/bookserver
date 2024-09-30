@@ -3,7 +3,7 @@ package indexpage
 import (
 	"bookserver/config"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -19,7 +19,7 @@ func Init(url string) func(w http.ResponseWriter, r *http.Request) {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path[len(baseurl):]
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	pass := config.Web.StaticPage
 	if pass[len(pass)-1:] != "/" {
 		pass += "/"

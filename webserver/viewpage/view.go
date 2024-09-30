@@ -2,7 +2,7 @@ package viewpage
 
 import (
 	"bookserver/table/historyviews"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,7 +12,7 @@ import (
 // /view/:idで呼び出される
 // もしidの値が数列に変換できない場合は、静的ページのviewフォルダから対象ファイル名を読み取る
 func GetIdView(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
@@ -37,7 +37,7 @@ func addhistory(id int, r *http.Request) {
 		User:   "guest",
 	}
 	if err := tmp.Add(); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "addhistory", "error", err.Error())
 	}
 }
 

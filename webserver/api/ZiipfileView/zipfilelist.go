@@ -3,18 +3,17 @@ package ziipfileview
 import (
 	readzipfile "bookserver/controller/readZipfile"
 	"bookserver/webserver/api/common"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 func GetZipFileList(w http.ResponseWriter, r *http.Request) {
-
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "GetZipFileList", "error", err.Error())
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
@@ -22,7 +21,7 @@ func GetZipFileList(w http.ResponseWriter, r *http.Request) {
 	//idを指定してfilelistテーブルからzipファイル名を取得
 	d, err := readzipfile.GetZiplist(id)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "GetZipFileList", "error", err.Error())
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return

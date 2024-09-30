@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -183,7 +183,7 @@ func readZipFileAll(name string, ctx context.Context) error {
 				for _, f := range r.File {
 					buf := new(bytes.Buffer)
 					if rc, err := r.Open(f.Name); err != nil {
-						log.Println(err)
+						slog.WarnContext(ctx, "error", "error", err.Error())
 						continue
 					} else {
 						if count, err := io.Copy(buf, rc); err != nil {
@@ -270,13 +270,13 @@ func clearZipFileCash(ctx context.Context) error {
 				bt = t
 			}
 		}
-		log.Println("info:", "Clear Cash", str)
+		slog.InfoContext(ctx, "Clear Cash", "name", str)
 		clearAddCashZip(str, ctx)
 	}
 	for s, t := range dataStore.cashZipTime {
 		if t.Minute() != 0 {
 			if time.Now().Sub(t).Minutes() > CASH_TIMEMAX {
-				log.Println("info:", "Clear Cash", s)
+				slog.InfoContext(ctx, "Clear Cash", "name", s)
 				clearAddCashZip(s, ctx)
 			}
 		}

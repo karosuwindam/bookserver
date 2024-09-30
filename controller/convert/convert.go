@@ -6,8 +6,7 @@ import (
 	"bookserver/controller/convert/ziptopdf"
 	"bookserver/table/uploadtmp"
 	"context"
-	"fmt"
-	"log"
+	"log/slog"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -65,13 +64,13 @@ func CheckCovertData() error {
 			defer spanConvert.End()
 			if err := pdftozip.ConvertPdfToZip(list.Name); err != nil {
 				spanConvert.SetStatus(codes.Error, err.Error())
-				log.Println("error:", err)
+				slog.ErrorContext(ctx, "Convert Pdf To Zip", "error", err.Error())
 			} else {
 				//コンバート成功時の処理
 				data, _ := pdftozip.ConvertPdfToZipChack(list.Name)
 				if err := list.SetZipPath(data.Zippass); err != nil {
 					spanConvert.SetStatus(codes.Error, err.Error())
-					log.Println("debug:", err)
+					slog.DebugContext(ctx, "SetZipPath", "error", err.Error())
 				}
 				spanConvert.SetAttributes(attribute.String("Name", data.Name))
 				spanConvert.SetAttributes(attribute.String("Pdf", data.Pdfpass))
@@ -86,16 +85,16 @@ func CheckCovertData() error {
 		if list.SavePdf != "" && list.SaveZip != "" { //正常処理済みなので完了させる
 			statusData.Change(list.Name) //ステータスの切り替え
 			if err := list.FlagOn(); err != nil {
-				log.Println("error:", err)
+				slog.ErrorContext(ctx, "FlagOn", "error", err.Error())
 			}
 		} else {
 			if err := list.CountUp(); err != nil {
-				log.Println("error:", err)
+				slog.ErrorContext(ctx, "CountUp", "error", err.Error())
 			} else {
 				if list.Count > count_error {
-					log.Println("info:", fmt.Sprintf("error Count OVER %v by file %v", count_error, list.Name))
+					slog.WarnContext(ctx, "error Count Over", "name", list.Name, "count", count_error)
 					if err := list.FlagOn(); err != nil {
-						log.Println("error:", err)
+						slog.ErrorContext(ctx, "FlagOn", "error", err.Error())
 					}
 				}
 			}

@@ -6,7 +6,7 @@ import (
 	"image"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
@@ -29,8 +29,9 @@ func ConvertZipToPdf(filepath string) error {
 	defer func() {
 
 		//一時フォルダ内のファイルを削除
+		slog.Debug("reove folder", "name", filepath)
 		if err := removeTmpFileFolder(filepath); err != nil {
-			log.Println("error:", err)
+			slog.Error("reoveTmpFIleFolder", "error", err.Error())
 		}
 	}()
 	//一時フォルダにzipファイルを解凍する
@@ -79,13 +80,13 @@ func imgToPdf(filename, pdfname string) error {
 		}
 		f, err := os.Open(tmpPass + pass + file.Name())
 		if err != nil {
-			log.Println("error:", err)
+			slog.Error("File Open", "error", err.Error())
 			continue
 		}
 		defer f.Close()
 		img, format, err := image.DecodeConfig(f)
 		if err != nil {
-			log.Println("error:", err)
+			slog.Error("DecodeConfig", "error", err.Error())
 		}
 		if format == "jpeg" || format == "jpg" || format == "png" {
 			//画像ファイルのサイズを取得する
@@ -135,17 +136,17 @@ func imgToJpg(filename string) error {
 			if i := strings.Index(strings.ToLower(filepass), PBM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Pbm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.Error("Pbm2jpg", "filepass", filepass, "outname", outputName, "error", err.Error())
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.Debug("Covert file", "filepass", filepass, "outputname", outputName)
 					os.Remove(filepass)
 				}
 			} else if i := strings.Index(strings.ToLower(filepass), PPM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Ppm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.Error("Pbm2jpg", "filepass", filepass, "outname", outputName, "error", err.Error())
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.Debug("Covert file", "filepass", filepass, "outputname", outputName)
 					os.Remove(filepass)
 				}
 			}
@@ -247,7 +248,7 @@ func imageCopyToJpg(filename, outputname string) error {
 			}
 			defer dst.Close()
 			_, err = io.Copy(dst, src)
-			log.Println("debug:", "copy img", imgPass+outname)
+			slog.Debug("copy img", "pass", imgPass+outname)
 			return err
 		}
 	}

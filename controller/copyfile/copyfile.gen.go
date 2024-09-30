@@ -4,7 +4,7 @@ import (
 	"bookserver/config"
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -42,7 +42,7 @@ func Init() error {
 
 func Run(ctx context.Context) error {
 	var wg sync.WaitGroup
-	log.Println("info:", "copy file loop start")
+	slog.InfoContext(ctx, "copy file loop start")
 	loopflag = true
 loop:
 	for {
@@ -52,20 +52,20 @@ loop:
 			break loop
 		case data := <-copythread:
 			if err := data.AddTable(ctx); err != nil {
-				log.Println("error:", err)
+				slog.ErrorContext(ctx, "AddTable", "error", err.Error())
 			}
 		case <-time.After(20 * time.Second):
 			//20秒ごとの処理
 			//テーブルを確認して、有効なファイルが公開フォルダに登録があるか確認
 			if err := ChackCopyFileTableDataAll(); err != nil {
-				log.Println("error:", err)
+				slog.ErrorContext(ctx, "ChackCopyFileTableDataAll", "error", err.Error())
 			}
 		}
 
 	}
 	wg.Wait()
 	loopflag = false
-	log.Println("info:", "copy file loop end")
+	slog.InfoContext(ctx, "copy file loop end")
 	return nil
 }
 

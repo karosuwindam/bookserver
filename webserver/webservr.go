@@ -7,12 +7,11 @@ import (
 	"bookserver/webserver/indexpage"
 	"bookserver/webserver/viewpage"
 	"context"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
 	"time"
-
-	"log"
 
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/pkg/errors"
@@ -101,7 +100,7 @@ func Start(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Println("info: Start Server", cfg.hostname+":"+cfg.port)
+	slog.InfoContext(ctx, "Start Server", "IP", cfg.hostname, "Port", cfg.port)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -112,7 +111,7 @@ func Start(ctx context.Context) error {
 		}
 	}()
 	wg.Wait()
-	log.Println("info: Server Stop")
+	slog.InfoContext(ctx, "Server Stop")
 	return err
 }
 

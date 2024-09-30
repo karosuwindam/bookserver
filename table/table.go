@@ -19,6 +19,9 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/plugin/opentelemetry/logging/logrus"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var db *gorm.DB
@@ -35,6 +38,9 @@ func Init() error {
 	}
 	if err = tableInit(db); err != nil {
 		return errors.Wrap(err, "tableInit")
+	}
+	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		return errors.Wrap(err, "tableTrace")
 	}
 	return nil
 }
@@ -91,8 +97,17 @@ func openSqlite3() (*gorm.DB, error) {
 		}
 
 	}
+	logger := logger.New(
+		logrus.NewWriter(),
+		logger.Config{
+			SlowThreshold: time.Millisecond,
+			LogLevel:      logger.Warn,
+			Colorful:      false,
+		},
+	)
 
-	return gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+	// return gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+	return gorm.Open(sqlite.Open(filepass), &gorm.Config{Logger: logger})
 
 }
 

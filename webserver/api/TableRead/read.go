@@ -7,18 +7,19 @@ import (
 	"bookserver/webserver/api/common"
 	"encoding/json"
 	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 // urlでtableとidをしていて読み取る
 func GetReadId(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	table := r.PathValue("table")
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "GetReadId", "error", err.Error())
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
@@ -37,7 +38,7 @@ func GetReadId(w http.ResponseWriter, r *http.Request) {
 
 // urlでtableを指定して読み取る
 func GetReadAll(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method)
 	tables := r.PathValue("table")
 	if tmp := readTableAll(tables); tmp == "" {
 		//検索したが失敗したときの処理

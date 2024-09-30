@@ -3,7 +3,7 @@ package healthcheck
 import (
 	"bookserver/controller"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -17,7 +17,7 @@ func Health(w http.ResponseWriter, r *http.Request) {
 	output.WebServer = bool(true)
 	output.Controller = controller.HealthCheck()
 	if d, err := json.Marshal(&output); err != nil {
-		log.Println("error", err)
+		slog.ErrorContext(r.Context(), "json Marshal", "error", err.Error())
 	} else {
 		w.Write(d)
 	}

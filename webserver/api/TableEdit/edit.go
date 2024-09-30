@@ -6,7 +6,7 @@ import (
 	"bookserver/table/filelists"
 	"encoding/json"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -15,7 +15,7 @@ func PostTableEditdId(w http.ResponseWriter, r *http.Request) {
 	table := r.PathValue("table")
 	data, _ := io.ReadAll(r.Body)
 	tmpid := r.PathValue("id")
-	log.Println("info:", r.URL, r.Method, string(data))
+	slog.InfoContext(r.Context(), "", "URL", r.URL, "Method", r.Method, "body", string(data))
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -23,7 +23,7 @@ func PostTableEditdId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := editTableSelect(table, id, data); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(r.Context(), "PostTableEditdId", "error", err.Error())
 		return
 	}
 	w.Write([]byte("{\"message\":\"ok\"}"))

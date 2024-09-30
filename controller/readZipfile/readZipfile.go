@@ -3,7 +3,7 @@ package readzipfile
 import (
 	"archive/zip"
 	"bookserver/table/filelists"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -24,7 +24,7 @@ func GetZiplist(id int) (ZipFile, error) {
 		}
 		//zipフォルダのキャッシュを作成依頼
 		if err := AddCash(d.Zippass); err != nil {
-			log.Println("error", err)
+			slog.Warn("error", "error", err.Error())
 		}
 		output = lists
 

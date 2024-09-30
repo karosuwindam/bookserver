@@ -4,7 +4,7 @@ import (
 	"bookserver/config"
 	"bytes"
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -39,7 +39,7 @@ func Init() error {
 // 定期処理
 func Run(ctx context.Context) {
 	var wg sync.WaitGroup
-	log.Println("info:", "zip cash loop start")
+	slog.InfoContext(ctx, "zip cash loop start")
 	loopflag = true
 loop:
 	for {
@@ -52,20 +52,19 @@ loop:
 			go func(filename string) {
 				defer wg.Done()
 				if err := readZipFileAll(filename, context.TODO()); err != nil {
-					log.Println("error:", err)
+					slog.WarnContext(ctx, "error readzipfilealll", "error", err.Error())
 				}
 			}(filename)
 		case <-time.After(1 * time.Second):
 			//１秒ごとの処理
 			if err := clearZipFileCash(context.TODO()); err != nil { //キャッシュ定期削除処理
-				log.Println("error:", err)
+				slog.WarnContext(ctx, "error clearzipfilecash", "error", err.Error())
 			}
 		}
 	}
 	wg.Wait()
 	loopflag = false
-	log.Println("info:", "zip cash loop end")
-
+	slog.InfoContext(ctx, "zip cash loop end")
 }
 
 // シャットダウン処理
@@ -98,13 +97,13 @@ func AddCash(filename string) error {
 func ReadZipfile(filename, zipName string) (*bytes.Buffer, error) {
 	buf, err := ReadCashData(filename, zipName)
 	if err != nil {
-		log.Println("error:", "ReadCashData(", filename, zipName, ") not data cash", err)
+		slog.Error("ReadCashData not data cash", "filename", filename, "zipName", zipName, "error", err.Error())
 		var wg sync.WaitGroup
 		wg.Add(1)
 		go func(filename string) {
 			defer wg.Done()
 			if err := AddCash(filename); err != nil {
-				log.Println("error:", err)
+				slog.Warn("AddCash", "error", err.Error())
 			}
 		}(filename)
 		buf, err = readZipFileData(filename, zipName)

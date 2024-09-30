@@ -7,7 +7,7 @@ import (
 	"bookserver/table/filelists"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strconv"
@@ -106,7 +106,7 @@ func ConvertPdfToZipChack(filepath string) (filelists.Filelists, error) {
 		}
 
 	} else {
-		log.Println("info:", "sql booknames", "not serch name =", pass, "data:", err)
+		slog.Info("sql booknames not serch", "name", pass, "error", err.Error())
 		output.Zippass = output.Name + ".zip"
 	}
 	return output, nil
@@ -122,7 +122,7 @@ func ConvertPdfToZip(filepath string) error {
 
 		//一時フォルダ内のファイルを削除
 		if err := removeTmpFileFolder(filepath); err != nil {
-			log.Println("error:", err)
+			slog.Error("removeTmpFileFolder", "error", err.Error())
 		}
 	}()
 	//pdfimageコマンドを使ってtmpフォルダへpdfファイルから画像と取り出す
@@ -177,7 +177,7 @@ func createZipfile(filename, outputName string) error {
 	if pass[len(pass)-1:] != "/" {
 		pass += "/"
 	}
-	log.Println("info:", "Create Zip FIle:", zipPass+outputName)
+	slog.Info("Create Zip FIle", "zipPass", zipPass, "outputName", outputName)
 	dest, err := os.Create(zipPass + outputName)
 	if err != nil {
 		return err
@@ -253,17 +253,17 @@ func imgToJpg(filename string) error {
 			if i := strings.Index(strings.ToLower(filepass), PBM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Pbm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.Warn("Pbm2jpg", "error", err.Error())
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.Debug("Covert file", "filepass", filepass, "outputName", outputName)
 					os.Remove(filepass)
 				}
 			} else if i := strings.Index(strings.ToLower(filepass), PPM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Ppm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.Warn("Ppm2jpg", "error", err.Error())
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.Debug("Covert file", "filepass", filepass, "outputName", outputName)
 					os.Remove(filepass)
 				}
 			}
@@ -311,7 +311,7 @@ func imageCopyToJpg(filename string) error {
 			}
 			defer dst.Close()
 			_, err = io.Copy(dst, src)
-			log.Println("debug:", "copy img", imgPass+outname)
+			slog.Debug("copy img", "imgPass", imgPass+outname)
 			return err
 		}
 	}
