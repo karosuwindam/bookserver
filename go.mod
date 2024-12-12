@@ -1,6 +1,6 @@
 module bookserver
 
-go 1.22
+go 1.23
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1
@@ -8,26 +8,26 @@ require (
 	github.com/m-mizutani/clog v0.0.7
 	github.com/pkg/errors v0.9.1
 	github.com/samber/slog-multi v1.2.4
-	github.com/signintech/gopdf v0.25.0
-	github.com/spakin/netpbm v1.3.0
+	github.com/signintech/gopdf v0.28.2
+	github.com/spakin/netpbm v1.3.2
 	go.opentelemetry.io/contrib/bridges/otelslog v0.7.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0
 	go.opentelemetry.io/otel v1.32.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.8.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.8.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.32.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.32.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.32.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.28.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.32.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.32.0
 	go.opentelemetry.io/otel/log v0.8.0
 	go.opentelemetry.io/otel/sdk v1.32.0
 	go.opentelemetry.io/otel/sdk/log v0.8.0
 	go.opentelemetry.io/otel/sdk/metric v1.32.0
 	go.opentelemetry.io/otel/trace v1.32.0
-	google.golang.org/grpc v1.67.1
-	gorm.io/driver/sqlite v1.5.5
-	gorm.io/gorm v1.25.9
+	google.golang.org/grpc v1.68.1
+	gorm.io/driver/sqlite v1.5.7
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -44,7 +44,7 @@ require (
 	github.com/m-mizutani/goerr v0.1.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/samber/lo v1.47.0 // indirect
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect

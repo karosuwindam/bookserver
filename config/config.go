@@ -49,6 +49,7 @@ type LogConfig struct {
 }
 
 type TracerData struct {
+	// GrpcURL string `env:"TRACER_GRPC_URL" envDefault:"localhost:4317"`
 	GrpcURL     string `env:"TRACER_GRPC_URL" envDefault:"otel-grpc.bookserver.home:4317"`
 	ServiceName string `env:"TRACER_SERVICE_URL" envDefault:"bookserver-test"`
 	TracerUse   bool   `env:"TRACER_ON" envDefault:"true"`

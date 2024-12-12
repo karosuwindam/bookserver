@@ -1,8 +1,8 @@
 TAG = ${shell cat version}
 APPNAME = "bookserver"
-GOVERSION = "1.22.1"
+GOVERSION = "1.23.4"
 TEMPLATE = ./Dockerfile_tmp
-BASE_CONTANER = "debian:12.6"
+BASE_CONTANER = "debian:12.8"
 TARGET = Dockerfile
 NAME = bookserver2:31000/tool/${APPNAME}
 TARGET_FILE = ./

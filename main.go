@@ -33,7 +33,7 @@ func Start() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	ctx, cancel := context.WithCancel(context.Background())
 	config.TracerStart(config.TraData.GrpcURL, config.TraData.ServiceName, ctx)
-	defer config.TracerStop(ctx)
+	defer config.TracerStop(context.Background())
 	var wg sync.WaitGroup
 	wg.Add(1)
 	wg.Add(1)
