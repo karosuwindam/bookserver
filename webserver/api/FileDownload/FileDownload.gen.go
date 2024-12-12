@@ -26,6 +26,6 @@ func Init(url string, mux *http.ServeMux) error {
 		return err
 	}
 
-	mux.HandleFunc("GET "+url+"/{filetype}/{id}", GetDownload)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{filetype}/{id}", GetDownload)
 	return nil
 }

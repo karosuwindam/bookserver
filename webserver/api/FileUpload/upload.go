@@ -5,11 +5,12 @@ import (
 	"bookserver/controller/convert/pdftozip"
 	"bookserver/table/uploadtmp"
 	"bookserver/webserver/api/common"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -25,13 +26,20 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ctx, span := config.TracerS(ctx, "PostUploadFile", r.URL.Path)
 	defer span.End()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+	)
 
 	var wg sync.WaitGroup
 	//複数のファイルを取得する
 	if err := r.ParseMultipartForm(maxMultiMemory); err != nil {
 		span.SetStatus(codes.Error, err.Error())
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("PostUploadFile ParseMultipartForm error"),
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("parse error"))
 		return
 	}
 	files := r.MultipartForm.File["file"]
@@ -40,7 +48,10 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 		list = append(list, fmt.Sprintf("file=%v size=%v", file.Filename, file.Size))
 	}
 	span.SetAttributes(attribute.StringSlice("list", list))
-	log.Println("info:", r.URL, r.Method, "File=", list)
+	slog.DebugContext(ctx,
+		fmt.Sprintf("PostUploadFile file list=%v", list),
+		"List", list,
+	)
 	for _, file := range files {
 		wg.Add(1)
 		go func(file *multipart.FileHeader) {
@@ -49,7 +60,10 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 			defer wg.Done()
 			if err := saveFileData(file); err != nil {
 				span2.SetStatus(codes.Error, err.Error())
-				log.Println("Not Save Error :", file.Filename)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("PostUploadFile saveFileData error file=%v", file.Filename),
+					"Error", err,
+				)
 			}
 			span2.SetAttributes(attribute.String("filename", file.Filename))
 			span2.SetAttributes(attribute.Int64("fileSize", file.Size))
@@ -111,6 +125,7 @@ func saveFileData(file *multipart.FileHeader) error {
 
 // PDFファイルの保存を実施する。
 func savePdfFile(file *multipart.FileHeader) error {
+	ctx := context.TODO()
 	savePath := pdfFolder + file.Filename
 	f, err := file.Open()
 	if err != nil {
@@ -130,12 +145,16 @@ func savePdfFile(file *multipart.FileHeader) error {
 		defer os.Remove(savePath)
 		return err
 	}
-	log.Println("info:", "Create File for:", savePath)
+	slog.InfoContext(ctx,
+		fmt.Sprintf("Create File for:%v", savePath),
+		"SavePath", savePath,
+	)
 	return nil
 }
 
 // Zipファイルの保存を実施する。
 func saveZipFile(file *multipart.FileHeader) error {
+	ctx := context.TODO()
 	savePath := zipFolder + file.Filename
 	f, err := file.Open()
 	if err != nil {
@@ -155,7 +174,11 @@ func saveZipFile(file *multipart.FileHeader) error {
 		defer os.Remove(savePath)
 		return err
 	}
-	log.Println("info:", "Create File for:", savePath)
+	slog.InfoContext(ctx,
+		fmt.Sprintf("Create File for:%v", savePath),
+		"SavePath", savePath,
+	)
+
 	return nil
 }
 
@@ -179,7 +202,12 @@ type ChangeNameS struct {
 // アップロード後の変換文字列を確認
 // その結果filelistに登録予定のファイルを作成
 func GetUploadFileChangeData(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	output := ChangeDataS{}
 	filename := r.PathValue("filename")
 	if strings.Index(strings.ToLower(filename), "pdf") > 0 {
@@ -196,29 +224,50 @@ func GetUploadFileChangeData(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if ok, err := checkByFIle("zip", b.Zippass); err != nil {
-				log.Println("debug:", r.Method, r.URL, "message:", err)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("GetUploadFileChangeData checkByFIle zip=%v", b.Zippass),
+					"Zip", b.Zippass,
+					"Error", err,
+				)
 				output.Register = false
 			} else {
+				slog.DebugContext(ctx,
+					fmt.Sprintf("GetUploadFileChangeData checkByFIle zip=%v ok", b.Zippass),
+				)
 				output.Register = ok
 			}
 
 			if ok, err := checkByFIle("pdf", b.Pdfpass); err != nil {
-				log.Println("debug:", r.Method, r.URL, "message:", err)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("GetUploadFileChangeData checkByFIle pdf=%v", b.Pdfpass),
+					"Pdf", b.Pdfpass,
+					"Error", err,
+				)
 				output.Overwrite = false
 			} else {
+				slog.DebugContext(ctx,
+					fmt.Sprintf("GetUploadFileChangeData checkByFIle pdf=%v ok", b.Pdfpass),
+				)
 				output.Overwrite = ok
 			}
 		}
 	} else if strings.Index(strings.ToLower(filename), "zip") > 0 {
 		output.Name = filename
 	} else {
+		slog.WarnContext(ctx,
+			fmt.Sprintf("GetUploadFileChangeData checkByFIle filetype=%v", filename),
+			"Filetype", filename,
+		)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("url status error"))
 		return
 	}
 	msg := common.Message(output)
 	if b, errj := json.Marshal(&msg); errj != nil {
-		log.Println(errj)
+		slog.WarnContext(ctx,
+			fmt.Sprintf("GetUploadFileChangeData json.Marshal error"),
+			"Error", errj,
+		)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("url status error"))
 	} else {
@@ -230,10 +279,20 @@ func GetUploadFileChangeData(w http.ResponseWriter, r *http.Request) {
 func GetUplodFileCheck(w http.ResponseWriter, r *http.Request) {
 	filetype := r.PathValue("filetype")
 	filename := r.PathValue("filename")
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	var output string
 	if ok, err := checkByFIle(filetype, filename); err != nil {
-		log.Println("debug:", r.Method, r.URL, "message:", err)
+		slog.WarnContext(ctx,
+			fmt.Sprintf("GetUplodFileCheck checkByFIle filetype=%v filename=%v", filetype, filename),
+			"Filetype", filetype,
+			"Filename", filename,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("url status error"))
 		return
@@ -257,6 +316,10 @@ func checkByFIle(filetype, filename string) (bool, error) {
 }
 
 func pdfCheckFilePass(filename string) (bool, error) {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("pdfCheckFilePass filename=%v", filename),
+	)
 	checkpass := pdfFolder
 	if strings.Index(strings.ToLower(filename), "pdf") > 0 {
 		checkpass += filename
@@ -269,6 +332,10 @@ func pdfCheckFilePass(filename string) (bool, error) {
 }
 
 func zipCheckFilePass(filename string) (bool, error) {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("zipCheckFilePass filename=%v", filename),
+	)
 	checkpass := zipFolder
 	if strings.Index(strings.ToLower(filename), "zip") > 0 {
 		checkpass += filename

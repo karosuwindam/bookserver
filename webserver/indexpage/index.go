@@ -2,8 +2,9 @@ package indexpage
 
 import (
 	"bookserver/config"
+	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -19,7 +20,12 @@ func Init(url string) func(w http.ResponseWriter, r *http.Request) {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path[len(baseurl):]
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	pass := config.Web.StaticPage
 	if pass[len(pass)-1:] != "/" {
 		pass += "/"
@@ -87,6 +93,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	slog.WarnContext(ctx, "Notfond Page")
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("404 Not Found"))

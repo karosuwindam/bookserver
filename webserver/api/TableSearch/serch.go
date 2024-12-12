@@ -6,9 +6,11 @@ import (
 	"bookserver/table/copyfiles"
 	"bookserver/table/filelists"
 	"bookserver/webserver/api/common"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -26,7 +28,12 @@ var keynames []string = []string{
 
 // Getにより受けったURLをベースにデータ検索を実施してJSON形式を返す
 func GetSearchTable(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	table := r.PathValue("table")
 	keyword := r.PathValue("keyword")
 	if checkTableData(table) != nil || keyword == "" {
@@ -54,11 +61,19 @@ func GetSearchTable(w http.ResponseWriter, r *http.Request) {
 // Postにより受け取ったJSONデータをベースに検索を実施しての結果をJSON形式で返す
 func PostSerchTable(w http.ResponseWriter, r *http.Request) {
 	b, _ := io.ReadAll(r.Body)
-	log.Println("info:", r.URL, r.Method, string(b))
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+		"data", string(b),
+	)
 	jout := SearchKey{}
 	if err := json.Unmarshal(b, &jout); err != nil || jout.Table == "" {
 		//入力データを異常やテーブル指定されていないときの処理
-		log.Println("error:", err)
+		slog.ErrorContext(ctx, "PostSerchTable json.Unmarshal error",
+			"error", err,
+		)
 	} else {
 		if checkTableData(jout.Table) != nil {
 			w.WriteHeader(http.StatusNotFound)
@@ -97,161 +112,245 @@ func (t *SearchKey) serchData() string {
 
 // 今日更新したデータを取得
 func toDayGetData(table string) string {
+	ctx := context.TODO()
 	var output string
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.ReadByDataRangeDay(booknames.TODAY); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toDayGetData booknames.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toDayGetData booknames json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case FILELISTS:
 		if ary, err := filelists.ReadByDataRangeDay(filelists.TODAY); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toDayGetData filelists.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toDayGetData filelists json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("toDayGetData read table:%v", table),
+		"table", table,
+		"output", output,
+	)
 	return output
 }
 
 // 今週更新したデータを取得
 func toWeekGetData(table string) string {
+	ctx := context.TODO()
 	var output string
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.ReadByDataRangeDay(booknames.TOWEEK); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toWeekGetData booknames.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toWeekGetData booknames json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case FILELISTS:
 		if ary, err := filelists.ReadByDataRangeDay(filelists.TOWEEK); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toWeekGetData filelists.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toWeekGetData filelists json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("toWeekGetData read table:%v", table),
+		"table", table,
+		"output", output,
+	)
 	return output
 }
 
 // 今月更新したデータを更新
 func toMonthGetData(table string) string {
+	ctx := context.TODO()
 	var output string
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.ReadByDataRangeDay(booknames.TOMONTH); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toMonthGetData booknames.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toMonthGetData booknames json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case FILELISTS:
 		if ary, err := filelists.ReadByDataRangeDay(filelists.TOMONTH); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "toMonthGetData filelists.ReadByDataRangeDay error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "toMonthGetData filelists json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("toMonthGetData read table:%v", table),
+		"table", table,
+		"output", output,
+	)
 	return output
 }
 
 // ランダムなデータを取得
 func randGetData(table string) string {
+	ctx := context.TODO()
 	var output string
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.ReadRandData(config.BScfg.RandamRead); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "randGetData booknames.ReadRandData error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "randGetData booknames json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case FILELISTS:
 		if ary, err := filelists.ReadRandData(config.BScfg.RandamRead); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx, "randGetData filelists.ReadRandData error",
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx, "randGetData filelists json.Marshal error",
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("randGetData read table:%v", table),
+		"table", table,
+		"output", output,
+	)
 	return output
 }
 
 // テーブルを指定して検索を実施
 func serchGetData(table string, keyword string) string {
+	ctx := context.TODO()
 	var output string
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.Search(keyword); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx,
+				fmt.Sprintf("serchGetData booknames.Search keyword:%v error", keyword),
+				"keyword", keyword,
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("serchGetData booknames json.Marshal error"),
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case COPYFILES:
 		if ary, err := copyfiles.Search(keyword); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx,
+				fmt.Sprintf("serchGetData copyfiles.Search keyword:%v error", keyword),
+				"keyword", keyword,
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("serchGetData copyfiles json.Marshal error"),
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	case FILELISTS:
 		if ary, err := filelists.Search(keyword); err != nil {
-			log.Println(err)
+			slog.WarnContext(ctx,
+				fmt.Sprintf("serchGetData filelists.Search keyword:%v error", keyword),
+				"keyword", keyword,
+				"error", err,
+			)
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
-				log.Println(errj)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("serchGetData filelists json.Marshal error"),
+					"error", errj,
+				)
 			} else {
 				output = string(b)
 			}
 		}
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("serchGetData read table:%v keyword:%v", table, keyword),
+		"table", table,
+		"keyword", keyword,
+		"output", output,
+	)
 	return output
 }

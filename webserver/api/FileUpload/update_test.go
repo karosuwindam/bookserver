@@ -8,9 +8,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -176,6 +177,7 @@ func getUpload(url string) (int, string) {
 }
 
 func postUpload(filename string) (int, error) {
+	ctx := context.TODO()
 	var buffer bytes.Buffer
 	writer := multipart.NewWriter(&buffer)
 	fileWriter, err := writer.CreateFormFile("file", filename)
@@ -199,7 +201,11 @@ func postUpload(filename string) (int, error) {
 	if err != nil {
 		return res.StatusCode, err
 	}
-	log.Println("info:", string(m))
+	slog.InfoContext(ctx,
+		fmt.Sprintf("postUpload filename=%v", filename),
+		"Filename", filename,
+		"Data", string(m),
+	)
 
 	return res.StatusCode, nil
 

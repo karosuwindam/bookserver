@@ -3,7 +3,7 @@ package fileupload
 import (
 	"bookserver/config"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -40,7 +40,11 @@ func Init(url string, mux *http.ServeMux) error {
 	//マルチアップロードの確保メモリ最大値入力
 	if tmp, err := setupMaxMultiMemory(config.BScfg.MAX_MULTI_MEMORY); err != nil || tmp < MIN_MULTI_MEMORY {
 		if err != nil {
-			log.Println(err)
+			slog.Error(
+				"setupMaxMultiMemory error",
+				"memory", config.BScfg.MAX_MULTI_MEMORY,
+				"Error", err,
+			)
 		}
 		if tmp == 0 { //0の場合は予定最大値を設定
 			maxMultiMemory = MAX_MULTI_MEMORY
@@ -50,9 +54,10 @@ func Init(url string, mux *http.ServeMux) error {
 	} else {
 		maxMultiMemory = tmp
 	}
-	mux.HandleFunc("POST "+url, PostUploadFile)
-	mux.HandleFunc("GET "+url+"/{filename}", GetUploadFileChangeData)
-	mux.HandleFunc("GET "+url+"/{filetype}/{filename}", GetUplodFileCheck)
+
+	config.TraceHttpHandleFunc(mux, "POST "+url, PostUploadFile)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{filename}", GetUploadFileChangeData)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{filetype}/{filename}", GetUplodFileCheck)
 	return nil
 }
 

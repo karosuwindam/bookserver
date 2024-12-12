@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -115,6 +115,11 @@ func addCashZip(filename, zipName string, size int, buf *bytes.Buffer) {
 //
 // filename string:対象となるzipファイル名
 func renewCashZipTime(filename string) {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("renewCashZipTime %v", filename),
+		"Name", filename,
+	)
 	dataStore.mu.Lock()
 	defer dataStore.mu.Unlock()
 	dataStore.cashZipTime[filename] = time.Now()
@@ -156,6 +161,10 @@ func readZipFileAll(name string, ctx context.Context) error {
 		span.SetStatus(codes.Error, "error clear cash")
 		return errors.New("error clear cash")
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("readZipFileAll %v", name),
+		"Name", name,
+	)
 	if dataStore.cashZip[name] == nil {
 		//キャッシュ作成
 		createAddCashZip(name)
@@ -183,7 +192,13 @@ func readZipFileAll(name string, ctx context.Context) error {
 				for _, f := range r.File {
 					buf := new(bytes.Buffer)
 					if rc, err := r.Open(f.Name); err != nil {
-						log.Println(err)
+						slog.ErrorContext(ctx,
+							fmt.Sprintf("%v zip Open filename=%v", pass, f.Name),
+							"Zip", pass,
+							"name", name,
+							"Error", err,
+						)
+
 						continue
 					} else {
 						if count, err := io.Copy(buf, rc); err != nil {
@@ -258,6 +273,10 @@ func clearZipFileCash(ctx context.Context) error {
 	defer span.End()
 	size := getZipFileCashSize()
 	span.SetAttributes(attribute.Int("cash size", size))
+	slog.DebugContext(ctx,
+		fmt.Sprintf("clearZipFileCash size=%v", size),
+		"Size", size,
+	)
 	if size > CASH_MAX {
 		str := ""
 		bt := time.Time{}
@@ -270,13 +289,21 @@ func clearZipFileCash(ctx context.Context) error {
 				bt = t
 			}
 		}
-		log.Println("info:", "Clear Cash", str)
+		slog.InfoContext(ctx,
+			fmt.Sprintf("Clear Cash %v", str),
+			"Name", str,
+		)
+
 		clearAddCashZip(str, ctx)
 	}
 	for s, t := range dataStore.cashZipTime {
 		if t.Minute() != 0 {
 			if time.Now().Sub(t).Minutes() > CASH_TIMEMAX {
-				log.Println("info:", "Clear Cash", s)
+				slog.InfoContext(ctx,
+					fmt.Sprintf("Clear Cash %v", s),
+					"Name", s,
+				)
+
 				clearAddCashZip(s, ctx)
 			}
 		}

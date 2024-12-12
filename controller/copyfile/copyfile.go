@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/pkg/errors"
@@ -80,6 +80,11 @@ func checkZipFileSize(str string) int {
 
 // ファイル名を指定して公開フォルダへコピを実施
 func copyFileForZipToPublic(str string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("copyFileForZipToPublic %v", str),
+		"Name", str,
+	)
 	zipFilePass := zippass + str
 	publicFilePass := publicpass + str
 	if _, err := os.Stat(zipFilePass); err != nil {
@@ -102,13 +107,22 @@ func copyFileForZipToPublic(str string) error {
 	if _, err := io.Copy(fp, f); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("io.Copy(%v,%v)", publicFilePass, zipFilePass))
 	}
-	log.Println("info:", "Copyfile", str)
+	slog.InfoContext(ctx,
+		fmt.Sprintf("Copy file %v to %v", zipFilePass, publicFilePass),
+		"From", zipFilePass,
+		"To", publicFilePass,
+	)
 	return nil
 
 }
 
 // ファイル名を指定して公開フォルダから削除
 func removeFileFromPublic(str string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("removeFileFromPublic %v", str),
+		"Name", str,
+	)
 	publicFilePass := publicpass + str
 	if _, err := os.Stat(publicFilePass); err != nil {
 		return nil
@@ -116,13 +130,18 @@ func removeFileFromPublic(str string) error {
 	if err := os.Remove(publicFilePass); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("os.Remove(%v)", publicFilePass))
 	}
-	log.Println("info:", "Remove file", str)
+	slog.InfoContext(ctx,
+		fmt.Sprintf("Remove file %v", publicFilePass),
+		"Name", publicFilePass,
+	)
 
 	return nil
 }
 
 // IDに紐付いたファイルが公開フォルダにあるか確認を行いファイルがない場合は削除
 func ChackCopyFileTableDataAll() error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx, "ChackCopyFileTableDataAll")
 	//テーブル内で有効になているものをすべて取得
 	if list, err := copyfiles.OnOFFSearch(copyfiles.ON); err != nil {
 		return err
@@ -133,10 +152,18 @@ func ChackCopyFileTableDataAll() error {
 			if _, err := os.Stat(publicFilePass); err == nil {
 				continue
 			}
-			log.Println("info:", fmt.Sprintf("Not file %v", publicFilePass))
+			slog.InfoContext(ctx,
+				fmt.Sprintf("Not file %v", publicFilePass),
+				"Name", publicFilePass,
+			)
+
 			//ファイルが存在しないものは無効にする
 			if err := d.OFF(); err != nil {
-				log.Println("error:", err)
+				slog.WarnContext(ctx,
+					fmt.Sprintf("OFF error %v", d.Zippass),
+					"Name", d.Zippass,
+					"Error", err,
+				)
 			}
 		}
 	}

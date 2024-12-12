@@ -2,8 +2,9 @@ package filedownload
 
 import (
 	"bookserver/table/filelists"
+	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,25 +14,44 @@ import (
 )
 
 func GetDownload(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	filetype := r.PathValue("filetype")
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("GetDownload strconv.Atoi id=%v", tmpid),
+			"Id", tmpid,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
 	}
 	filename, err := readFileName(id, filetype)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("GetDownload readFileName id=%v filetype=%v", id, filetype),
+			"Id", id,
+			"Filetype", filetype,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
 	}
 	if b, err := readFileData(filename, filetype); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("GetDownload readFileData filename=%v filetype=%v", filename, filetype),
+			"Filename", filename,
+			"Filetype", filetype,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
@@ -67,6 +87,7 @@ func readFileName(id int, filetype string) (string, error) {
 }
 
 func readFileData(filename, filetype string) ([]byte, error) {
+	ctx := context.TODO()
 	var buffer []byte
 	pass, err := createPass(filename, filetype)
 	if err != nil {
@@ -83,7 +104,11 @@ func readFileData(filename, filetype string) ([]byte, error) {
 				break
 			}
 			if err != nil {
-				log.Println("errors:", err)
+				slog.ErrorContext(ctx,
+					fmt.Sprintf("readFileData file.Read pass=%v", pass),
+					"Pass", pass,
+					"Error", err,
+				)
 				break
 			}
 			buffer = append(buffer, buf[:n]...)

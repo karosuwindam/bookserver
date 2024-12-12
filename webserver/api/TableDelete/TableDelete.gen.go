@@ -1,9 +1,12 @@
 package tabledelete
 
-import "net/http"
+import (
+	"bookserver/config"
+	"net/http"
+)
 
 func Init(url string, mux *http.ServeMux) error {
-	mux.HandleFunc("GET "+url+"/{table}/{id}", GetChackTalbeById)
-	mux.HandleFunc("DELETE "+url+"/{table}/{id}", DeleteTableById)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{table}/{id}", GetChackTalbeById)
+	config.TraceHttpHandleFunc(mux, "DELETE "+url+"/{table}/{id}", DeleteTableById)
 	return nil
 }
