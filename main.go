@@ -6,31 +6,15 @@ import (
 	"bookserver/table"
 	"bookserver/webserver"
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-
-	"github.com/comail/colog"
 )
 
-func logConfig() error {
-	colog.SetDefaultLevel(colog.LDebug)
-	colog.SetMinLevel(colog.LTrace)
-	colog.SetFormatter(&colog.StdFormatter{
-		Colors: true,
-		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
-	})
-	colog.Register()
-	return nil
-}
-
-func Init() {
+func init() {
 	if err := config.Init(); err != nil {
-		panic(err)
-	}
-	if err := logConfig(); err != nil {
 		panic(err)
 	}
 	if err := table.Init(); err != nil {
@@ -73,14 +57,17 @@ func Start() {
 }
 
 func Stop(ctx context.Context) {
+	slog.InfoContext(ctx, "Main Stop Start")
 	webserver.Stop(ctx)
+	slog.DebugContext(ctx, "webserver Stop")
 	if err := controller.Stop(); err != nil {
 		panic(err)
 	}
+	slog.DebugContext(ctx, "controller Stop")
+	slog.InfoContext(ctx, "Main Stop End")
 }
 
 func main() {
 
-	Init()
 	Start()
 }

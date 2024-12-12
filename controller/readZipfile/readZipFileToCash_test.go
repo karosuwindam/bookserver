@@ -3,7 +3,7 @@ package readzipfile
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"testing"
 	"time"
 )
@@ -25,7 +25,7 @@ func TestCashTest(t *testing.T) {
 	if _, err := readZipFileData("test.zip", "testout-100.jpg"); err == nil {
 		t.Fatal("error data")
 	} else {
-		log.Println("info:", err)
+		slog.Info("errror data", "err", err)
 	}
 
 	if err := readZipFileAll("test.zip", context.TODO()); err != nil {

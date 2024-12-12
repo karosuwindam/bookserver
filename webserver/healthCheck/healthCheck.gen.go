@@ -1,8 +1,11 @@
 package healthcheck
 
-import "net/http"
+import (
+	"bookserver/config"
+	"net/http"
+)
 
 func Init(mux *http.ServeMux) error {
-	mux.HandleFunc("/health", Health)
+	config.TraceHttpHandleFunc(mux, "/health", Health)
 	return nil
 }

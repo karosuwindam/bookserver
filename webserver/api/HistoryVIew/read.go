@@ -4,13 +4,19 @@ import (
 	"bookserver/config"
 	"bookserver/table/historyviews"
 	"bookserver/webserver/api/common"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 func GetHistoryRead(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	var n int
 	queryParams := r.URL.Query()
 	tmp := queryParams.Get("n")

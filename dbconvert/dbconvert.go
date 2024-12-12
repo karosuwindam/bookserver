@@ -5,7 +5,7 @@ import (
 	v1struct "bookserver/dbconvert/v1Struct"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -39,14 +39,16 @@ func covertSQL3_0_1(srcName, dstName string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("info:", fmt.Sprintf("start copy db %v to %v", srcName, dstName))
+	slog.Info(fmt.Sprintf("start copy db %v to %v", srcName, dstName))
+
 	return covertWrite0to1(v0db, v1db)
 }
 
 func covertWrite0to1(v0db, v1db *gorm.DB) error {
 	timeNow := time.Now()
 	//Copyfileのコピー
-	log.Println("info:", "copyfile table copy")
+	slog.Info("copyfile table copy")
+
 	if ary, err := v0struct.ReadCopyfiles(v0db); err != nil {
 		return err
 	} else {
@@ -78,11 +80,12 @@ func covertWrite0to1(v0db, v1db *gorm.DB) error {
 
 		}
 	}
-	log.Println("info:", fmt.Sprintf("copyfile table copy end %s", time.Since(timeNow)))
+	slog.Info(fmt.Sprintf("copyfile table copy end %s", time.Since(timeNow)))
 
 	timeNow = time.Now()
 
-	log.Println("info:", "Booknames table copy")
+	slog.Info("Booknames table copy")
+
 	if ary, err := v0struct.ReadBooknames(v0db); err != nil {
 		return err
 	} else {
@@ -117,10 +120,11 @@ func covertWrite0to1(v0db, v1db *gorm.DB) error {
 
 		}
 	}
-	log.Println("info:", fmt.Sprintf("Booknames table copy end %s", time.Since(timeNow)))
+	slog.Info(fmt.Sprintf("Booknames table copy end %s", time.Since(timeNow)))
+
 	timeNow = time.Now()
 
-	log.Println("info:", "Filelists table copy")
+	slog.Info("Filelists table copy")
 	if ary, err := v0struct.ReadFilelists(v0db); err != nil {
 		return err
 	} else {
@@ -156,7 +160,7 @@ func covertWrite0to1(v0db, v1db *gorm.DB) error {
 
 		}
 	}
-	log.Println("info:", fmt.Sprintf("Filelists table copy end %s", time.Since(timeNow)))
+	slog.Info(fmt.Sprintf("Filelists table copy end %s", time.Since(timeNow)))
 
 	return nil
 }

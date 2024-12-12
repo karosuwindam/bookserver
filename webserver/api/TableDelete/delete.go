@@ -5,13 +5,19 @@ import (
 	"bookserver/table/copyfiles"
 	"bookserver/table/filelists"
 	"errors"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 func GetChackTalbeById(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	table := r.PathValue("table")
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
@@ -21,18 +27,33 @@ func GetChackTalbeById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := checkTablebyId(id, table); err != nil {
-		log.Println("error:", err)
+		slog.WarnContext(ctx,
+			fmt.Sprintf("GetChackTalbeById checkTablebyId table=%v id=%v", table, id),
+			"Table", table,
+			"Id", id,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("{\"message\":\"ng\"}"))
 		return
 	}
+	slog.DebugContext(ctx,
+		fmt.Sprintf("GetChackTalbeById checkTablebyId table=%v id=%v ok", table, id),
+		"Table", table,
+		"Id", id,
+	)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{\"message\":\"ok\"}"))
 }
 
 // DELETEで受け取ったurlをもとに削除する
 func DeleteTableById(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	table := r.PathValue("table")
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
