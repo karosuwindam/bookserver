@@ -7,15 +7,14 @@ import (
 	"bookserver/webserver/indexpage"
 	"bookserver/webserver/viewpage"
 	"context"
+	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
 	"time"
 
-	"log"
-
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // SetupServer
@@ -52,7 +51,8 @@ func Init() error {
 	if err := viewpage.Init("/view", cfg.mux); err != nil {
 		return errors.Wrap(err, "viewpage.Init()")
 	}
-	cfg.mux.HandleFunc("/", indexpage.Init("/"))
+	// cfg.mux.HandleFunc("/", indexpage.Init("/"))
+	config.TraceHttpHandleFunc(cfg.mux, "/", indexpage.Init("/"))
 	return nil
 }
 
@@ -60,29 +60,31 @@ func Start(ctx context.Context) error {
 	var err error = nil
 	var wg sync.WaitGroup
 
-	if config.TraData.TracerUse {
-		hander := otelhttp.NewHandler(cfg.mux, "http-server",
-			otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
-		)
-		srv = &http.Server{
-			Addr:         cfg.hostname + ":" + cfg.port,
-			Handler:      hander,
-			ReadTimeout:  30 * time.Second,
-			WriteTimeout: 60 * time.Second,
-		}
-	} else {
-		srv = &http.Server{
-			Addr:         cfg.hostname + ":" + cfg.port,
-			Handler:      cfg.mux,
-			ReadTimeout:  30 * time.Second,
-			WriteTimeout: 60 * time.Second,
-		}
+	// if config.TraData.TracerUse {
+	// 	hander := otelhttp.NewHandler(cfg.mux, "http-server",
+	// 		otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
+	// 	)
+	// 	srv = &http.Server{
+	// 		Addr:         cfg.hostname + ":" + cfg.port,
+	// 		Handler:      hander,
+	// 		ReadTimeout:  30 * time.Second,
+	// 		WriteTimeout: 60 * time.Second,
+	// 	}
+	// } else {
+	srv = &http.Server{
+		Addr:         cfg.hostname + ":" + cfg.port,
+		Handler:      cfg.mux,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 60 * time.Second,
 	}
+	// }
 	l, err := net.Listen(cfg.protocol, srv.Addr)
 	if err != nil {
 		return err
 	}
-	log.Println("info: Start Server", cfg.hostname+":"+cfg.port)
+	slog.InfoContext(ctx,
+		fmt.Sprintf("Start Server %v:%v", cfg.hostname, cfg.port),
+	)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -93,7 +95,7 @@ func Start(ctx context.Context) error {
 		}
 	}()
 	wg.Wait()
-	log.Println("info: Server Stop")
+	slog.InfoContext(ctx, "Server Stop")
 	return err
 }
 

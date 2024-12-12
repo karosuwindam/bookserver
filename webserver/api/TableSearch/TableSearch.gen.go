@@ -1,9 +1,12 @@
 package tablesearch
 
-import "net/http"
+import (
+	"bookserver/config"
+	"net/http"
+)
 
 func Init(url string, mux *http.ServeMux) error {
-	mux.HandleFunc("POST "+url, PostSerchTable)
-	mux.HandleFunc("GET "+url+"/{table}/{keyword}", GetSearchTable)
+	config.TraceHttpHandleFunc(mux, "POST "+url, PostSerchTable)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{table}/{keyword}", GetSearchTable)
 	return nil
 }

@@ -1,8 +1,11 @@
 package historyview
 
-import "net/http"
+import (
+	"bookserver/config"
+	"net/http"
+)
 
 func Init(url string, mux *http.ServeMux) error {
-	mux.HandleFunc("GET "+url, GetHistoryRead)
+	config.TraceHttpHandleFunc(mux, "GET "+url, GetHistoryRead)
 	return nil
 }

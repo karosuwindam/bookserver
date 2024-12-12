@@ -3,8 +3,9 @@ package historyviews
 import (
 	"bookserver/config"
 	"bookserver/table/filelists"
+	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/pkg/errors"
@@ -59,6 +60,7 @@ func (t *HistoryViews) Add() error {
 func GetHistory(n int) ([]filelists.Filelists, error) {
 	var out []filelists.Filelists
 	var tmps, historys []sqlHistoryViews
+	ctx := context.TODO()
 	if results := basedb.Order("create_at DESC").Limit(config.BScfg.HistoryMax).Find(&historys); results.Error != nil {
 		return out, results.Error
 	}
@@ -81,7 +83,11 @@ func GetHistory(n int) ([]filelists.Filelists, error) {
 		if b, err := filelists.GetId(int(tmp.FileId)); err == nil {
 			out = append(out, b)
 		} else {
-			log.Println("error:", err)
+			slog.ErrorContext(ctx,
+				fmt.Sprintf("GetHistory filelists.GetId(%v) error", tmp.FileId),
+				"id", tmp.FileId,
+				"Error", err,
+			)
 		}
 	}
 	return out, nil

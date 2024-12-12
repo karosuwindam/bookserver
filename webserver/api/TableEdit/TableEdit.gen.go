@@ -1,11 +1,15 @@
 package tableedit
 
-import "net/http"
+import (
+	"bookserver/config"
+	"net/http"
+)
 
 func Init(url string, mux *http.ServeMux) error {
 
-	mux.HandleFunc("GET "+url+"/{table}/{id}", GetReadId)
-	mux.HandleFunc("POST "+url+"/{table}/{id}", PostTableEditdId)
-	mux.HandleFunc("DELETE "+url+"/{table}/{id}", DeleteTableById)
+	config.TraceHttpHandleFunc(mux, "GET "+url+"/{table}/{id}", GetReadId)
+	config.TraceHttpHandleFunc(mux, "POST "+url+"/{table}/{id}", PostTableEditdId)
+	config.TraceHttpHandleFunc(mux, "DELETE "+url+"/{table}/{id}", DeleteTableById)
+
 	return nil
 }

@@ -3,10 +3,12 @@ package ziptopdf
 import (
 	"archive/zip"
 	"bookserver/controller/convert/pnmtojpg"
+	"context"
+	"fmt"
 	"image"
 	"io"
 	"io/ioutil"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
@@ -16,6 +18,10 @@ import (
 )
 
 func ConvertZipToPdf(filepath string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("ConvertZipToPdf %v", filepath),
+	)
 	// outputname := ""
 	pass := ""
 	// tag := ""
@@ -30,7 +36,11 @@ func ConvertZipToPdf(filepath string) error {
 
 		//一時フォルダ内のファイルを削除
 		if err := removeTmpFileFolder(filepath); err != nil {
-			log.Println("error:", err)
+			slog.ErrorContext(ctx,
+				fmt.Sprintf("ConvertZipToPdf removeTmpFileFolder(%v) error", filepath),
+				"Name", filepath,
+				"Error", err,
+			)
 		}
 	}()
 	//一時フォルダにzipファイルを解凍する
@@ -59,6 +69,12 @@ func ConvertZipToPdf(filepath string) error {
 
 // 一時フォルダ内の画像ファイルをpdfへ変換
 func imgToPdf(filename, pdfname string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("imgToPdf %v %v", filename, pdfname),
+		"Name", filename,
+		"PdfName", pdfname,
+	)
 	pass := filename
 	if i := strings.Index(strings.ToLower(filename), ".zip"); i > 0 {
 		pass = filename[:i]
@@ -79,13 +95,23 @@ func imgToPdf(filename, pdfname string) error {
 		}
 		f, err := os.Open(tmpPass + pass + file.Name())
 		if err != nil {
-			log.Println("error:", err)
+			slog.ErrorContext(ctx,
+				fmt.Sprintf("imgToPdf Open file=%v", pass+file.Name()),
+				"file", pass+file.Name(),
+				"Error", err,
+			)
+
 			continue
 		}
 		defer f.Close()
 		img, format, err := image.DecodeConfig(f)
 		if err != nil {
-			log.Println("error:", err)
+			slog.ErrorContext(ctx,
+				fmt.Sprintf("imgToPdf DecodeConfig file=%v", pass+file.Name()),
+				"file", pass+file.Name(),
+				"Error", err,
+			)
+
 		}
 		if format == "jpeg" || format == "jpg" || format == "png" {
 			//画像ファイルのサイズを取得する
@@ -112,6 +138,11 @@ const (
 
 // pbmやppm形式のファイルをjpgへ変換する
 func imgToJpg(filename string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("imgToJpg %v", filename),
+		"Name", filename,
+	)
 	var ch chan bool = make(chan bool, 10)
 	var wg sync.WaitGroup
 
@@ -135,17 +166,35 @@ func imgToJpg(filename string) error {
 			if i := strings.Index(strings.ToLower(filepass), PBM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Pbm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.ErrorContext(ctx,
+						fmt.Sprintf("imgToJpg Pbm2jpg file=%v", filepass),
+						"file", filepass,
+						"Error", err,
+					)
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.DebugContext(ctx,
+						fmt.Sprintf("imgToJpg Pbm2jpg file=%v to %v", filepass, outputName),
+						"file", filepass,
+						"output", outputName,
+					)
+
 					os.Remove(filepass)
 				}
 			} else if i := strings.Index(strings.ToLower(filepass), PPM); i > 0 {
 				outputName := filepass[:i] + JPG
 				if err := pnmtojpg.Ppm2jpg(filepass, outputName); err != nil {
-					log.Println("error:", filepass, outputName)
+					slog.ErrorContext(ctx,
+						fmt.Sprintf("imgToJpg Ppm2jpg file=%v", filepass),
+						"file", filepass,
+						"Error", err,
+					)
 				} else {
-					log.Panicln("debug:", "Covert file", filepass, "to", outputName)
+					slog.DebugContext(ctx,
+						fmt.Sprintf("imgToJpg Ppm2jpg file=%v to %v", filepass, outputName),
+						"file", filepass,
+						"output", outputName,
+					)
+
 					os.Remove(filepass)
 				}
 			}
@@ -162,6 +211,11 @@ func imgToJpg(filename string) error {
 //
 // filename(string) : zipフォルダ内のあるzipファイル名
 func unzip(filename string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("unzip %v", filename),
+		"Name", filename,
+	)
 	pass := filename
 	if i := strings.Index(strings.ToLower(filename), ".zip"); i > 0 {
 		pass = filename[:i]
@@ -212,6 +266,12 @@ func removeTmpFileFolder(filename string) error {
 
 // 番初めに取り出した画像ファイルを特定フォルダへコピ
 func imageCopyToJpg(filename, outputname string) error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("imageCopyToJpg %v %v", filename, outputname),
+		"Name", filename,
+		"OutputName", outputname,
+	)
 
 	pass := filename
 	if i := strings.Index(strings.ToLower(filename), ".pdf"); i > 0 {
@@ -247,7 +307,10 @@ func imageCopyToJpg(filename, outputname string) error {
 			}
 			defer dst.Close()
 			_, err = io.Copy(dst, src)
-			log.Println("debug:", "copy img", imgPass+outname)
+			slog.DebugContext(ctx,
+				fmt.Sprintf("imageCopyToJpg copy img=%v", imgPass+outname),
+				"Name", imgPass+outname,
+			)
 			return err
 		}
 	}

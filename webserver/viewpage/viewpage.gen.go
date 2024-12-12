@@ -18,6 +18,6 @@ func Init(url string, mux *http.ServeMux) error {
 	if htmlpass[len(htmlpass)-1:] == "/" {
 		htmlpass = htmlpass[:len(htmlpass)-1]
 	}
-	mux.HandleFunc("GET "+baseurl+"/{id}", GetIdView)
+	config.TraceHttpHandleFunc(mux, "GET "+baseurl+"/{id}", GetIdView)
 	return nil
 }

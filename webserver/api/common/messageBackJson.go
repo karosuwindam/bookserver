@@ -1,8 +1,9 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 )
 
 type message struct {
@@ -16,9 +17,13 @@ func Message(str interface{}) message {
 }
 
 func (t *message) Json() []byte {
+	ctx := context.TODO()
 	tmp, err := json.Marshal(t)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			"Message Json error",
+			"Error", err,
+		)
 		return nil
 	}
 	return tmp

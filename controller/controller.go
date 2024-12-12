@@ -6,7 +6,7 @@ import (
 	readzipfile "bookserver/controller/readZipfile"
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 )
@@ -34,7 +34,7 @@ func Init() error {
 
 func Run(ctx context.Context) error {
 	var wg sync.WaitGroup
-	log.Println("info:", "controller Start")
+	slog.InfoContext(ctx, "controller Start")
 
 	wg.Add(1)
 	go func(ctx context.Context) {
@@ -45,7 +45,10 @@ func Run(ctx context.Context) error {
 	go func(ctx context.Context) {
 		defer wg.Done()
 		if err := copyfile.Run(ctx); err != nil {
-			log.Println("error", err)
+			slog.ErrorContext(ctx,
+				"copyfile.Run error",
+				"Error", err,
+			)
 		}
 	}(ctx)
 	wg.Add(1)
@@ -58,22 +61,32 @@ func Run(ctx context.Context) error {
 				shutdown_back <- true
 				break loop
 			case <-run:
+				ctxconvert, _ := context.WithTimeout(ctx, 1*time.Hour)
 				if err := convert.CheckCovertData(); err != nil {
-					log.Println("error:", err)
+					slog.ErrorContext(ctxconvert,
+						"CheckCovertData error",
+						"Error", err,
+					)
 				}
 			case <-time.After(5 * time.Second):
+				ctxconvert, _ := context.WithTimeout(ctx, 5*time.Second)
 				if err := convert.CheckCovertData(); err != nil {
-					log.Println("error:", err)
+					slog.ErrorContext(ctxconvert,
+						"CheckCovertData error",
+						"Error", err,
+					)
 				}
 			}
 		}
 	}()
 	wg.Wait()
-	log.Println("info:", "controller ShutDown")
+	slog.InfoContext(ctx, "controller Stop")
 	return nil
 }
 
 func Stop() error {
+	ctx := context.TODO()
+	slog.DebugContext(ctx, "controller Stop Start")
 	shutdown <- true
 	if err := readzipfile.Stop(); err != nil {
 		return err
@@ -83,6 +96,8 @@ func Stop() error {
 	}
 	select {
 	case <-shutdown_back:
+		slog.DebugContext(ctx, "controller Stop End")
+		break
 	case <-time.After(5 * time.Second):
 		return errors.New("Shutdown error")
 	}

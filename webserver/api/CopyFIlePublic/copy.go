@@ -4,8 +4,9 @@ import (
 	"bookserver/controller/copyfile"
 	"bookserver/webserver/api/common"
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -15,18 +16,30 @@ type CopyFileRecv struct {
 }
 
 func PostCopyFile(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	data, _ := io.ReadAll(r.Body)
-	log.Println("info:", r.URL, r.Method, string(data))
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Body", string(data),
+	)
 	msg := common.Message("NG")
 	//処理を後で各
 	tmp := CopyFileRecv{}
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("PostCopyFile json.Unmarshal error"),
+			"Error", err,
+		)
 		w.Write(msg.Json())
 		return
 	}
 	if err := copyfile.Add(tmp.Id, tmp.Flag); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("PostCopyFile copyfile.Add id=%v error", tmp.Id),
+			"id", tmp.Id,
+			"flag", tmp.Flag,
+			"Error", err,
+		)
 		w.Write(msg.Json())
 		return
 	}

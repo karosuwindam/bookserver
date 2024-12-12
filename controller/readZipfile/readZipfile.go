@@ -3,7 +3,9 @@ package readzipfile
 import (
 	"archive/zip"
 	"bookserver/table/filelists"
-	"log"
+	"context"
+	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -11,6 +13,11 @@ import (
 )
 
 func GetZiplist(id int) (ZipFile, error) {
+	ctx := context.TODO()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("GetZiplist id=%v", id),
+		"id", id,
+	)
 	var output ZipFile
 	//idを元にテーブルからzipのファイル名を取得
 	if d, err := filelists.GetId(id); err != nil {
@@ -24,7 +31,11 @@ func GetZiplist(id int) (ZipFile, error) {
 		}
 		//zipフォルダのキャッシュを作成依頼
 		if err := AddCash(d.Zippass); err != nil {
-			log.Println("error", err)
+			slog.ErrorContext(ctx,
+				fmt.Sprintf("GetZiplist AddChash file=%v", d.Zippass),
+				"file", d.Zippass,
+				"Error", err,
+			)
 		}
 		output = lists
 

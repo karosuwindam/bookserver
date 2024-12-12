@@ -2,7 +2,8 @@ package viewpage
 
 import (
 	"bookserver/table/historyviews"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,12 +13,21 @@ import (
 // /view/:idで呼び出される
 // もしidの値が数列に変換できない場合は、静的ページのviewフォルダから対象ファイル名を読み取る
 func GetIdView(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.URL, r.Method),
+		"url", r.URL,
+		"Method", r.Method,
+	)
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
 		htmlPageView(w, r)
 	} else {
+		slog.DebugContext(ctx,
+			fmt.Sprintf("addhistory id=%v", id),
+			"id", id,
+		)
 		addhistory(id, r)
 		filepath := htmlpass + baseurl + "/index.html"
 		tmp := make(map[string]string)
@@ -37,11 +47,15 @@ func addhistory(id int, r *http.Request) {
 		User:   "guest",
 	}
 	if err := tmp.Add(); err != nil {
-		log.Println("error:", err)
+		slog.Warn("addhistory error",
+			"error", err,
+		)
 	}
 }
 
 func htmlPageView(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	slog.DebugContext(ctx, "htmlPageView run")
 
 	pass := htmlpass
 	if pass[len(pass)-1:] != "/" {
@@ -69,6 +83,10 @@ func htmlPageView(w http.ResponseWriter, r *http.Request) {
 		w.Write(buffer)
 		return
 	}
+	slog.WarnContext(ctx,
+		fmt.Sprintf("error opne file name=%v", filepath),
+		"error", err,
+	)
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("404 Not Found"))

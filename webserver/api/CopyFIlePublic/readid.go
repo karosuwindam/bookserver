@@ -3,24 +3,38 @@ package copyfilepublic
 import (
 	"bookserver/controller/copyfile"
 	"bookserver/webserver/api/common"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 func GetFileDataFlagById(w http.ResponseWriter, r *http.Request) {
-	log.Println("info:", r.URL, r.Method)
+	ctx := r.Context()
+	slog.InfoContext(ctx,
+		fmt.Sprintf("%v %v", r.Method, r.URL),
+		"Url", r.URL,
+		"Method", r.Method,
+	)
 	tmpid := r.PathValue("id")
 	id, err := strconv.Atoi(tmpid)
 	if err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("GetFileDataFlagById strconv.Atoi id=%v", tmpid),
+			"Id", tmpid,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
 	}
 	// idに紐づいたファイルが存在するか確認
 	if d, err := copyfile.ReadCopyFIleFlagById(id); err != nil {
-		log.Println("error:", err)
+		slog.ErrorContext(ctx,
+			fmt.Sprintf("GetFileDataFlagById ReadCopyFIleFlagById id=%v", id),
+			"Id", id,
+			"Error", err,
+		)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("page not found"))
 		return
