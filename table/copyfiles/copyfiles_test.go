@@ -3,6 +3,7 @@ package copyfiles_test
 import (
 	"bookserver/config"
 	"bookserver/table/copyfiles"
+	"context"
 	"os"
 	"testing"
 
@@ -34,7 +35,7 @@ func TestCopyfiles(t *testing.T) {
 	if err := tmp.Add(); err != nil {
 		t.Fatal(err)
 	}
-	if d, err := copyfiles.GetAll(); err != nil {
+	if d, err := copyfiles.GetAll(context.TODO()); err != nil {
 		t.Fatal(err)
 	} else {
 		if len(d) != 2 {

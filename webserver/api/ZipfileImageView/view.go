@@ -1,6 +1,7 @@
 package zipfileimageview
 
 import (
+	"bookserver/config"
 	readzipfile "bookserver/controller/readZipfile"
 	"bookserver/table/filelists"
 	"fmt"
@@ -11,6 +12,9 @@ import (
 
 func GetZipFileImageView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := config.TracerS(ctx, "GetZipFileImageView", "Get Zip File Image View")
+	defer span.End()
+
 	slog.InfoContext(ctx,
 		fmt.Sprintf("%v %v", r.Method, r.URL),
 		"Url", r.URL,

@@ -5,6 +5,7 @@ import (
 	"bookserver/table"
 	"bookserver/table/booknames"
 	"bookserver/table/filelists"
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -55,6 +56,7 @@ func TestPdfToZipChangeName(t *testing.T) {
 	os.Setenv("PDF_FILEPASS", "./pdf")
 	os.Setenv("ZIP_FILEPASS", "./test/zip")
 	os.Setenv("DB_ROOTPASS", "./test/")
+
 	defer func() {
 		os.RemoveAll("./test/")
 	}()
@@ -98,7 +100,7 @@ func TestPdfToZipChangeName(t *testing.T) {
 	if err := ConvertPdfToZip("testout.pdf"); err != nil {
 		t.Fatal(err)
 	}
-	if d, err := filelists.GetAll(); err != nil {
+	if d, err := filelists.GetAll(context.TODO()); err != nil {
 		t.Fatal(err)
 	} else if len(d) != 1 {
 		t.Fatal("add over table")
@@ -155,7 +157,7 @@ func TestPdfToZipChangeName_1(t *testing.T) {
 	if err := ConvertPdfToZip("testout.pdf"); err != nil {
 		t.Fatal(err)
 	}
-	if d, err := filelists.GetAll(); err != nil {
+	if d, err := filelists.GetAll(context.TODO()); err != nil {
 		t.Fatal(err)
 	} else if len(d) != 2 {
 		t.Fatal("add over table")

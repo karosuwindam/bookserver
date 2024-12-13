@@ -2,6 +2,7 @@ package readzipfile
 
 import (
 	"archive/zip"
+	"bookserver/config"
 	"bookserver/table/filelists"
 	"context"
 	"fmt"
@@ -12,25 +13,37 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetZiplist(id int) (ZipFile, error) {
-	ctx := context.TODO()
+func GetZiplist(ctx context.Context) (ZipFile, error) {
+	var output ZipFile
+
+	ctx, span := config.TracerS(ctx, "GetZiplist", "Get Zip List")
+	defer span.End()
+	id, ok := contextReadZipId(ctx)
+	if !ok {
+		err := fmt.Errorf("context Not Input id")
+		config.TracerError(span, err)
+		return output, err
+	}
 	slog.DebugContext(ctx,
 		fmt.Sprintf("GetZiplist id=%v", id),
 		"id", id,
 	)
-	var output ZipFile
 	//idを元にテーブルからzipのファイル名を取得
 	if d, err := filelists.GetId(id); err != nil {
+		config.TracerError(span, err)
 		return output, errors.Wrap(err, "sql read by booknamaes")
 	} else {
 		//zipファイル名からファイルリストを作成
 		lists, err := openfile(d.Zippass)
 		if err != nil {
+			config.TracerError(span, err)
+
 			return output, errors.Wrap(err, "read zipfile error")
 
 		}
 		//zipフォルダのキャッシュを作成依頼
 		if err := AddCash(d.Zippass); err != nil {
+			config.TracerError(span, err)
 			slog.ErrorContext(ctx,
 				fmt.Sprintf("GetZiplist AddChash file=%v", d.Zippass),
 				"file", d.Zippass,

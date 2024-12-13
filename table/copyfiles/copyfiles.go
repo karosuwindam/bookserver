@@ -1,6 +1,8 @@
 package copyfiles
 
 import (
+	"bookserver/config"
+	"context"
 	"errors"
 	"strconv"
 	"time"
@@ -57,10 +59,13 @@ func (t *Copyfile) Add() error {
 	return nil
 }
 
-func GetAll() ([]Copyfile, error) {
+func GetAll(ctx context.Context) ([]Copyfile, error) {
+	ctx, span := config.TracerS(ctx, "GetAll", "Get All Copyfile")
+	defer span.End()
 	out := []Copyfile{}
 	tmps := []sqlCopyfile{}
 	if results := basedb.Find(&tmps); results.Error != nil {
+		config.TracerError(span, results.Error)
 		return out, results.Error
 	}
 	for _, sbn := range tmps {

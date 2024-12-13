@@ -33,7 +33,7 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 	var wg sync.WaitGroup
 	//複数のファイルを取得する
 	if err := r.ParseMultipartForm(maxMultiMemory); err != nil {
-		span.SetStatus(codes.Error, err.Error())
+		config.TracerError(span, err)
 		slog.ErrorContext(ctx,
 			fmt.Sprintf("PostUploadFile ParseMultipartForm error"),
 			"Error", err,
@@ -55,12 +55,12 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 	for _, file := range files {
 		wg.Add(1)
 		go func(file *multipart.FileHeader) {
-			_, span2 := config.TracerS(ctx, "saveFileData "+file.Filename, "saveFileData")
+			ctxsave, span2 := config.TracerS(ctx, "saveFileData "+file.Filename, "saveFileData")
 			defer span2.End()
 			defer wg.Done()
-			if err := saveFileData(file); err != nil {
+			if err := saveFileData(ctxsave, file); err != nil {
 				span2.SetStatus(codes.Error, err.Error())
-				slog.WarnContext(ctx,
+				slog.WarnContext(ctxsave,
 					fmt.Sprintf("PostUploadFile saveFileData error file=%v", file.Filename),
 					"Error", err,
 				)
@@ -75,21 +75,31 @@ func PostUploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 // アップロードしたときのファイル保存処理
-func saveFileData(file *multipart.FileHeader) error {
+func saveFileData(ctx context.Context, file *multipart.FileHeader) error {
+	ctx, span := config.TracerS(ctx, "saveFileData", "save File Data")
+	defer span.End()
+	slog.DebugContext(ctx,
+		fmt.Sprintf("saveFileData file=%v Run", file.Filename),
+		"Filename", file.Filename,
+	)
 	filename := file.Filename
+
 	//テーブルへの追加
 	sqlTmp := uploadtmp.UploadTmp{
 		Name: filename,
 	}
 	if err := sqlTmp.CheckName(); err != nil {
+		config.TracerError(span, err)
 		return err
 	}
 	if sqlTmp.Id > 0 {
 		if err := sqlTmp.CountClear(); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 	} else {
 		if err := sqlTmp.Add(); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 	}
@@ -97,26 +107,31 @@ func saveFileData(file *multipart.FileHeader) error {
 	if strings.Index(strings.ToLower(filename), "pdf") > 0 {
 		//pdfの処理
 		//ファイルを特定フォルダへ保存
-		if err := savePdfFile(file); err != nil {
+		if err := savePdfFile(ctx, file); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 		//テーブルを書き換える
 		if err := sqlTmp.SetPdfPath(pdfFolder + filename); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 	} else if strings.Index(strings.ToLower(filename), "zip") > 0 {
 		//zipの処理
 		//ファイルを特定フォルダへ保存
-		if err := saveZipFile(file); err != nil {
+		if err := saveZipFile(ctx, file); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 		//テーブルを書き換える
 		if err := sqlTmp.SetZipPath(zipFolder + filename); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 	} else {
 		//定期処理を無効にする処理
 		if err := sqlTmp.FlagOn(); err != nil {
+			config.TracerError(span, err)
 			return err
 		}
 	}
@@ -124,25 +139,31 @@ func saveFileData(file *multipart.FileHeader) error {
 }
 
 // PDFファイルの保存を実施する。
-func savePdfFile(file *multipart.FileHeader) error {
-	ctx := context.TODO()
+func savePdfFile(ctx context.Context, file *multipart.FileHeader) error {
+	ctx, span := config.TracerS(ctx, "savePdfFile", "save Pdf File")
+	defer span.End()
+
 	savePath := pdfFolder + file.Filename
 	f, err := file.Open()
 	if err != nil {
+		config.TracerError(span, err)
 		return err
 	}
 	defer f.Close()
 	out, err := os.Create(savePath)
 	if err != nil {
+		config.TracerError(span, err)
 		return err
 	}
 	defer out.Close()
 	if _, err = f.Seek(0, 0); err != nil {
 		defer os.Remove(savePath)
+		config.TracerError(span, err)
 		return err
 	}
 	if _, err = io.Copy(out, f); err != nil {
 		defer os.Remove(savePath)
+		config.TracerError(span, err)
 		return err
 	}
 	slog.InfoContext(ctx,
@@ -153,25 +174,30 @@ func savePdfFile(file *multipart.FileHeader) error {
 }
 
 // Zipファイルの保存を実施する。
-func saveZipFile(file *multipart.FileHeader) error {
-	ctx := context.TODO()
+func saveZipFile(ctx context.Context, file *multipart.FileHeader) error {
+	ctx, span := config.TracerS(ctx, "saveZipFile", "save Zip File")
+	defer span.End()
 	savePath := zipFolder + file.Filename
 	f, err := file.Open()
 	if err != nil {
+		config.TracerError(span, err)
 		return err
 	}
 	defer f.Close()
 	out, err := os.Create(savePath)
 	if err != nil {
+		config.TracerError(span, err)
 		return err
 	}
 	defer out.Close()
 	if _, err = f.Seek(0, 0); err != nil {
 		defer os.Remove(savePath)
+		config.TracerError(span, err)
 		return err
 	}
 	if _, err = io.Copy(out, f); err != nil {
 		defer os.Remove(savePath)
+		config.TracerError(span, err)
 		return err
 	}
 	slog.InfoContext(ctx,

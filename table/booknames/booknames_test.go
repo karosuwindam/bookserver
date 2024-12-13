@@ -2,6 +2,7 @@ package booknames
 
 import (
 	"bookserver/config"
+	"context"
 	"os"
 	"testing"
 
@@ -30,7 +31,7 @@ func TestBookNameTable(t *testing.T) {
 	if err := tmp.Add(); err != nil {
 		t.Fatal(err)
 	}
-	if d, err := GetAll(); err != nil {
+	if d, err := GetAll(context.TODO()); err != nil {
 		t.Fatal(err)
 	} else {
 		if len(d) != 2 {

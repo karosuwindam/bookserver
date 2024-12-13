@@ -1,6 +1,8 @@
 package filelists
 
 import (
+	"bookserver/config"
+	"context"
 	"errors"
 	"math/rand"
 	"strconv"
@@ -61,10 +63,14 @@ func (t *Filelists) Add() error {
 	return nil
 }
 
-func GetAll() ([]Filelists, error) {
+func GetAll(ctx context.Context) ([]Filelists, error) {
+	ctx, span := config.TracerS(ctx, "GetAll", "Get All Filelists")
+	defer span.End()
+
 	out := []Filelists{}
 	tmps := []sqlFilelists{}
 	if results := basedb.Find(&tmps); results.Error != nil {
+		config.TracerError(span, results.Error)
 		return out, results.Error
 	}
 	for _, sbn := range tmps {

@@ -1,7 +1,10 @@
 package booknames
 
 import (
+	"bookserver/config"
+	"context"
 	"errors"
+	"log/slog"
 	"math/rand"
 	"strconv"
 	"time"
@@ -62,10 +65,15 @@ func (t *Booknames) Add() error {
 
 }
 
-func GetAll() ([]Booknames, error) {
+func GetAll(ctx context.Context) ([]Booknames, error) {
+	ctx, span := config.TracerS(ctx, "GetAll", "Get All Data")
+	defer span.End()
+	slog.DebugContext(ctx, "Bookname GetAll Start")
+
 	out := []Booknames{}
 	tmps := []sqlBooknames{}
 	if results := basedb.Find(&tmps); results.Error != nil {
+		config.TracerError(span, results.Error)
 		return out, results.Error
 	}
 	for _, sbn := range tmps {

@@ -1,6 +1,7 @@
 package tableread
 
 import (
+	"bookserver/config"
 	"bookserver/table/booknames"
 	"bookserver/table/copyfiles"
 	"bookserver/table/filelists"
@@ -16,21 +17,19 @@ import (
 // urlでtableとidをしていて読み取る
 func GetReadId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := config.TracerS(ctx, "GetReadId", "Get Read Id")
+	defer span.End()
+
 	slog.InfoContext(ctx,
 		fmt.Sprintf("%v %v", r.Method, r.URL),
 		"Url", r.URL,
 		"Method", r.Method,
 	)
-	table := r.PathValue("table")
-	tmpid := r.PathValue("id")
-	id, err := strconv.Atoi(tmpid)
+	ctx, err := readRequestTableId(r)
 	if err != nil {
-		slog.ErrorContext(ctx, "GetReadId strconv.Atoi error", "error", err)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("page not found"))
-		return
+		slog.ErrorContext(ctx, "GetReadId readRequestTableId error", "error", err)
 	}
-	if tmp := readTablebyId(id, table); tmp == "" {
+	if tmp := readTablebyId(ctx); tmp == "" {
 		//検索したが失敗したときの処理
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("[]"))
@@ -42,16 +41,37 @@ func GetReadId(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func readRequestTableId(r *http.Request) (context.Context, error) {
+	ctx := r.Context()
+	table := r.PathValue("table")
+	tmpid := r.PathValue("id")
+	slog.DebugContext(ctx,
+		fmt.Sprintf("readRequestTableId table:%v id:%v", table, tmpid),
+		"table", table,
+		"id", tmpid,
+	)
+
+	id, err := strconv.Atoi(tmpid)
+	if err != nil {
+		return r.Context(), err
+	}
+	ctx = contextWriteTableIdName(ctx, table, id)
+	return ctx, nil
+}
+
 // urlでtableを指定して読み取る
 func GetReadAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := config.TracerS(ctx, "GetReadId", "Get Read Id")
+	defer span.End()
+
 	slog.InfoContext(ctx,
 		fmt.Sprintf("%v %v", r.Method, r.URL),
 		"Url", r.URL,
 		"Method", r.Method,
 	)
-	tables := r.PathValue("table")
-	if tmp := readTableAll(tables); tmp != "" {
+	ctx = readRequestTable(r)
+	if tmp := readTableAll(ctx); tmp != "" {
 		//検索して成功したときの処理
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(tmp))
@@ -64,12 +84,31 @@ func GetReadAll(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func readTablebyId(id int, table string) string {
+func readRequestTable(r *http.Request) context.Context {
+	ctx := r.Context()
+	ctx = contextWriteTableName(ctx, r.PathValue("table"))
+	return ctx
+}
+
+func readTablebyId(ctx context.Context) string {
+	ctx, span := config.TracerS(ctx, "readTablebyId", "Read Table by Id")
+	defer span.End()
 	var output string
-	ctx := context.TODO()
+	v, ok := contextReadTableIdName(ctx)
+	if !ok {
+		msg := "readTablebyId context data not"
+		slog.WarnContext(ctx,
+			fmt.Sprintf(msg),
+		)
+		config.TracerError(span, fmt.Errorf(msg))
+	}
+	table := v.tableName
+	id := v.id
+
 	switch table {
 	case BOOKNAMES:
 		if ary, err := booknames.GetId(id); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTablebyId booknames.GetId Id=%v error", id),
 				"id", id,
@@ -88,6 +127,7 @@ func readTablebyId(id int, table string) string {
 		}
 	case FILELISTS:
 		if ary, err := filelists.GetId(id); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTablebyId filelists.GetId Id=%v error", id),
 				"id", id,
@@ -106,6 +146,7 @@ func readTablebyId(id int, table string) string {
 		}
 	case COPYFILES:
 		if ary, err := copyfiles.GetId(id); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTablebyId copyfiles.GetId Id=%v error", id),
 				"id", id,
@@ -132,12 +173,25 @@ func readTablebyId(id int, table string) string {
 	return output
 }
 
-func readTableAll(table string) string {
-	ctx := context.TODO()
+func readTableAll(ctx context.Context) string {
+	ctx, span := config.TracerS(ctx, "readTableAll", "Read Table All")
+	defer span.End()
+
 	var output string
+	table, ok := contextReadTableName(ctx)
+	if !ok {
+		msg := "readTableAll context data not"
+		slog.WarnContext(ctx,
+			fmt.Sprintf(msg),
+			"table", table,
+		)
+		config.TracerError(span, fmt.Errorf(msg))
+		return output
+	}
 	switch table {
 	case BOOKNAMES:
-		if ary, err := booknames.GetAll(); err != nil {
+		if ary, err := booknames.GetAll(ctx); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTableAll booknames.GetAll error"),
 				"error", err,
@@ -145,6 +199,7 @@ func readTableAll(table string) string {
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
+				config.TracerError(span, errj)
 				slog.WarnContext(ctx,
 					"readTableAll booknames json.Marshal error",
 					"error", errj,
@@ -154,7 +209,8 @@ func readTableAll(table string) string {
 			}
 		}
 	case FILELISTS:
-		if ary, err := filelists.GetAll(); err != nil {
+		if ary, err := filelists.GetAll(ctx); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTableAll filelists.GetAll error"),
 				"error", err,
@@ -162,6 +218,7 @@ func readTableAll(table string) string {
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
+				config.TracerError(span, errj)
 				slog.WarnContext(ctx,
 					"readTableAll filelists json.Marshal error",
 					"error", errj,
@@ -171,7 +228,8 @@ func readTableAll(table string) string {
 			}
 		}
 	case COPYFILES:
-		if ary, err := copyfiles.GetAll(); err != nil {
+		if ary, err := copyfiles.GetAll(ctx); err != nil {
+			config.TracerError(span, err)
 			slog.WarnContext(ctx,
 				fmt.Sprintf("readTableAll copyfiles.GetAll error"),
 				"error", err,
@@ -179,6 +237,7 @@ func readTableAll(table string) string {
 		} else {
 			msg := common.Message(ary)
 			if b, errj := json.Marshal(&msg); errj != nil {
+				config.TracerError(span, errj)
 				slog.WarnContext(ctx,
 					"readTableAll copyfiles json.Marshal error",
 					"error", errj,

@@ -28,7 +28,7 @@ func GetZipFileList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//idを指定してfilelistテーブルからzipファイル名を取得
-	d, err := readzipfile.GetZiplist(id)
+	d, err := readzipfile.GetZiplist(readzipfile.ContextWriteZipId(ctx, id))
 	if err != nil {
 		slog.ErrorContext(ctx, "GetZipFileList readzipfile.GetZiplist error",
 			"id", id,

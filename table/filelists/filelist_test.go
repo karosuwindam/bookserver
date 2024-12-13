@@ -3,6 +3,7 @@ package filelists_test
 import (
 	"bookserver/config"
 	"bookserver/table/filelists"
+	"context"
 	"os"
 	"testing"
 
@@ -32,7 +33,7 @@ func TestFilelists(t *testing.T) {
 	if err := tmp.Add(); err != nil {
 		t.Fatal(err)
 	}
-	if d, err := filelists.GetAll(); err != nil {
+	if d, err := filelists.GetAll(context.TODO()); err != nil {
 		t.Fatal(err)
 	} else {
 		if len(d) != 2 {

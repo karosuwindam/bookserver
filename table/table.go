@@ -19,6 +19,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var db *gorm.DB
@@ -77,6 +78,7 @@ func openSqlite3() (*gorm.DB, error) {
 			tmpdb = nil
 			os.Remove(filepass)
 			tmpdb, _ = gorm.Open(sqlite.Open(filepass), &gorm.Config{})
+			tmpdb.Use(tracing.NewPlugin())
 			if err := tableInit(tmpdb); err != nil {
 				os.Remove(filepass)
 				fileCopy(tmpFIlePass, filepass)
